@@ -1,0 +1,35 @@
+.bottom-two-line
+    position relative
+    overflow hidden
+
+    &:after, &:before
+        content ''
+        position absolute
+        bottom 0
+        left 0
+        width 100%
+        height 1px
+        will-change transform
+        background-color currentColor
+        +lt-lg()
+            bottom 0
+
+    &:after
+        transition transform 0.3s ease-in-out 0.3s
+
+    &:before
+        transform translateX(-100%)
+        transition transform 0.3s ease-in-out
+
+    &:hover
+        &:after
+            transform translateX(100%)
+            transition transform 0.3s ease-in-out
+
+        &:before
+            transform translateX(0)
+            transition transform 0.3s ease-in-out 0.3s
+
+.bottom-two-line_white
+    &:after, &:before
+        background-color #ffffff

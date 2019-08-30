@@ -1,0 +1,5 @@
+static/js/analytics/*
+server/*
+test/*
+assets/stylus/*
+temp/*

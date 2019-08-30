@@ -1,0 +1,22 @@
+{
+    "breakpoints":  {
+        "xs": "screen and (max-width: 640px)",
+        "sm": "screen and (min-width: 641px) and (max-width: 1020px)",
+        "md": "screen and (min-width: 1021px) and (max-width: 1600px)",
+        "lg": "screen and (min-width: 1601px)",
+
+        "lt-xs": "screen and (max-width: 640px)",
+        "lt-sm": "screen and (max-width: 1020px)",
+        "lt-lg": "screen and (max-width: 1600px)",
+
+        "gt-xs": "screen and (min-width: 641px)",
+        "gt-sm": "screen and (min-width: 1021px)",
+        "gt-lg": "screen and (min-width: 1601px)"
+    },
+    "columns": {
+        "xs": 16,
+        "sm": 24,
+        "md": 36,
+        "lg": 36
+    }
+}

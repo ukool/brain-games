@@ -1,0 +1,21 @@
+.title
+    width-between-property('margin-left', $sm, 0, $lg, -1, true, true)
+    width-between-property('font-size', $sm, 36, $lg, 52, true, true)
+    font-weight 900
+    letter-spacing 1px
+    +lt-sm()
+        margin-left 0
+        letter-spacing normal
+
+.title-lg
+    width-between-property('margin-left', $sm, -2, $lg, -7, true, true)
+    width-between-property('font-size', $sm, 50, $lg, 100, true, true)
+    font-weight 900
+    letter-spacing 5px
+    +lt-sm()
+        margin-left -3px
+        width-between-property 'font-size', $xs, 34, $sm, 50, true, true
+        letter-spacing 2.5px
+    +xs()
+        margin-left: -1px
+        letter-spacing 1px

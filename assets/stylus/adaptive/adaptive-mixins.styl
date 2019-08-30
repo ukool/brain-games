@@ -1,0 +1,53 @@
+// @stylint off
+vars = json('adaptive-config.json', { hash: true, leave-strings: true  })
+
+xs()
+    query = 'only ' + vars.breakpoints.xs;
+    @media query
+        {block}
+
+sm()
+    query = 'only ' + vars.breakpoints.sm;
+    @media query
+        {block}
+
+md()
+    query = 'only ' + vars.breakpoints.md;
+    @media query
+        {block}
+
+lg()
+    query = 'only ' + vars.breakpoints.lg;
+    @media query
+        {block}
+
+lt-xs()
+    query = 'only ' + vars.breakpoints.lt-xs;
+    @media query
+        {block}
+
+lt-sm()
+    query = 'only ' + vars.breakpoints.lt-sm;
+    @media query
+        {block}
+
+lt-lg()
+    query = 'only ' + vars.breakpoints.lt-lg;
+    @media query
+        {block}
+
+gt-xs()
+    query = 'only ' + vars.breakpoints.gt-xs;
+    @media query
+        {block}
+
+gt-sm()
+    query = 'only ' + vars.breakpoints.gt-sm;
+    @media query
+        {block}
+
+gt-lg()
+    query = 'only ' + vars.breakpoints.gt-lg;
+    @media query
+        {block}
+// @stylint on

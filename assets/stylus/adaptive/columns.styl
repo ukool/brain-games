@@ -1,0 +1,22 @@
+vars = json('adaptive-config.json', { hash: true, leave-strings: true  })
+
+for size in keys(vars.columns)
+    query = 'only ' + vars.breakpoints[size]
+    @media query
+        for num in (1..vars.columns[size])
+            .{size}-col-{num} {
+                width: (100 / vars.columns[size] * num) * 1% !important;
+            }
+
+            .{size}-push-{num} {
+                margin-left: (100 / vars.columns[size] * num) * 1% !important;
+            }
+
+            .{size}-pull-{num} {
+                margin-right: (100 / vars.columns[size] * num) * 1% !important;
+            }
+
+        .{size}-col-100p {
+            width 100% !important
+        }
+

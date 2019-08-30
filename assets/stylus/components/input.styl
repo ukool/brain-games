@@ -1,0 +1,25 @@
+.input
+    box-sizing border-box
+    height 45px
+    padding 0 15px
+    font-weight 300
+    font-size 15px
+    color $black
+    line-height 45px
+    border solid 1px $violet-light
+    transition border-color 0.2s ease-in-out
+
+    &::placehoder
+        color $violet-light
+
+    &:active,
+    &:focus
+        border-color $saffron
+
+.label
+    font-weight 500
+    font-size 13px
+    line-height 1.54
+
+    &-text
+        margin-bottom 5px
