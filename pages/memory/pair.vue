@@ -50,8 +50,8 @@
 </template>
 
 <script>
-import PairCard from '~/components/pair/PairCard';
-import PairSidebar from '~/components/pair/PairSidebar';
+import PairCard from '~/components/memory/pair/PairCard';
+import PairSidebar from '~/components/memory/pair/PairSidebar';
 
 export default {
   components: {

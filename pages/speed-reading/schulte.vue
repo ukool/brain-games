@@ -42,8 +42,8 @@
 
 <script>
 import SuccessModal from '~/components/shared/modal/SuccessModal';
-import SchulteCard from '~/components/schulte/SchulteCard';
-import SchulteSidebar from '~/components/schulte/SchulteSidebar';
+import SchulteCard from '~/components/speedReading/schulte/SchulteCard';
+import SchulteSidebar from '~/components/speedReading/schulte/SchulteSidebar';
 
 export default {
   components: {
