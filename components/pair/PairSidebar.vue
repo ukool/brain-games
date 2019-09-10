@@ -4,14 +4,14 @@
     Найди пару
   </h1>
 
-  <SelectApp
+  <VSelect
     class="sidebar__select"
     :title="'Сложность'"
     :select-list="difficultyLevels"
     @click-select="changeDifficultyListener"
   />
 
-  <SelectApp
+  <VSelect
     class="sidebar__select"
     :title="'Изображения'"
     :select-list="cardsImage"
@@ -40,14 +40,14 @@
 </template>
 
 <script>
-import SelectApp from '~/components/shared/SelectApp';
-import Stopwatch from '~/components/shared/Stopwatch';
+import VSelect from '~/components/shared/components/Select';
+import Stopwatch from '~/components/shared/components/Stopwatch';
 
 export default {
   name: 'PairSidebar',
 
   components: {
-    SelectApp,
+    VSelect,
     Stopwatch,
   },
 

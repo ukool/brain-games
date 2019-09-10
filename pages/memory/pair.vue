@@ -134,7 +134,7 @@ export default {
     searchDublicateValue(array, value) {
       let dublicate = false;
 
-      array.forEach((item)=> {
+      array.forEach((item) => {
         if (item.imageIndex === value) {
           dublicate = true;
         }

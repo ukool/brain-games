@@ -38,7 +38,7 @@
 
 <script>
 export default {
-  name: 'SelectApp',
+  name: 'VSelect',
 
   props: {
     title: {
