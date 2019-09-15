@@ -287,9 +287,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.section
-  // margin-top 50px
-
 .game
   &__field
     position relative
