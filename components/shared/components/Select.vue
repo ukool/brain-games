@@ -76,7 +76,6 @@ export default {
 <style lang="stylus" scoped>
 .select
   &__title
-    margin-top 10px
     font-size 16px
 
   &__selected

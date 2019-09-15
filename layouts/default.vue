@@ -1,16 +1,23 @@
 <template>
-<div>
+<div class="content">
   <Header />
-  <nuxt />
+  <div class="content-space">
+    <div class="content-centered">
+      <nuxt />
+    </div>
+  </div>
+  <Footer />
 </div>
 </template>
 
 <script>
 import Header from '~/components/header/Header';
+import Footer from '~/components/footer/Footer';
 
 export default {
   components: {
     Header,
+    Footer,
   },
 };
 </script>
@@ -26,6 +33,11 @@ html {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
+  height: 100%;
+}
+
+body {
+  height: 100%;
 }
 
 *,
@@ -35,32 +47,37 @@ html {
   margin: 0;
 }
 
-.button--green {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #3b8070;
-  color: #3b8070;
-  text-decoration: none;
-  padding: 10px 30px;
+#__nuxt{
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
 }
 
-.button--green:hover {
-  color: #fff;
-  background-color: #3b8070;
+#__layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    flex: 1 0 auto;
 }
 
-.button--grey {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #35495e;
-  color: #35495e;
-  text-decoration: none;
-  padding: 10px 30px;
-  margin-left: 15px;
+.content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    flex: 1 0 auto;
 }
 
-.button--grey:hover {
-  color: #fff;
-  background-color: #35495e;
+.content-space {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 0 auto;
+}
+
+.content-centered {
+  min-height: 100%;
+  flex: 1 0 auto;
+
 }
 </style>

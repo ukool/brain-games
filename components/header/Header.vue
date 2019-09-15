@@ -1,66 +1,58 @@
 <template>
-<div class="container">
-  <header class="header row">
-    <n-link
-      class="header__logo-link"
-      :to="{name: 'index'}"
-    >
-      <img
-        class="header__image"
-        src="~/assets/img/logo.png"
-        alt=""
+<header class="header">
+  <div class="container">
+    <div class="row header__row">
+      <n-link
+        class="header__logo-link"
+        :to="{name: 'index'}"
       >
-    </n-link>
-
-    <nav class="header__nav">
-      <ul class="header__list">
-        <li
-          v-for="(menu, index) in menuStructure"
-          :key="`${index}_menu`"
-          class="header__item"
+        <img
+          class="header__image"
+          src="~/assets/img/logo.png"
+          alt=""
         >
-          <n-link
-            class="header__link"
-            :to="menu.href"
-          >
-            {{ menu.name }}
-          </n-link>
+      </n-link>
 
-          <ul class="header__sublist">
-            <li
-              v-for="(submenu, item) in menu.sublinks"
-              :key="`${item}_submenu`"
-              class="header__subitem"
+      <nav class="header__nav">
+        <ul class="header__list">
+          <li
+            v-for="(menu, index) in menuStructure"
+            :key="`${index}_menu`"
+            class="header__item"
+            @mouseenter="handleMouseEnter(index)"
+            @mouseleave="handleMouseleave(index)"
+          >
+            <n-link
+              class="header__link"
+              :to="menu.href"
             >
-              <n-link
-                class="header__sublink"
-                :to="submenu.href"
+              {{ menu.name }}
+            </n-link>
+            <transition name="fade">
+              <ul
+                v-if="acitveMenuItem === index"
+                class="header__sublist"
               >
-                {{ submenu.name }}
-              </n-link>
-            </li>
-          </ul>
-        </li>
-        <!-- <li class="header__item">
-          <n-link
-            class="header__link"
-            to="/"
-          >
-            Скорочтение
-          </n-link>
-        </li> -->
-        <!-- <li class="header__item">
-          <n-link
-            class="header__link"
-            to="/"
-          >
-            Математика
-          </n-link>
-        </li> -->
-      </ul>
-    </nav>
-  </header>
-</div>
+                <li
+                  v-for="(submenu, item) in menu.sublinks"
+                  :key="`${item}_submenu`"
+                  class="header__subitem"
+                >
+                  <n-link
+                    class="header__sublink"
+                    :to="submenu.href"
+                  >
+                    {{ submenu.name }}
+                  </n-link>
+                </li>
+              </ul>
+            </transition>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
 </template>
 
 <script>
@@ -85,8 +77,8 @@ export default {
           name: 'Скорочтение',
           href: '',
           sublinks: [
-            { name: 'Таблица Шульте', href: '/speed-reading/schulte' }, // href: '/speed-reading/schulte' },
-            { name: 'Тест Струпа', href: '' }, // href: '/speed-reading/stroop' },
+            { name: 'Таблица Шульте', href: '/speed-reading/schulte' },
+            { name: 'Тест Струпа', href: '/speed-reading/stroop' },
             { name: 'Найти слово', href: '' }, // href: '/speed-reading/find-word' },
             { name: 'Скоростное чтение', href: '' }, // href: '/speed-reading/reading' },
             { name: 'Нестандартное чтение', href: '' }, // href: '/speed-reading/сustom-reading' },
@@ -99,20 +91,36 @@ export default {
             { name: 'Устный счет', href: '' }, // }href: '/math/verbal' },
           ],
         },
-      ]
+      ],
+      acitveMenuItem: null,
     };
+  },
+
+  methods: {
+    handleMouseEnter(index) {
+      this.acitveMenuItem = index;
+    },
+
+    handleMouseleave() {
+      this.acitveMenuItem = null;
+    },
   },
 };
 </script>
 
 <style scoped lang="stylus">
 .header
-  justify-content space-between
-  align-items center
+  padding 5px 0
+  background-color #fff
+  border-bottom 1px solid $blue-rick
+
+  &__row
+    justify-content space-between
+    align-items center
 
   &__image
     display block
-    width 100px
+    width 70px
     height auto
 
   &__nav
@@ -122,6 +130,36 @@ export default {
     display flex
 
   &__item
+    position relative
     &:not(:last-of-type)
-      margin-right 15px
+      margin-right 20px
+
+  &__link
+    font-size 18px
+    color $blue-rick
+
+  &__sublist
+    position absolute
+    padding 15px
+    box-sizing border-box
+    background-color white
+    z-index 10
+    // width 185px
+
+  &__sublink
+    display inline-block
+    padding 3px 0
+    transition color 0.2s ease-in-out
+    &:hover
+      color $violet
+
+.fade-enter-active,
+.fade-leave-active
+  transition opacity 0.2s ease-in-out
+
+.fade-enter,
+.fade-leave-to
+  opacity 0
+  transition opacity 0.2s ease-in-out
+
 </style>
