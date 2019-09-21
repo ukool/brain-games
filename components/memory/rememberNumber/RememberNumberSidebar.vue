@@ -16,9 +16,9 @@
 
   <VCheckbox
     class="sidebar__checkbox"
-    :title="'Английский язык'"
-    :value="$props.settings.english"
-    :name="'english'"
+    :title="'Бесконечная игра'"
+    :value="$props.settings.infinityGame"
+    :name="'infinityGame'"
     @checked="handlerChecked"
   />
 
@@ -36,7 +36,7 @@ import VCheckbox from '~/components/shared/components/Checkbox';
 import ResetButton from '~/components/shared/components/buttons/ResetButton';
 
 export default {
-  name: 'StroopSidebar',
+  name: 'RememberNumberSidebar',
 
   components: {
     VSelect,
@@ -61,6 +61,7 @@ export default {
         list: [
           { value: 'easy', title: 'легкий', selected: false },
           { value: 'medium', title: 'средний', selected: false },
+          { value: 'hard', title: 'сложный', selected: false },
         ],
       },
 
@@ -92,6 +93,7 @@ export default {
     },
 
     handlerChecked(value, name) {
+      console.log(value, name)
       this.$emit('change-settings', value, name);
     },
   },
