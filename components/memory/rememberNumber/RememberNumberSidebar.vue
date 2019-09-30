@@ -27,6 +27,14 @@
     :text="'Начать заново'"
     @reset="listenerReset"
   />
+
+  <button
+    class="sidebar__btn-start"
+    type="button"
+    @click="handlerStart"
+  >
+    Начать игру
+  </button>
 </div>
 </template>
 
@@ -93,8 +101,12 @@ export default {
     },
 
     handlerChecked(value, name) {
-      console.log(value, name)
+      console.log(value, name);
       this.$emit('change-settings', value, name);
+    },
+
+    handlerStart() {
+      this.$emit('start-game');
     },
   },
 };

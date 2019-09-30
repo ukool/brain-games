@@ -1,20 +1,20 @@
 <template>
-<div class="container index">
+<div class="container memory">
   <div class="row">
-    <ul class="index__list">
+    <ul class="memory__list">
       <li
         v-for="(link, index) in links"
         :key="`${index}_menu`"
-        class="index__item"
+        class="memory__item"
       >
-        <div class="index__inner">
+        <div class="memory__inner">
           <nuxt-link
-            class="index__link"
+            class="memory__link"
             :to="link.page"
           >
             {{ link.name }}
             <svg-icon
-              class="index__icon"
+              class="memory__icon"
               :name="link.icon"
             />
           </nuxt-link>
@@ -26,14 +26,12 @@
 </template>
 
 <script>
-
 export default {
   data() {
     return {
       links: [
-        { name: 'Развитие памяти', page: 'memory', icon: 'memory' },
-        { name: 'Скорочтение', page: 'speed-reading', icon: 'book' },
-        { name: 'Математика', page: 'math', icon: 'math' },
+        { name: 'Найди пару', page: 'memory/pair', icon: 'pair' },
+        { name: 'Запомни число', page: 'memory/remember-number', icon: 'number' },
       ],
     };
   },
@@ -41,7 +39,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.index
+.memory
   &__list
     width 100%
     display flex

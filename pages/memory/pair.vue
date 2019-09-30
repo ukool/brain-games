@@ -24,24 +24,38 @@
           Повторить
         </button>
       </div>
-      <div class="memory__field">
-        <PairCard
-          v-for="(card, index) in cardNumbers"
-          :key="index"
-          :card="card"
-          :name="images"
-          class="memory__card"
-          :class="getActuallyCardClass()"
-          @card-click="handleClick"
+      <div
+        class="memory__field"
+        :class="gameSettings.difficulty"
+      >
+        <PlugPlayButton
+          v-if="showPlugStartGame"
         />
+        <transition name="fade">
+          <Countdown
+            v-if="showCountdown"
+          />
+        </transition>
+
+        <template v-if="!showPlugStartGame && !showCountdown && gameCards.length">
+          <PairCard
+            v-for="(card, index) in gameCards"
+            :key="`${index}_card`"
+            :card="card"
+            :name="gameSettings.images"
+            class="memory__card"
+            :class="gameSettings.difficulty"
+            @card-click="handlerClick"
+          />
+        </template>
       </div>
       <div class="memory__sidebar">
         {{ gameSuccess }}
         <PairSidebar
-          :moves="moves"
+          :moves="gameResult.moves"
           :game-success="gameSuccess"
-          @change-difficulty="changeDifficultyLevel"
-          @change-images="changeImages"
+          @change-difficulty="listenerChangeDifficultyLevel"
+          @change-images="listenerChangeImages"
         />
       </div>
     </div>
@@ -50,6 +64,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import PairCard from '~/components/memory/pair/PairCard';
 import PairSidebar from '~/components/memory/pair/PairSidebar';
 
@@ -61,63 +76,82 @@ export default {
 
   data() {
     return {
-      amountPictures: 20,
-      cardAmount: 10,
-      cardNumbers: [],
-      firstFlipCard: null,
-      secondFlipCard: null,
-      success: false,
+      gameSettings: {
+        difficulty: 'easy',
+        images: 'animal',
+        picturesAmount: 20,
+        cardAmount: 10,
+      },
+
+      gameResult: {
+        moves: 0,
+      },
+
+      gameStatus: {
+        start: false,
+        complete: false,
+      },
+
+      flippedCards: {
+        first: null,
+        second: null,
+        identically: false,
+      },
+
+      gameCards: [],
+
       correctAnswersCount: 0,
       levelDifficulty: 'easy',
-      images: 'animal',
-      moves: 0,
       gameSuccess: false,
     };
   },
 
-  watch: {
-    levelDifficulty(value) {
-      console.log('watch');
-      this.levelDifficulty = value;
-      this.changeCardAmount(this.levelDifficulty);
-      this.resetGame();
-    },
+  computed: {
+    ...mapState('plugStartGame', ['showPlugStartGame']),
+    ...mapState('countdown', ['showCountdown']),
+    ...mapState('resetGame', ['resetGame']),
+  },
 
-    images(value) {
-      this.images = value;
+  watch: {
+    resetGame(value) {
+      if (value) {
+        this.$store.commit('resetGame/startGame');
+        this.$store.commit('plugStartGame/showPlugStartGame');
+        this.startGame();
+      }
     },
   },
 
   mounted() {
-    this.cardNumbers = this.shuffleCardsArray();
+    this.startGame();
+  },
+
+  destroyed() {
+    this.$store.commit('plugStartGame/showPlugStartGame');
+    this.$store.commit('countdown/hideCountdown');
   },
 
   methods: {
-    changeCardAmount(level) {
-      if (level === 'easy') {
-        this.cardAmount = 10;
-      } else if (level === 'medium') {
-        this.cardAmount = 15;
-      } else if (level === 'hard') {
-        this.amountPictures = 21;
-        this.cardAmount = 21;
-      }
-    },
-
+    /**
+     * Генирирует случайное число от 0 до количевства изображений
+     */
     generateRandomNumber() {
-      return Math.floor(Math.random() * this.amountPictures);
+      return Math.floor(Math.random() * this.gameSettings.picturesAmount);
     },
 
-    fillArray() {
-      const array = [];
+    /**
+     * Заполняет массив gameCards
+     */
+    fillGameCardsArray() {
+      const gameArray = [];
 
       let i = 0;
 
-      while (i < this.cardAmount) {
+      while (i < this.gameSettings.cardAmount) {
         const randomNumber = this.generateRandomNumber();
 
-        if (!this.searchDublicateValue(array, randomNumber)) {
-          array.push(
+        if (!this.searchDublicateValue(gameArray, randomNumber)) {
+          gameArray.push(
             {
               imageIndex: randomNumber,
               success: false,
@@ -128,9 +162,12 @@ export default {
         }
       }
 
-      return array;
+      return gameArray;
     },
 
+    /**
+     * Ищет дубликаты в массиве
+     */
     searchDublicateValue(array, value) {
       let dublicate = false;
 
@@ -143,91 +180,139 @@ export default {
       return dublicate;
     },
 
-    dublicateCardsArray() {
-      const cardsArray = this.fillArray();
-      const dublicateArray = JSON.parse(JSON.stringify(cardsArray));
+    /**
+     * Дублирует имеющиеся элементы в массиве
+     */
+    dublicateGameCardsArray() {
+      const gameCards = this.fillGameCardsArray();
+      const dublicateArray = JSON.parse(JSON.stringify(gameCards));
 
-      cardsArray.push(...dublicateArray);
+      gameCards.push(...dublicateArray);
 
-      return cardsArray;
+      return gameCards;
     },
 
-    addIdToCardsArray() {
+    /**
+     * Добаляет к каждому элементу массива id
+     */
+    addIdToGameCardsArray() {
       let i = 0;
-      const cardsArray = this.dublicateCardsArray();
+      const gameCards = this.dublicateGameCardsArray();
 
-      cardsArray.forEach((item) => {
+      gameCards.forEach((item) => {
         item.id = i;
         i += 1;
       });
 
-      return cardsArray;
+      return gameCards;
     },
 
-    shuffleCardsArray() {
-      return this.addIdToCardsArray().sort(() => Math.random() - 0.5);
+    /**
+     * Перемешивает массив
+     */
+    shuffleGameCardsArray() {
+      const gameCards = this.addIdToGameCardsArray();
+
+      gameCards.sort(() => Math.random() - 0.5);
+      gameCards.sort(() => Math.random() - 0.5);
+      gameCards.sort(() => Math.random() - 0.5);
+
+      return gameCards;
     },
 
-    handleClick(id) {
-      if (!this.firstFlipCard) {
-        this.firstFlipCard = this.findCard(id);
-        this.firstFlipCard.flip = true;
-        this.moves += 1;
-      } else if (!this.secondFlipCard) {
-        this.secondFlipCard = this.findCard(id);
-        this.secondFlipCard.flip = true;
-        this.moves += 1;
-        this.comparesCards();
-      }
+    /**
+     * Ищет карту в массиве и возвращает ее
+     */
+    findGameCard(id) {
+      return this.gameCards.find(item => item.id === id);
     },
 
+    startGame() {
+      if (this.gameSettings.difficulty === 'easy') this.startEasyGame();
+      else if (this.gameSettings.difficulty === 'medium') this.startMediumGame();
+      else if (this.gameSettings.difficulty === 'hard') this.startHardGame();
+    },
+
+    startEasyGame() {
+      this.gameSettings.cardAmount = 10;
+      this.gameCards = this.shuffleGameCardsArray();
+    },
+
+    startMediumGame() {
+      this.gameSettings.cardAmount = 15;
+      this.gameCards = this.shuffleGameCardsArray();
+    },
+
+    startHardGame() {
+      this.gameSettings.cardAmount = 21;
+      this.gameSettings.picturesAmount = 21;
+      this.gameCards = this.shuffleGameCardsArray();
+    },
+
+    /**
+     * Сбрасывает игру
+     */
+    resetGame() {
+      console.log('reset')
+      this.gameCards = this.shuffleGameCardsArray();
+    },
+
+    /**
+     * Сравнивает перевернутые карты
+     */
     comparesCards() {
-      if (this.firstFlipCard.imageIndex === this.secondFlipCard.imageIndex) {
+      if (this.flippedCards.first.imageIndex === this.flippedCards.second.imageIndex) {
         setTimeout(() => {
-          this.firstFlipCard.success = true;
-          this.secondFlipCard.success = true;
-          this.firstFlipCard = null;
-          this.secondFlipCard = null;
+          this.flippedCards.first.success = true;
+          this.flippedCards.second.success = true;
+          this.flippedCards.first = null;
+          this.flippedCards.second = null;
         }, 300);
 
         this.correctAnswersCount += 1;
 
-        if (this.cardAmount === this.correctAnswersCount ) {
+        if (this.gameSettings.cardAmount === this.correctAnswersCount) {
           this.gameSuccess = true;
         }
       } else {
         setTimeout(() => {
-          this.firstFlipCard.flip = false;
-          this.secondFlipCard.flip = false;
-          this.firstFlipCard = null;
-          this.secondFlipCard = null;
-        }, 400);
+          this.flippedCards.first.flip = false;
+          this.flippedCards.second.flip = false;
+          this.flippedCards.first = null;
+          this.flippedCards.second = null;
+        }, 300);
       }
     },
 
-    findCard(id) {
-      return this.cardNumbers.find(item => item.id === id);
+    // Обработчики событий
+
+    handlerClick(id) {
+      if (!this.flippedCards.first) {
+        this.flippedCards.first = this.findGameCard(id);
+        this.flippedCards.first.flip = true;
+        this.gameResult.moves += 1;
+      } else if (!this.flippedCards.second) {
+        this.flippedCards.second = this.findGameCard(id);
+        this.flippedCards.second.flip = true;
+        this.gameResult.moves += 1;
+        this.comparesCards();
+      }
     },
 
-    resetGame() {
-      console.log('reset')
-      this.cardNumbers = this.shuffleCardsArray();
+    // Слушатели кастомных событий
+
+    listenerChangeDifficultyLevel(level) {
+      this.gameSettings.difficulty = level;
+      this.$store.commit('plugStartGame/showPlugStartGame');
+
+      this.startGame();
     },
 
-    changeDifficultyLevel(value) {
-      this.levelDifficulty = value;
-      console.log(this.levelDifficulty);
-    },
+    listenerChangeImages(value) {
+      this.gameSettings.images = value;
+      this.$store.commit('plugStartGame/showPlugStartGame');
 
-    changeImages(value) {
-      this.images = value;
-      this.resetGame();
-    },
-
-    getActuallyCardClass() {
-      if (this.levelDifficulty === 'easy') return 'easy';
-      if (this.levelDifficulty === 'medium') return 'medium';
-      if (this.levelDifficulty === 'hard') return 'hard';
+      this.startGame();
     },
   },
 };
@@ -239,11 +324,14 @@ export default {
 
 .memory
   &__field
+    position relative
     display flex
     justify-content space-between
     flex-wrap wrap
     width 75%
     margin-right auto
+    &.easy
+      width 67%
 
   &__sidebar
     width 23%

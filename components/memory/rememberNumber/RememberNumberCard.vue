@@ -133,31 +133,13 @@ export default {
 
   methods: {
     startGame() {
-      this.disabledInputs = false;
-      if (this.$props.level === 'easy') {
-        this.startEasyGame();
-      } else if (this.$props.level === 'medium') {
-        this.startMediumGame();
-      } else if (this.$props.level === 'hard') {
-        this.startHardGame();
-      }
+      this.disabledInputs = true;
       this.showNumbers = true;
 
       setTimeout(() => {
-        // this.showNumbers = false;
-      }, 1500);
-    },
-
-    startEasyGame() {
-
-    },
-
-    startMediumGame() {
-
-    },
-
-    startHardGame() {
-
+        this.disabledInputs = false;
+        this.showNumbers = false;
+      }, 1100);
     },
 
     fillGameCards() {
@@ -178,7 +160,6 @@ export default {
       this.answerPart[index] = value.replace(/[^0-9]/g, '');
 
       const answerIsFull = this.checkAnswerPartArray();
-      console.log(answerIsFull);
 
       if (answerIsFull) {
         this.answerFull = Object.values(this.answerPart).join('');

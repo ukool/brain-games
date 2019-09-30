@@ -3,6 +3,18 @@
   <div class="container">
     <div class="row">
       <div class="game__field">
+        <PlugPlayButton
+          v-if="!gameStatus.start"
+          @play="listenerPlay"
+        />
+        <transition name="fade">
+          <Countdown
+            v-show="showTimer && !gameStatus.start"
+            class="game__start"
+            :start-timer="showTimer"
+          />
+        </transition>
+
         <RememberNumberCard
           :current-number="currentNumber"
           :number-length="gameSettings.numberLength"
@@ -12,6 +24,7 @@
           @submit-answer="listenerSubmitAnswer"
         />
       </div>
+
       <aside class="game__sidebar">
         <RememberNumberSidebar
           :settings="gameSettings"
@@ -19,6 +32,7 @@
           @change-amoun-round="listenerChangeAmounRound"
           @change-settings="listenerChangeSettings"
           @reset="startGame"
+          @start-game="listenerStartGame"
         />
       </aside>
     </div>
@@ -57,7 +71,7 @@ export default {
         complete: false,
         currentRound: 0,
       },
-
+      showTimer: false,
       userAnswer: null,
       currentNumber: null,
     };
@@ -65,6 +79,7 @@ export default {
 
   mounted() {
     this.startGame();
+    // this.gameResult.start = true;
   },
 
   methods: {
@@ -143,6 +158,25 @@ export default {
 
     // Слушатели кастомных событий
 
+    listenerPlay() {
+      this.showTimer = true;
+
+      setTimeout(() => {
+        this.showTimer = false;
+        this.gameStatus.start = true;
+        this.startGame();
+      }, 4100);
+    },
+
+    listenerStartGame() {
+      this.gameStatus.start = true;
+      this.startGame();
+
+      setTimeout(() => {
+        this.gameStatus.start = false;
+      }, 4100);
+    },
+
     listenerSubmitAnswer(answer) {
       let rightAnswer;
 
@@ -170,7 +204,7 @@ export default {
 
     listenerChangeGameDifficulty(level) {
       this.gameSettings.difficulty = level;
-
+      this.gameStatus.start = false;
       if (level === 'easy') {
         this.startEasyGame();
       } else if (level === 'medium') {
@@ -204,4 +238,11 @@ export default {
 
   &__sidebar
     width 23%
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
 </style>

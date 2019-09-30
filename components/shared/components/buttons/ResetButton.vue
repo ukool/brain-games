@@ -2,7 +2,7 @@
 <button
   class="reset"
   type="button"
-  @click="clickHandler"
+  @click="handlerClick"
 >
   <svg-icon
     class="reset__icon"
@@ -26,7 +26,8 @@ export default {
   },
 
   methods: {
-    clickHandler() {
+    handlerClick() {
+      this.$store.commit('resetGame/resetGame');
       this.$emit('reset');
     },
   },

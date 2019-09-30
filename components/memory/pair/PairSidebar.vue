@@ -30,6 +30,8 @@
     </li>
   </ul>
 
+  <ResetButton />
+
   <button
     class="sidebar__btn"
     type="button"
@@ -42,6 +44,7 @@
 <script>
 import VSelect from '~/components/shared/components/Select';
 import Stopwatch from '~/components/shared/components/Stopwatch';
+import ResetButton from '~/components/shared/components/buttons/ResetButton';
 
 export default {
   name: 'PairSidebar',
@@ -49,6 +52,7 @@ export default {
   components: {
     VSelect,
     Stopwatch,
+    ResetButton,
   },
 
   props: {

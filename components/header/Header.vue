@@ -7,6 +7,8 @@
         :to="{name: 'index'}"
       >
         <img
+          width="70"
+          height="70"
           class="header__image"
           src="~/assets/img/logo.png"
           alt=""
@@ -68,7 +70,7 @@ export default {
           sublinks: [
             { name: 'Найти пару', href: '/memory/pair' }, // href: '/memory/find-pair' },
             { name: 'Найти одинаковую', href: '' }, // href: '/memory/same' },
-            { name: 'Запомнить числа', href: '' }, // href: '/memory/number' },
+            { name: 'Запомнить числа', href: '/memory/remember-number' },
             { name: 'Запомнить слова', href: '' }, // href: '/memory/words' },
             { name: 'Запомнить картинки', href: '' }, // href: '/memory/images' },
           ],
@@ -117,6 +119,10 @@ export default {
   &__row
     justify-content space-between
     align-items center
+
+  &__logo-link
+    width 70px
+    height 70px
 
   &__image
     display block

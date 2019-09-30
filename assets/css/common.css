@@ -276,11 +276,16 @@ body {
   max-width: 1400px;
   margin-right: auto;
   margin-left: auto;
+  padding: 0 15px;
 }
-@media only screen and (max-width: 1020px) {
+@media only screen and (min-width: 641px) and (max-width: 1020px) {
   .container {
     width: 100%;
-    padding: 0 15px;
+  }
+}
+@media only screen and (max-width: 640px) {
+  .container {
+    width: 100%;
   }
 }
 .row {

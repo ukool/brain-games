@@ -23,16 +23,12 @@ module.exports = {
   ** Customize the progress-bar color
   */
   loading: { color: '#fff' },
-  /*
-  ** Global CSS
-  */
-  css: [
-    '@/assets/css/common.css',
-  ],
+
   /*
   ** Plugins to load before mounting the App
   */
   plugins: [
+    '~/plugins/globalComponents',
   ],
   /*
   ** Nuxt.js dev-modules
@@ -48,10 +44,29 @@ module.exports = {
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
     '@nuxtjs/svg-sprite',
-    ['nuxt-stylus-resources-loader', [
-      resolve(__dirname, 'assets/stylus/style.styl'),
-      resolve(__dirname, 'assets/stylus/base/fonts.styl'),
-    ]]
+    '@nuxtjs/style-resources',
+    // ['nuxt-stylus-resources-loader', [
+    //   resolve(__dirname, '~/assets/stylus/style.styl'),
+    //   resolve(__dirname, '~/assets/stylus/base/fonts.styl'),
+    // ]]
+  ],
+
+  styleResources: {
+    stylus: [
+      '@/assets/stylus/mixins/index.styl',
+      '@/assets/stylus/adaptive/adaptive-mixins.styl',
+      '@/assets/stylus/helpers/vars.styl',
+    ]
+  },
+
+    /*
+  ** Global CSS
+  */
+  css: [
+    {
+      src: '@/assets/stylus/style.styl',
+      lang: 'scss',
+    }
   ],
   /*
   ** Axios module configuration
