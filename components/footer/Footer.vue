@@ -43,7 +43,8 @@ export default {
 <style lang="stylus" scoped>
 .footer
   padding 20px 0
-  border-top 1px solid $blue-rick
+  border-top 1px solid $black
+  background-color $violet
 
   &__row
     align-items center
@@ -58,12 +59,14 @@ export default {
       margin-right 20px
 
   &__link
-    display block
-    width 30px
-    height 30px
     display flex
     align-items center
     justify-content center
+    width 30px
+    height 30px
+
+  &__text
+    color $white
 
   &__icon
     width 25px

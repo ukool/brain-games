@@ -6,13 +6,12 @@
         class="header__logo-link"
         :to="{name: 'index'}"
       >
-        <img
-          width="70"
-          height="70"
+        <svg-icon
           class="header__image"
-          src="~/assets/img/logo.png"
-          alt=""
-        >
+          name="idea"
+          width="50"
+          height="50"
+        />
       </n-link>
 
       <nav class="header__nav">
@@ -113,21 +112,21 @@ export default {
 <style scoped lang="stylus">
 .header
   padding 5px 0
-  background-color #fff
-  border-bottom 1px solid $blue-rick
+  background-color $violet
+  border-bottom 1px solid $black
 
   &__row
     justify-content space-between
     align-items center
 
   &__logo-link
-    width 70px
-    height 70px
+    width 50px
+    height 50px
 
   &__image
     display block
-    width 70px
-    height auto
+    width 50px
+    height 50px
 
   &__nav
     display flex
@@ -142,7 +141,7 @@ export default {
 
   &__link
     font-size 18px
-    color $blue-rick
+    color $white
 
   &__sublist
     position absolute
