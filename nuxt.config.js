@@ -56,6 +56,7 @@ module.exports = {
       '@/assets/stylus/mixins/index.styl',
       '@/assets/stylus/adaptive/adaptive-mixins.styl',
       '@/assets/stylus/helpers/vars.styl',
+      // '@/assets/stylus/helpers/commonStyle.styl',
     ]
   },
 
@@ -65,7 +66,7 @@ module.exports = {
   css: [
     {
       src: '@/assets/stylus/style.styl',
-      lang: 'scss',
+      lang: 'styl',
     }
   ],
   /*
