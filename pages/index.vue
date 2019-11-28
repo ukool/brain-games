@@ -1,8 +1,8 @@
 <template>
 <main class="index">
-  <section class="hero">
+  <section class="hero about">
     <div class="container hero__container">
-      <div class="hero__inner">
+      <div class="hero__col half-width">
         <h1 class="hero__title">
           Для чего сайт?
         </h1>
@@ -14,7 +14,7 @@
         </p>
       </div>
     </div>
-    <div class="hero__image-box">
+    <div class="hero__image-box absolute">
       <img
         class="hero__img"
         src="/img/index/rocket.svg"
@@ -23,34 +23,33 @@
     </div>
   </section>
 
-  <section class="differences">
-    <div class="differences__image-box">
+  <section class="hero differences">
+    <div class="container hero__container">
       <img
-        class="differences__img"
+        class="hero__img"
         src="/img/index/frankenstein.svg"
         alt=""
       >
-    </div>
-    <div class="container differences__container">
-      <div class="differences__inner">
-        <h1 class="differences__title">
+
+      <div class="hero__col pressed-right">
+        <h1 class="hero__title black">
           А отличие?
         </h1>
-        <ul class="differences__list">
-          <li class="differences__item">
-            - бесплатно
+        <ul class="hero__list">
+          <li class="hero__list-item">
+            бесплатно
           </li>
-          <li class="differences__item">
-            - стильно
+          <li class="hero__list-item">
+            стильно
           </li>
-          <li class="differences__item">
-            - просто
+          <li class="hero__list-item">
+            просто
           </li>
-          <li class="differences__item">
-            - без рекламы
+          <li class="hero__list-item">
+            без рекламы
           </li>
-          <li class="differences__item">
-            - вау, пыщь-пыщь
+          <li class="hero__list-item">
+            вау, пыщь-пыщь
           </li>
         </ul>
       </div>
@@ -59,7 +58,7 @@
 
   <section class="games">
     <div class="container">
-      <h1 class="games__title">
+      <h1 class="hero__title black games__title">
         Доступные категории
       </h1>
       <div class="row">
@@ -84,6 +83,7 @@
               </span>
               <img
                 class="games__image"
+                :class="[category.page]"
                 :src="category.imageSrc"
               />
             </nuxt-link>
@@ -93,113 +93,143 @@
     </div>
   </section>
 
-  <section class="it-all">
-    <div class="container it-all__container">
-      <div class="it-all__inner">
-        <h1 class="it-all__title">
+  <section class="it-all hero">
+    <div class="container hero__container">
+      <div class="hero__col">
+        <h1 class="hero__title">
           И это все?
         </h1>
-        <p class="it-all__description">
-          Пока - да )=
+        <p class="hero__description">
+          Пока - да
+          <svg-icon
+            name="crying"
+            width="35"
+            height="35"
+          />
         </p>
-        <p class="it-all__description">
-          В скором времени ожидается пополнение игр
+        <p class="hero__description">
+          В скором времени ожидается
+          <br />
+          пополнение&nbsp;игр
         </p>
       </div>
-    </div>
-    <div class="it-all__image-box">
       <img
-        class="it-all__img"
-        src="/img/index/frankenstein.svg"
+        class="hero__img medium pressed-right"
+        src="/img/index/owl.svg"
         alt=""
       >
     </div>
   </section>
 
-  <section class="new">
-    <div class="new__image-box">
+  <section class="hero new">
+    <div class="container hero__container">
       <img
-        class="new__img"
+        class="hero__img medium pressed-left"
         src="/img/index/snail.svg"
         alt=""
       >
-    </div>
-    <div class="container new__container">
-      <div class="new__inner">
-        <h1 class="new__title">
+      <div class="hero__col pressed-right">
+        <h1 class="hero__title black">
           И что будет?
         </h1>
-        <ul class="new__list">
-          <li class="new__item">
-            - новые игры
+        <ul class="hero__list">
+          <li class="hero__list-item">
+            новые игры
           </li>
-          <li class="new__item">
-            - личный кабинет
+          <li class="hero__list-item">
+            личный кабинет
           </li>
-          <li class="new__item">
-            - статистика
+          <li class="hero__list-item">
+            статистика
           </li>
-          <li class="new__item">
-            - прогресс
+          <li class="hero__list-item">
+            прогресс
           </li>
-          <li class="new__item">
-            - и другая пижня
+          <li class="hero__list-item">
+            и другое...
           </li>
         </ul>
       </div>
     </div>
   </section>
 
-  <section class="help hero">
-    <div class="container it-all__container">
-      <div class="it-all__inner">
-        <h1 class="it-all__title">
+  <section class="hero help">
+    <div class="container hero__container">
+      <div class="hero__col">
+        <h1 class="hero__title">
           Вау! Помочь?
         </h1>
-        <p class="it-all__description">
+        <p class="hero__description">
           Буду рад
         </p>
-        <p class="it-all__description">
-          Проект оpen source - вот github
+        <p class="hero__description">
+          Проект open source - вот
+          <a
+            class="hero__link bottom-two-line"
+            href="https://github.com/ukool/brain-games"
+            target="_blank"
+            rel="nofollow"
+          >
+            github
+          </a>
         </p>
       </div>
-    </div>
-    <div class="hero__image-box">
       <img
-        class="hero__img"
+        class="hero__img pressed-right"
         src="/img/index/watch.svg"
         alt=""
       >
     </div>
   </section>
 
-  <section class="new communication">
-    <div class="new__image-box">
+  <section class="hero communication">
+    <div class="container hero__container">
       <img
-        class="new__img"
+        class="hero__img"
         src="/img/index/talkie.svg"
         alt=""
       >
-    </div>
-    <div class="container new__container">
-      <div class="new__inner">
-        <h1 class="new__title">
-          На связи?
+      <div class="hero__col pressed-right">
+        <h1 class="hero__title black">
+          На связи? Канешн!
         </h1>
-        <p class="it-all__description">
-          Канешн
-        </p>
-        <ul class="new__list">
-          <li class="new__item">
-            - telegramm
+        <ul class="hero__list">
+          <li class="hero__list-item">
+            Эй, у тебя ошибка!
           </li>
-          <li class="new__item">
-            - email
+          <li class="hero__list-item">
+            Я придумал кое-что интересное!
           </li>
-          <li class="new__item">
-            - issue на github
+          <li class="hero__list-item">
+            Давай запилим крутую штуку!
           </li>
         </ul>
+        <p class="hero__links">
+          Пишите:
+          <a
+            class="hero__link bottom-two-line"
+            href="tg://resolve?domain=ukool"
+            target="_blank"
+            rel="nofollow"
+          >
+            telegram
+          </a>,
+          <a
+            class="hero__link bottom-two-line"
+            href="https://github.com/ukool/brain-games/issues"
+            target="_blank"
+            rel="nofollow"
+          >
+            github
+          </a>,
+          <a
+            class="hero__link bottom-two-line"
+            href="mailto:d_ukolov@bk.ru"
+            rel="nofollow"
+          >
+            email
+          </a>
+        </p>
       </div>
     </div>
   </section>
@@ -244,7 +274,25 @@ export default {
     position relative
     height 600px
     width: 100%
-    background-color $violet
+
+    &__container
+      box-sizing border-box
+      position relative
+      display flex
+      height 100%
+      padding 0 8%
+
+    &__col
+      display inline-flex
+      flex-direction column
+      &.half-width
+        width 50%
+      &.pressed-right
+        margin-left auto
+      &.pressed-left
+        margin-right auto
+      &.margin-right
+        margin-right 19.3%
 
     &__title
       font-weight: 700
@@ -252,12 +300,42 @@ export default {
       padding-top 10vh
       letter-spacing 1.1px
       color white
+      &.black
+        color $black
 
     &__description
-      max-width 50%
-      margin-top: 50px
-      font-size: 45px
+      margin-top: 35px
+      font-size: 35px
       color white
+      & + &
+        margin-top: 10px
+
+    &__links
+      margin-top 50px
+      font-size 35px
+
+    &__link
+      font-weight 300
+
+    &__list
+      margin-top: 35px
+      &.white
+        color $white
+
+    &__list-item
+      position relative
+      font-size 25px
+      padding-left 20px
+      &::before
+        content ''
+        position absolute
+        top 50%
+        left 0
+        transform translateY(-50%)
+        width 10px
+        height 10px
+        border-radius 50%
+        background-color currentColor
       & + &
         margin-top: 20px
 
@@ -265,61 +343,38 @@ export default {
       position absolute
       bottom 0
       right 0
-      width: 600px
-      height: 600px
+      display flex
+      width 600px
+      height 100%
+      justify-content flex-end
+
+      img
+        align-self flex-end
 
     &__img
       display block
-      width: 100%
-      height auto
+      max-height 80%
+      height 80%
+      align-self center
+      &.medium
+        max-height 50%
+        height 50%
+      &.pressed-right
+        margin-left auto
+
+.about
+  background-color $violet
 
 .differences
-  position relative
-  height 600px
-  width: 100%
   background-color $yellow
 
-  &__inner
-    max-width 50%
-    margin-left auto
-
-  &__title
-    font-weight 700
-    font-size 60px
-    padding-top 10vh
-    letter-spacing 1.1px
-    text-align right
-
-  &__list
-    width 77%;
-    margin-left 23%;
-
-  &__item
-    margin-top 50px
-    font-size 25px
-    & + &
-      margin-top: 20px
-
-  &__image-box
-    position absolute
-    top 0
-    left 0
-    width: 600px
-    height: 600px
-
-  &__img
-    display block
-    width: 100%
-    height auto
-
 .games
-  height 600px
+  padding-bottom 4vh
+
   &__title
-    font-weight: 700
-    font-size 60px
     margin-top 5vh
+    padding-top 0
     text-align center
-    letter-spacing 1.1px
 
   &__list
     width 100%
@@ -357,7 +412,6 @@ export default {
   &__name
     font-weight 700
     font-size 30px
-    color $violet
 
   &__description
     margin-top: 15px
@@ -368,82 +422,21 @@ export default {
 
   &__image
     position absolute
-    bottom -30px
-    right 0
-    width 250px
-    height 250px
-    margin-top 20px
+    bottom 20px
+    right 20px
+    width 120px
+    height 100px
+    &.memory
+      height 47px
+    &.speed-reading
+      width 120px
 
 .it-all
-  position relative
-  height 600px
   background-color #595e62
 
-  &__title
-    font-weight: 700
-    font-size 60px
-    padding-top 10vh
-    letter-spacing 1.1px
-    color white
-
-  &__description
-    max-width 50%
-    margin-top 50px
-    font-size 45px
-    color white
-    & + &
-      margin-top 20px
-
-  &__image-box
-    position absolute
-    bottom 0
-    right 0
-    width 600px
-    height 600px
-
-  &__img
-    display block
-    width 100%
-    height auto
-
 .new
-  position relative
-  height 600px
-  width 100%
   background-color $yellow
 
-  &__inner
-    max-width 50%
-    margin-left auto
-
-  &__title
-    font-weight 700
-    font-size 60px
-    padding-top 10vh
-    letter-spacing 1.1px
-    text-align right
-
-  &__list
-    width 77%
-    margin-left 23%
-
-  &__item
-    margin-top 50px
-    font-size 25px
-    & + &
-      margin-top: 20px
-
-  &__image-box
-    position absolute
-    top 0
-    left 0
-    width 600px
-    height 600px
-
-  &__img
-    display block
-    width: 100%
-    height auto
 .help
   background-color $violet
 
