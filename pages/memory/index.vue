@@ -1,32 +1,36 @@
 <template>
 <div class="container memory">
   <div class="row">
-    <ul class="memory__list">
-      <li
-        v-for="(link, index) in links"
-        :key="`${index}_menu`"
-        class="memory__item"
-      >
-        <div class="memory__inner">
-          <nuxt-link
-            class="memory__link"
-            :to="link.page"
-          >
-            {{ link.name }}
-            <svg-icon
-              class="memory__icon"
-              :name="link.icon"
-            />
-          </nuxt-link>
-        </div>
-      </li>
-    </ul>
+    <GamePreviewCard />
+<!--    <ul class="memory__list">-->
+<!--      <li-->
+<!--        v-for="(link, index) in links"-->
+<!--        :key="`${index}_menu`"-->
+<!--        class="memory__item"-->
+<!--      >-->
+<!--        <div class="memory__inner">-->
+<!--          <nuxt-link-->
+<!--            class="memory__link"-->
+<!--            :to="link.page"-->
+<!--          >-->
+<!--            {{ link.name }}-->
+<!--            <svg-icon-->
+<!--              class="memory__icon"-->
+<!--              :name="link.icon"-->
+<!--            />-->
+<!--          </nuxt-link>-->
+<!--        </div>-->
+<!--      </li>-->
+<!--    </ul>-->
   </div>
 </div>
 </template>
 
 <script>
+import GamePreviewCard from '~/components/shared/GamePreviewCard';
+
 export default {
+  components: { GamePreviewCard },
   data() {
     return {
       links: [

@@ -33,7 +33,7 @@
 
       <div class="hero__col pressed-right">
         <h1 class="hero__title black">
-          А отличие?
+          Почему здесь?
         </h1>
         <ul class="hero__list">
           <li class="hero__list-item">
@@ -273,7 +273,7 @@ export default {
 .hero
     position relative
     height 600px
-    width: 100%
+    width 100%
 
     &__container
       box-sizing border-box
@@ -295,7 +295,7 @@ export default {
         margin-right 19.3%
 
     &__title
-      font-weight: 700
+      font-weight 700
       font-size 60px
       padding-top 10vh
       letter-spacing 1.1px
@@ -304,11 +304,11 @@ export default {
         color $black
 
     &__description
-      margin-top: 35px
-      font-size: 35px
+      margin-top 35px
+      font-size 35px
       color white
       & + &
-        margin-top: 10px
+        margin-top 10px
 
     &__links
       margin-top 50px
@@ -318,7 +318,7 @@ export default {
       font-weight 300
 
     &__list
-      margin-top: 35px
+      margin-top 35px
       &.white
         color $white
 
@@ -337,7 +337,7 @@ export default {
         border-radius 50%
         background-color currentColor
       & + &
-        margin-top: 20px
+        margin-top 20px
 
     &__image-box
       position absolute
@@ -388,7 +388,7 @@ export default {
   &__item
     position relative
     width calc(100% / 3 - 20px)
-    height: 420px
+    height 420px
     margin-bottom 20px
     +xs()
       width 100%
@@ -405,7 +405,7 @@ export default {
     background-color $blue-light
     transition 0.4s ease-in-out
     +xs()
-      font-size: 21px
+      font-size 21px
     &:hover
       box-shadow 0 10px 30px rgba(0, 0, 0, 0.4)
 
@@ -414,7 +414,7 @@ export default {
     font-size 30px
 
   &__description
-    margin-top: 15px
+    margin-top 15px
     font-size 20px
 
   &__count
