@@ -29,6 +29,7 @@ module.exports = {
   */
   plugins: [
     '~/plugins/globalComponents',
+    { src: '~/plugins/v-click-outside', ssr: false },
   ],
   /*
   ** Nuxt.js dev-modules

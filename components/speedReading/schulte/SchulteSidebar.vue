@@ -1,67 +1,71 @@
 <template>
-<div class="schulte__sidebar">
-  <VSelect
-    class="schulte__select"
-    :title="'Сложность'"
-    :select-list="difficultyLevels"
-    @click-select="changeDifficultyListener"
-  />
+<Sidebar>
+  <template v-slot:content>
+    <Dropdown
+      class="sidebar__select"
+      :title="'Сетка'"
+      :select-list="difficultyLevels"
+      @click-select="changeDifficultyListener"
+    />
 
-  <VCheckbox
-    class="schulte__checkbox"
-    :title="'Показывать подсказку'"
-    :value="$props.settings.tip"
-    :name="'tip'"
-    @checked="checkedHandler"
-  />
-  <VCheckbox
-    class="schulte__checkbox"
-    :title="'Подсвечивать угаданные числа'"
-    :value="$props.settings.highlight"
-    :name="'highlight'"
-    @checked="checkedHandler"
-  />
-  <VCheckbox
-    class="schulte__checkbox"
-    :title="'Цветные карточки'"
-    :value="$props.settings.coloredCards"
-    :name="'coloredCards'"
-    @checked="checkedHandler"
-  />
-  <VCheckbox
-    class="schulte__checkbox"
-    :title="'Устная игра'"
-    :value="$props.settings.orally"
-    :name="'orally'"
-    @checked="checkedHandler"
-  />
-  <VCheckbox
-    class="schulte__checkbox"
-    :title="'Анимации'"
-    :value="$props.settings.animation"
-    :name="'animation'"
-    @checked="checkedHandler"
-  />
+    <Checkbox
+      class="sidebar__checkbox"
+      :title="'Показывать подсказку'"
+      :value="$props.settings.tip"
+      :name="'tip'"
+      @checked="checkedHandler"
+    />
+    <Checkbox
+      class="sidebar__checkbox"
+      :title="'Подсвечивать угаданные числа'"
+      :value="$props.settings.highlight"
+      :name="'highlight'"
+      @checked="checkedHandler"
+    />
+    <Checkbox
+      class="sidebar__checkbox"
+      :title="'Цветные карточки'"
+      :value="$props.settings.coloredCards"
+      :name="'coloredCards'"
+      @checked="checkedHandler"
+    />
+    <Checkbox
+      class="sidebar__checkbox"
+      :title="'Устная игра'"
+      :value="$props.settings.orally"
+      :name="'orally'"
+      @checked="checkedHandler"
+    />
+    <Checkbox
+      class="sidebar__checkbox"
+      :title="'Анимации'"
+      :value="$props.settings.animation"
+      :name="'animation'"
+      @checked="checkedHandler"
+    />
 
-  <ResetButton
-    class="schulte__btn-reset"
-    :text="'Начать заново'"
-    @reset="resetListener"
-  />
-</div>
+    <ResetButton
+      class="sidebar__btn-reset"
+      :text="'Начать заново'"
+      @reset="resetListener"
+    />
+  </template>
+</Sidebar>
 </template>
 
 <script>
-import VSelect from '~/components/shared/components/Select';
-import VCheckbox from '~/components/shared/components/Checkbox';
+import Dropdown from '~/components/shared/components/Dropdown';
 import ResetButton from '~/components/shared/components/buttons/ResetButton';
+import Checkbox from '~/components/shared/components/Checkbox';
+import Sidebar from '~/components/shared/elements/Sidebar';
 
 export default {
   name: 'SchulteSidebar',
 
   components: {
-    VSelect,
-    VCheckbox,
+    Sidebar,
+    Checkbox,
+    Dropdown,
     ResetButton,
   },
 
@@ -105,16 +109,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="stylus">
-.schulte
-  &__checkbox
-    & + &
-      margin-top 30px
-
-    ../__select + &
-      margin-top 30px
-
-  &__btn-reset
-    margin-top 30px
-</style>

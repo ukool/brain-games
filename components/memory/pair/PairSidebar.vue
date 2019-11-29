@@ -1,56 +1,55 @@
 <template>
-<div class="sidebar">
-  <h1 class="sidebar__title">
-    Найди пару
-  </h1>
+<Sidebar>
+  <template v-slot:content>
+    <h1 class="sidebar__title">
+      Найди пару
+    </h1>
 
-  <VSelect
-    class="sidebar__select"
-    :title="'Сложность'"
-    :select-list="difficultyLevels"
-    @click-select="changeDifficultyListener"
-  />
+    <Dropdown
+      class="sidebar__select"
+      :title="'Сложность'"
+      :select-list="difficultyLevels"
+      @click-select="changeDifficultyListener"
+    />
 
-  <VSelect
-    class="sidebar__select"
-    :title="'Изображения'"
-    :select-list="cardsImage"
-    @click-select="changeCardsImage"
-  />
+    <Dropdown
+      class="sidebar__select"
+      :title="'Изображения'"
+      :select-list="cardsImage"
+      @click-select="changeCardsImage"
+    />
 
-  <ul class="sidebar__list">
-    <li class="sidebar__item">
-      Ходов: {{ $props.moves }}
-    </li>
-    <li class="sidebar__item">
-      Время:
-      <Stopwatch
-        :status-timer="statusTimer"
-      />
-    </li>
-  </ul>
+    <ul class="sidebar__info-list">
+      <li class="sidebar__item">
+        Ходов: {{ $props.moves }}
+      </li>
+      <li class="sidebar__info-item">
+        Время:
+        <Stopwatch
+          :status-timer="statusTimer"
+        />
+      </li>
+    </ul>
 
-  <ResetButton />
-
-  <button
-    class="sidebar__btn"
-    type="button"
-  >
-    Сбросить
-  </button>
-</div>
+    <ResetButton
+      class="sidebar__btn-reset"
+    />
+  </template>
+</Sidebar>
 </template>
 
 <script>
-import VSelect from '~/components/shared/components/Select';
+import Dropdown from '~/components/shared/components/Dropdown';
 import Stopwatch from '~/components/shared/components/Stopwatch';
 import ResetButton from '~/components/shared/components/buttons/ResetButton';
+import Sidebar from '~/components/shared/elements/Sidebar';
 
 export default {
   name: 'PairSidebar',
 
   components: {
-    VSelect,
+    Sidebar,
+    Dropdown,
     Stopwatch,
     ResetButton,
   },
@@ -118,23 +117,3 @@ export default {
   },
 };
 </script>
-
-<style lang="stylus" scoped>
-.sidebar
-  &__title
-    font-size 20px
-
-  &__select
-    & + &
-      margin-top 25px
-
-    .sidebar__title + &
-      margin-top 15px
-
-  &__list
-    margin-top 30px
-
-  &__item
-    &:not(:first-of-type)
-      margin-top 10px
-</style>

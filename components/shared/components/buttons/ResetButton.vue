@@ -1,11 +1,11 @@
 <template>
 <button
-  class="reset"
+  class="border-btn"
   type="button"
   @click="handlerClick"
 >
   <svg-icon
-    class="reset__icon"
+    class="border-btn__icon"
     name="refr"
     width="16"
     height="16"
@@ -34,7 +34,8 @@ export default {
 };
 </script>
 
-<style scoped lang="stylus">
+<style lang="stylus">
+@import "./stylus/borderButton.styl"
 .reset
   position relative
   display flex

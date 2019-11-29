@@ -1,0 +1,45 @@
+.border-btn
+  position relative
+  display inline-flex
+  align-items center
+  justify-content center
+  color $black
+  text-decoration none
+  border 2px solid $black
+  height 40px
+  padding 0 15px
+  min-width 180px
+  transition border-color 0.1s cubic-bezier(0.86, 0, 0.07, 1)
+
+  &::before,
+  &::after
+    content ''
+    position absolute
+    display block
+    width 10%
+    height 5px
+    background white
+    transition all 0.45s cubic-bezier(0.86, 0, 0.07, 1)
+
+  &::before
+    right 20%
+    top -3px
+    transform skewX(-45deg)
+
+  &::after
+    left: 20%
+    bottom: -3px
+    transform: skewX(45deg)
+
+  &:hover
+    border-color $violet
+    &::before
+      right: 80%
+    &::after
+      left: 80%
+    .border-btn__icon
+      fill $violet
+
+  &__icon
+    margin-right 15px
+    transition fill 0.1s cubic-bezier(0.86, 0, 0.07, 1)

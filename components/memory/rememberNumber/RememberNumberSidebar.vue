@@ -1,20 +1,20 @@
 <template>
 <div class="sidebar">
-  <VSelect
+  <Dropdown
     class="sidebar__select"
     :title="'Сложность'"
     :select-list="difficultyLevels"
     @click-select="listenerChangeDifficulty"
   />
 
-  <VSelect
+  <Dropdown
     class="sidebar__select"
     :title="'Количество раундов'"
     :select-list="amoundRound"
     @click-select="listenerAmountRound"
   />
 
-  <VCheckbox
+  <Checkbox
     class="sidebar__checkbox"
     :title="'Бесконечная игра'"
     :value="$props.settings.infinityGame"
@@ -39,16 +39,16 @@
 </template>
 
 <script>
-import VSelect from '~/components/shared/components/Select';
-import VCheckbox from '~/components/shared/components/Checkbox';
+import Dropdown from '~/components/shared/components/Dropdown';
+import Checkbox from '~/components/shared/components/Checkbox';
 import ResetButton from '~/components/shared/components/buttons/ResetButton';
 
 export default {
   name: 'RememberNumberSidebar',
 
   components: {
-    VSelect,
-    VCheckbox,
+    Dropdown,
+    Checkbox,
     ResetButton,
   },
 

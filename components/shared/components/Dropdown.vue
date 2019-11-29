@@ -11,11 +11,20 @@
       @click="toggleVisibleSelectList"
     >
       {{ selectedItem }}
+
+      <svg-icon
+        class="select__icon-arrow"
+        :class="{ 'open' : visibleSelectList}"
+        name="arrow-angle"
+        width="9"
+        height="9"
+      />
     </button>
 
     <ul
       v-if="visibleSelectList"
       class="select__list"
+      v-click-outside="hideSelectList"
     >
       <li
         v-for="item in $props.selectList.list"
@@ -29,6 +38,14 @@
           @click="clickHandler(item)"
         >
           {{ item.title }}
+
+          <svg-icon
+            v-if="item.title === selectedItem"
+            class="select__btn-icon"
+            name="check"
+            width="10"
+            height="10"
+          />
         </button>
       </li>
     </ul>
@@ -38,7 +55,7 @@
 
 <script>
 export default {
-  name: 'VSelect',
+  name: 'Dropdown',
 
   props: {
     title: {
@@ -66,6 +83,10 @@ export default {
       this.selectedItem = value.title;
     },
 
+    hideSelectList() {
+      this.visibleSelectList = false;
+    },
+
     toggleVisibleSelectList() {
       this.visibleSelectList = !this.visibleSelectList;
     },
@@ -75,33 +96,41 @@ export default {
 
 <style lang="stylus" scoped>
 .select
+  display flex
+
   &__title
     font-size 16px
 
   &__selected
-    padding 5px
-    border 1px solid #000
-    border-radius 3px
+    position relative
+    display flex
+    align-items center
+    border-bottom 1px solid $black
+
+  &__icon-arrow
+    margin-left 10px
+    transform rotate(90deg)
+    fill $black
+    &.open
+      transform rotate(-90deg)
 
   &__inner
     position relative
-    margin-top 5px
-
-  &__selected
-    position relative
-    width 250px
+    margin-left 15px
 
   &__list
     position absolute
     z-index 1
-    top 35px
-    left 0
-    width 250px
+    top 25px
+    left -10px
     background-color #fff
+    box-shadow: 0 3px 10px 2px rgba(0, 0, 0, 0.05);
 
   &__btn
+    display flex
+    align-items center
     width 100%
-    padding 5px
+    padding 5px 10px
     text-align left
     transition 0.2s color ease-in-out
 
@@ -109,6 +138,8 @@ export default {
       color #8A2BE2
 
     &.active
-      color #8A2BE2
       pointer-events none
+
+  &__btn-icon
+    margin-left: 10px
 </style>
