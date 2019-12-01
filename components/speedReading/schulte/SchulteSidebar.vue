@@ -12,12 +12,12 @@
       class="sidebar__checkbox"
       :title="'Показывать подсказку'"
       :value="$props.settings.tip"
-      :name="'tip'"
+      name="tip"
       @checked="checkedHandler"
     />
     <Checkbox
       class="sidebar__checkbox"
-      :title="'Подсвечивать угаданные числа'"
+      title="Закрашивать угаданные карточки"
       :value="$props.settings.highlight"
       :name="'highlight'"
       @checked="checkedHandler"

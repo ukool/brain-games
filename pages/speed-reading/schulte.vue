@@ -1,60 +1,62 @@
 <template>
-<section class="section">
-  <div class="container">
-    <div class="row">
-      <!-- <SuccessModal /> -->
-      <div class="game__field">
-        <div
-          v-if="gameSettings.tip"
-          class="game__tip"
-        >
-          Найдите число {{ currentCardNumber }}
-        </div>
-        <div
-          class="game__inner"
-          :class="currentCssClass"
-        >
-          <SchulteCard
-            v-for="card in cards"
-            :key="`${card.number}_number`"
-            :card="card"
-            :fill-cards="gameSettings.highlight"
-            :colored-cards="gameSettings.coloredCards"
-            :animation-cards="gameSettings.animation"
-            class="game__card"
-            :class="currentCssClass"
-            @card-click="compareCardNumbers"
-          />
-        </div>
-      </div>
-      <div class="game__sidebar">
-        <SchulteSidebar
-          :settings="gameSettings"
-          @change-difficulty="changeDifficultyLevel"
-          @change-settings="changeGameSettings"
-          @reset="resetGame"
-        />
-      </div>
+<GameField
+  :game-pause="gameStatus.pause"
+  @start-game="setGameOnPlayed"
+>
+  <template v-slot:game>
+    <div
+      class="game__wrapper"
+      :class="currentCssClass"
+    >
+      <SchulteCard
+        v-for="card in cards"
+        :key="`${card.number}_number`"
+        :card="card"
+        :fill-cards="gameSettings.highlight"
+        :colored-cards="gameSettings.coloredCards"
+        :animation-cards="gameSettings.animation"
+        class="game__card"
+        :class="currentCssClass"
+        @card-click="compareCardNumbers"
+      />
     </div>
-  </div>
-</section>
+    <div
+      v-if="gameSettings.tip"
+      class="game__tip"
+    >
+      Найдите число {{ currentCardNumber }}
+    </div>
+  </template>
+
+  <template v-slot:sidebar>
+    <SchulteSidebar
+      :settings="gameSettings"
+      @change-difficulty="changeDifficultyLevel"
+      @change-settings="changeGameSettings"
+      @reset="resetGame"
+    />
+  </template>
+</GameField>
 </template>
 
 <script>
-import SuccessModal from '~/components/shared/modal/SuccessModal';
 import SchulteCard from '~/components/speedReading/schulte/SchulteCard';
 import SchulteSidebar from '~/components/speedReading/schulte/SchulteSidebar';
+import GameField from '~/components/shared/elements/GameField';
 
 export default {
+  name: 'SchulteGame',
+
   components: {
+    GameField,
     SchulteCard,
     SchulteSidebar,
-    SuccessModal,
   },
 
   data() {
     return {
       gameSettings: {
+        cardAmount: 25,
         difficulty: '5x5',
         highlight: true,
         coloredCards: false,
@@ -65,14 +67,17 @@ export default {
         tip: true,
       },
       gameStatus: {
-        start: false,
+        played: false,
         stop: false,
+        pause: false,
+      },
+      gameResult: {
         success: false,
+        moves: 0,
       },
       currentCardNumber: 1,
       currentCssClass: 'five',
       cards: null,
-      cardAmount: 25,
     };
   },
 
@@ -84,13 +89,22 @@ export default {
   },
 
   methods: {
+    /**
+     * Генерирует массив карточек
+     * в завимости от количества cardAmount в gameSettings
+     * @returns { Array }
+     */
     generateCardsArray() {
-      return Array.from(Array(this.cardAmount).keys()).map(i => ({
+      return Array.from(Array(this.gameSettings.cardAmount).keys()).map(i => ({
         number: i + 1,
         status: null,
       }));
     },
 
+    /**
+     * Перемешивает массив карточек
+     * @returns { Array }
+     */
     shuffleCardsArray() {
       const cardsArray = this.generateCardsArray();
       cardsArray.sort(() => Math.random() - 0.5);
@@ -99,14 +113,15 @@ export default {
       return cardsArray;
     },
 
-    cardClickListener(value) {
-      console.log(value);
-    },
+    /**
+     * Сравнивает карточку на которую кликнули,
+     * с карточкой которая должна быть следующей
+     * @param number
+     */
+    compareCardNumbers(number) {
+      const card = this.findCardByNumber(number);
 
-    compareCardNumbers(value) {
-      const card = this.findCardByValue(value);
-
-      if (value === this.currentCardNumber) {
+      if (number === this.currentCardNumber) {
         this.currentCardNumber += 1;
         card.status = 'success';
       } else {
@@ -116,32 +131,60 @@ export default {
         }, 500);
       }
 
-      if (this.currentCardNumber === this.cardAmount) {
+      if (this.currentCardNumber === this.gameSettings.cardAmount) {
+        this.gameStatus.played = false;
         this.gameStatus.stop = true;
-        this.gameStatus.success = true;
+        this.gameResult.success = true;
       }
+
+      this.gameResult.moves += 1;
     },
 
-    findCardByValue(value) {
-      return this.cards.find(card => card.number === value);
+    findCardByNumber(number) {
+      return this.cards.find(card => card.number === number);
     },
 
+    /**
+     * Изменяет сложность уровня игры
+     * @param value
+     */
     changeDifficultyLevel(value) {
+      this.setGameOnPause();
       this.gameSettings.difficulty = value;
-      this.cardAmount = value[0] * value[2];
+      this.gameSettings.cardAmount = value[0] * value[2];
 
       this.resetGame();
     },
 
+    /**
+     * Изменяет настройки игры
+     * @param value
+     * @param settingsName
+     */
     changeGameSettings(value, settingsName) {
+      this.setGameOnPause();
       this.gameSettings[settingsName] = value;
       this.resetGame();
     },
 
+    /**
+     * Сбрасывает игру
+     */
     resetGame() {
+      this.setGameOnPause();
       this.getCurrentClass();
       this.currentCardNumber = 1;
       this.cards = this.shuffleCardsArray();
+    },
+
+    setGameOnPause() {
+      this.gameStatus.played = false;
+      this.gameStatus.pause = true;
+    },
+
+    setGameOnPlayed() {
+      this.gameStatus.played = true;
+      this.gameStatus.pause = false;
     },
 
     getCurrentClass() {
@@ -167,28 +210,9 @@ export default {
   },
 };
 </script>
-
-<style lang="stylus" scoped>
-.section
-  margin-top 50px
-
+<style scoped lang="stylus">
 .game
-  &__field
-    position relative
-    padding-top 45px
-    display flex
-    justify-content center
-    flex-wrap wrap
-    width 75%
-    margin-right auto
-
-  &__tip
-    position absolute
-    top 0
-    left 50%
-    transform translateX(-50%)
-
-  &__inner
+  &__wrapper
     display flex
     flex-wrap wrap
     &.four,
@@ -202,10 +226,6 @@ export default {
       width 90%
     &.nine
       width 100%
-
-
-  &__sidebar
-    width 23%
 
   &__card
     &.four

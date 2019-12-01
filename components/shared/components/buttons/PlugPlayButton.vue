@@ -7,7 +7,6 @@
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
       x="0px"
       y="0px"
       width="213.7px"
@@ -42,20 +41,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-
 export default {
-  name: 'PlugPlayButton',
-
-  computed: {
-    ...mapState('plugStartGame', ['showPlugStartGame']),
-  },
-
   methods: {
     handlerClick() {
-      this.$store.commit('plugStartGame/hidePlugStartGame');
-      this.$store.commit('countdown/showCountdown');
-
       this.$emit('play');
     },
   },
@@ -74,7 +62,7 @@ export default {
     z-index 30
     width 100%
     height 100%
-    background #fff
+    background-color rgba($white, 0.7)
 
   &__btn
     display inline-block
@@ -83,7 +71,7 @@ export default {
       .plug-play__triangle
         stroke-dashoffset 0
         opacity 1
-        stroke #f8aa28
+        stroke $violet
         animation nudge 0.7s ease-in-out
 
       .plug-play__circle
@@ -98,7 +86,7 @@ export default {
     transform translateY(0)
 
   &__circle
-    stroke #f8aa28
+    stroke $violet
     stroke-dasharray 650
     stroke-dashoffset 650
     opacity 0.3
@@ -106,19 +94,19 @@ export default {
 
 @keyframes nudge{
   0% {
-    transform: translateX(0)
+    transform translateX(0)
   }
   30% {
-    transform: translateX(-5px)
+    transform translateX(-5px)
   }
   50% {
-    transform: translateX(5px)
+    transform translateX(5px)
   }
   70% {
-    transform: translateX(-2px)
+    transform translateX(-2px)
   }
   100% {
-    transform: translateX(0)
+    transform translateX(0)
   }
 }
 </style>

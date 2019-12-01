@@ -1,23 +1,21 @@
 <template>
-<div class='loader'>
-  <div>
-    <div>
-      <div>
-        <div>
-          <div>
-            <div>
-              <div>
-                <div>
-                  <div>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="loader">
+  <div class="loader__item">
+    <svg viewBox="0 0 80 80">
+      <circle id="test" cx="40" cy="40" r="32"></circle>
+    </svg>
+  </div>
+
+  <div class="loader__item triangle">
+    <svg viewBox="0 0 86 80">
+      <polygon points="43 8 79 72 7 72"></polygon>
+    </svg>
+  </div>
+
+  <div class="loader__item">
+    <svg viewBox="0 0 80 80">
+      <rect x="8" y="8" width="64" height="64"></rect>
+    </svg>
   </div>
 </div>
 </template>
@@ -25,49 +23,138 @@
 <script>
 export default {
   name: 'Loader',
-}
+};
 </script>
 
 <style lang="stylus" scoped>
 .loader
-  position relative
-  margin 75px aut;
-  width 150px
-  height 150px
-  display block
-  overflow hidden
-  div
+  display flex
+  width 240px
+  position absolute
+
+.loader__item
+  --path #2F3545
+  --dot #5628EE
+  --duration 3s
+  display inline-block
+  width 44px
+  height 44px
+  position: relative
+  margin 0 16px
+  &::before
+    content ''
+    width 6px
+    height 6px
+    border-radius 50%
+    position absolute
+    display block
+    background var(--dot)
+    top 37px
+    left 19px
+    transform translate(-18px, -18px)
+    animation dotRect var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite
+
+  svg
+    display block
+    width 100%
     height 100%
+    rect,
+    polygon,
+    circle
+      fill none
+      stroke var(--path)
+      stroke-width 10px
+      stroke-linejoin round
+      stroke-linecap round
 
+    polygon
+      stroke-dasharray 145 (221 - 145) 145 (221 - 145)
+      stroke-dashoffset 0
+      animation pathTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite
 
-.loader,
-.loader div
-  border-radius 50%
-  padding 8px
-  border 2px solid transparent
-  animation rotate linear 3.5s infinite
-  border-radius 50%
-  padding 4px
-  animation rotate2 4s infinite linear
+    rect
+      stroke-dasharray (256 / 4 * 3) (256 / 4) (256 / 4 * 3) (256 / 4)
+      stroke-dashoffset 0
+      animation pathRect 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite
 
+    circle
+      stroke-dasharray (200 / 4 * 3) (200 / 4) (200 / 4 * 3) (200 / 4)
+      stroke-dashoffset 75
+      animation pathCircle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite
 
-.loader,
-.loader *
-  will-change: transform;
+  &.triangle
+    width 48px
+    &::before
+      left 21px
+      transform translate(-10px, -18px)
+      animation dotTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite
 
-
-@keyframes rotate2 {
-  0% {
-    transform: rotate(0deg);
-    border-top-color: #7ffa67;
+@keyframes pathTriangle {
+  33% {
+    stroke-dashoffset 74
   }
-  50% {
-    transform: rotate(180deg);
-    border-top-color:rgba(0, 0, 255, .5);
+  66% {
+    stroke-dashoffset 147
   }
   100% {
-    transform: rotate(360deg);
-    border-top-color: #7ffa67;
+    stroke-dashoffset 221
+  }
+}
+
+@keyframes dotTriangle {
+  33% {
+    transform translate(0, 0)
+  }
+  66% {
+    transform translate(10px, -18px)
+  }
+  100% {
+    transform translate(-10px, -18px)
+  }
+}
+
+@keyframes pathRect {
+  25% {
+    stroke-dashoffset 64
+  }
+  50% {
+    stroke-dashoffset 128
+  }
+  75% {
+    stroke-dashoffset 192
+  }
+  100% {
+    stroke-dashoffset 256
+  }
+}
+
+@keyframes dotRect {
+  25% {
+    transform translate(0, 0)
+  }
+  50% {
+    transform translate(18px, -18px)
+  }
+  75% {
+    transform translate(0, -36px)
+  }
+  100% {
+    transform translate(-18px, -18px)
+  }
+}
+
+@keyframes pathCircle {
+  25% {
+    stroke-dashoffset 125
+  }
+  50% {
+    stroke-dashoffset 175
+  }
+  75% {
+    stroke-dashoffset 225
+  }
+  100% {
+    stroke-dashoffset 275
   }
 }
 </style>

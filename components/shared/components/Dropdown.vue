@@ -124,7 +124,7 @@ export default {
     top 25px
     left -10px
     background-color #fff
-    box-shadow: 0 3px 10px 2px rgba(0, 0, 0, 0.05);
+    box-shadow 0 3px 10px 2px rgba(0, 0, 0, 0.05)
 
   &__btn
     display flex
@@ -141,5 +141,5 @@ export default {
       pointer-events none
 
   &__btn-icon
-    margin-left: 10px
+    margin-left 10px
 </style>

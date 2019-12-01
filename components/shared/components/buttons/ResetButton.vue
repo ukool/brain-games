@@ -1,6 +1,7 @@
 <template>
 <button
   class="border-btn"
+  :class="[size]"
   type="button"
   @click="handlerClick"
 >
@@ -22,6 +23,14 @@ export default {
     text: {
       type: String,
       default: 'Сбросить',
+    },
+
+    size: {
+      type: String,
+      default: 'md',
+      validator(value) {
+        return ['md', 'sm', 'xs'].indexOf(value) !== -1;
+      },
     },
   },
 

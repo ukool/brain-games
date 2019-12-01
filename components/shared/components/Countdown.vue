@@ -18,7 +18,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
 
 export default {
   name: 'Countdown',
@@ -37,24 +36,14 @@ export default {
     };
   },
 
-  computed: {
-    ...mapState('countdown', ['startCountdown']),
-  },
-
-  watch: {
-    startCountdown(value) {
-      if (value) this.start();
-    },
-  },
-
   mounted() {
     setTimeout(() => {
-      this.$store.commit('countdown/playCountdown');
+      this.startCountdown();
     }, 1000);
   },
 
   methods: {
-    start() {
+    startCountdown() {
       this.showTimer = true;
 
       const timer = setInterval(() => {
@@ -63,9 +52,8 @@ export default {
 
       setTimeout(() => {
         clearInterval(timer);
+        this.$emit('contdown-final');
         this.timer = 3;
-        this.$store.commit('countdown/hideCountdown');
-        this.$store.commit('countdown/stopCountdown');
       }, 3100);
     },
   },
@@ -89,11 +77,4 @@ export default {
   &__text
     text-transform uppercase
     font-size 25px
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
-}
 </style>
