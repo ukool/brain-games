@@ -1,7 +1,9 @@
 <template>
 <GameField
   :game-pause="gameStatus.pause"
+  :game-final="gameStatus.final"
   @start-game="setGameOnPlayed"
+  @start-game-after-pause="setGameOnPlayed"
 >
   <template v-slot:game>
     <div
@@ -33,7 +35,7 @@
       :settings="gameSettings"
       @change-difficulty="changeDifficultyLevel"
       @change-settings="changeGameSettings"
-      @reset="resetGame"
+      @reset="resetGame(true)"
     />
   </template>
 </GameField>
@@ -68,12 +70,12 @@ export default {
       },
       gameStatus: {
         played: false,
-        stop: false,
+        final: false,
         pause: false,
       },
       gameResult: {
-        success: false,
         moves: 0,
+        time: 0,
       },
       currentCardNumber: 1,
       currentCssClass: 'five',
@@ -119,10 +121,11 @@ export default {
      * @param number
      */
     compareCardNumbers(number) {
+      this.gameResult.moves += 1;
+
       const card = this.findCardByNumber(number);
 
       if (number === this.currentCardNumber) {
-        this.currentCardNumber += 1;
         card.status = 'success';
       } else {
         card.status = 'error';
@@ -132,12 +135,11 @@ export default {
       }
 
       if (this.currentCardNumber === this.gameSettings.cardAmount) {
-        this.gameStatus.played = false;
-        this.gameStatus.stop = true;
-        this.gameResult.success = true;
+        this.setGameOnFinal();
+        this.resetGame();
+      } else {
+        this.currentCardNumber += 1;
       }
-
-      this.gameResult.moves += 1;
     },
 
     findCardByNumber(number) {
@@ -153,7 +155,7 @@ export default {
       this.gameSettings.difficulty = value;
       this.gameSettings.cardAmount = value[0] * value[2];
 
-      this.resetGame();
+      this.resetGame(true);
     },
 
     /**
@@ -164,27 +166,44 @@ export default {
     changeGameSettings(value, settingsName) {
       this.setGameOnPause();
       this.gameSettings[settingsName] = value;
-      this.resetGame();
+      this.resetGame(true);
     },
 
     /**
      * Сбрасывает игру
+     * @param pause - ставит игру на паузу
      */
-    resetGame() {
-      this.setGameOnPause();
+    resetGame(pause = false) {
       this.getCurrentClass();
       this.currentCardNumber = 1;
       this.cards = this.shuffleCardsArray();
+
+      if (pause) this.setGameOnPause();
     },
 
+    /**
+     * Устанавливает игру в режим паузы
+     */
     setGameOnPause() {
       this.gameStatus.played = false;
       this.gameStatus.pause = true;
     },
 
+    /**
+     * Устанавливает игру в режим игры
+     */
     setGameOnPlayed() {
       this.gameStatus.played = true;
       this.gameStatus.pause = false;
+      this.gameStatus.final = false;
+    },
+
+    /**
+     * Устанавливает игру в режим "игра закончена"
+     */
+    setGameOnFinal() {
+      this.gameStatus.played = false;
+      this.gameStatus.final = true;
     },
 
     getCurrentClass() {

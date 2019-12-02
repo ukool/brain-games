@@ -6,14 +6,14 @@
   >
     Приготовьтесь
   </p>
-  <transition name="fade">
+
     <p
       v-if="showTimer"
       class="countdown__text countdown__timer"
     >
       {{ timer }}
     </p>
-  </transition>
+
 </div>
 </template>
 

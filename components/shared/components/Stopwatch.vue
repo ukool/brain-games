@@ -1,10 +1,12 @@
 <template>
 <div class="timer">
-  {{ hours }} : {{ minute }} : {{ seconds }}
+  {{ stopWatch }}
 </div>
 </template>
 
 <script>
+import StopWatch from '~/helpers/stopWatch';
+
 export default {
   name: 'Stopwatch',
 
@@ -22,12 +24,16 @@ export default {
 
   data() {
     return {
-      hours: 0,
-      minute: 0,
-      seconds: 0,
-      miliseconds: 0,
-      timer: null,
+      stopWatch: null,
     };
+  },
+
+  created() {
+    this.stopWatch = new StopWatch();
+  },
+
+  mounted() {
+    this.stopWatch.startWatch();
   },
 
   watch: {
@@ -38,38 +44,63 @@ export default {
     },
   },
 
-  // mounted() {
-  //   this.start();
-  // },
-
   methods: {
-    add() {
-      this.seconds += 1;
-      if (this.seconds >= 60) {
-        this.seconds = 0;
-        this.minute += 1;
-        if (this.minute >= 60) {
-          this.minute = 0;
-          this.hours += 1;
-        }
-      }
-    },
-
-    startWatch() {
-      this.timer = setInterval(() => {
-        this.add();
-      }, 1000);
-    },
-
-    stopWatch() {
-      clearInterval(this.timer);
-    },
-
-    resetWatch() {
-      this.hours = 0;
-      this.minute = 0;
-      this.seconds = 0;
-    },
+    // startWatch() {
+    //   if (this.running) return;
+    //
+    //   if (this.timeBegan === null) {
+    //     this.resetWatch();
+    //     this.timeBegan = new Date();
+    //   }
+    //
+    //   if (this.timeStopped !== null) {
+    //     this.stoppedDuration += (new Date() - this.timeStopped);
+    //   }
+    //
+    //   this.started = setInterval(this.watchRunning, 10);
+    //   this.running = true;
+    // },
+    //
+    // stopWatch() {
+    //   this.running = false;
+    //   this.timeStopped = new Date();
+    //   clearInterval(this.started);
+    //
+    //   this.$emit('stop-watch', this.time);
+    // },
+    //
+    // resetWatch() {
+    //   this.running = false;
+    //   clearInterval(this.started);
+    //   this.stoppedDuration = 0;
+    //   this.timeBegan = null;
+    //   this.timeStopped = null;
+    //   this.time = '00:00:00.000';
+    // },
+    //
+    // watchRunning() {
+    //   const currentTime = new Date();
+    //   const timeElapsed = new Date(currentTime - this.timeBegan - this.stoppedDuration);
+    //   const hour = timeElapsed.getUTCHours();
+    //   const min = timeElapsed.getUTCMinutes();
+    //   const sec = timeElapsed.getUTCSeconds();
+    //   const ms = timeElapsed.getUTCMilliseconds();
+    //
+    //   this.time =
+    //     `${this.zeroPrefix(hour, 2)}:${
+    //       this.zeroPrefix(min, 2)}:${
+    //       this.zeroPrefix(sec, 2)}.${
+    //       this.zeroPrefix(ms, 3)}
+    //   `;
+    // },
+    //
+    // zeroPrefix(num, digit) {
+    //   let zero = '';
+    //   for (let i = 0; i < digit; i += 1) {
+    //     zero += '0';
+    //   }
+    //   return (zero + num).slice(-digit);
+    // },
   },
 };
 </script>

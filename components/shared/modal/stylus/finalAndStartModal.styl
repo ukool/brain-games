@@ -1,0 +1,67 @@
+.game-modal
+  position absolute
+  top 50%
+  left 50%
+  transform translate(-50%, -50%)
+  z-index 20
+  box-sizing border-box
+  display flex
+  flex-direction column
+  height 550px
+  width 700px
+  padding 30px
+  background-color #fff
+  box-shadow 0 3px 10px 2px rgba(0, 0, 0, 0.05)
+
+  &__icon
+    position absolute
+    top 20px
+    right 30px
+
+  &__title
+    margin-top 50px
+    font-size 25px
+    font-weight 700
+
+  &__tags
+    display flex
+    margin-top 20px
+
+  &__tag
+    font-weight: 300
+    background-color $violet-light
+    padding 2px 7px
+    &:not(:last-of-type)
+      margin-right: 10px
+
+  &__total
+    margin-top 30px
+    font-weight 700
+
+  &__total-list
+    margin-top 15px
+    
+  &__total-item
+    & + &
+      margin-top 7px
+
+  &__description
+    margin-top 30px
+
+  &__paragraph
+    font-size 18px
+    & + &
+      margin-top 7px
+
+  &__controls
+    display flex
+    align-items center
+    justify-content space-between
+    margin auto 0 20px 0
+
+  &__settings
+    display flex
+
+  &__settings-btn
+    &:not(:last-of-type)
+      margin-right 10px

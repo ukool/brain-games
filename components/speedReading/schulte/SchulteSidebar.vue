@@ -49,6 +49,7 @@
       :text="'Начать заново'"
       @reset="resetListener"
     />
+    <Stopwatch />
   </template>
 </Sidebar>
 </template>
@@ -58,11 +59,13 @@ import Dropdown from '~/components/shared/components/Dropdown';
 import ResetButton from '~/components/shared/components/buttons/ResetButton';
 import Checkbox from '~/components/shared/components/Checkbox';
 import Sidebar from '~/components/shared/elements/Sidebar';
+import Stopwatch from '../../shared/components/Stopwatch';
 
 export default {
   name: 'SchulteSidebar',
 
   components: {
+    Stopwatch,
     Sidebar,
     Checkbox,
     Dropdown,

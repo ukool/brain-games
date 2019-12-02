@@ -7,20 +7,33 @@
           v-show="startGame"
           name="game"
         />
-        <GameStartModal
-          v-if="!startGame"
-          @starting-game="startingCountdown"
-        />
+        <transition name="fade">
+          <GameStartModal
+            v-if="!startGame"
+            @starting-game="startingCountdown"
+          />
+        </transition>
 
-        <PlugPlayButton
-          v-if="gamePause"
-          @play="startingGameAfterPause"
-        />
+        <transition name="fade">
+          <GameFinalModal
+            v-if="gameFinal"
+            @starting-game="startingCountdown"
+          />
+        </transition>
 
-        <Countdown
-          v-if="showCountdown"
-          @contdown-final="startingGame"
-        />
+        <transition name="fade">
+          <PlugPlayButton
+            v-if="gamePause"
+            @play="startingGameAfterPause"
+          />
+        </transition>
+
+        <transition name="fade">
+          <Countdown
+            v-if="showCountdown"
+            @contdown-final="startingGame"
+          />
+        </transition>
       </div>
       <div
         v-show="startGame"
@@ -35,11 +48,15 @@
 
 <script>
 import GameStartModal from '~/components/shared/modal/GameStartModal';
+import GameFinalModal from '~/components/shared/modal/GameFinalModal';
 
 export default {
   name: 'GameField',
 
-  components: { GameStartModal },
+  components: {
+    GameStartModal,
+    GameFinalModal,
+  },
 
   props: {
     modalData: {
@@ -48,6 +65,11 @@ export default {
     },
 
     gamePause: {
+      type: Boolean,
+      default: false,
+    },
+
+    gameFinal: {
       type: Boolean,
       default: false,
     },
@@ -73,7 +95,7 @@ export default {
     },
 
     startingGameAfterPause() {
-      this.$emit('start-game');
+      this.$emit('start-game-after-pause');
       this.startGame = true;
     },
   },

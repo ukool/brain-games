@@ -54,103 +54,21 @@
         size="xs"
         icon-name="full-screen"
       />
+      <Stopwatch />
     </div>
   </div>
 </div>
 </template>
 
 <script>
-import BorderButton from '~/components/shared/components/buttons/BorderButton';
+import gameStartAndFinalModalMixin from './mixins/gameStartAndFinalModalMixin';
+import Stopwatch from '../components/Stopwatch';
 
 export default {
   name: 'GameStartModal',
-  components: { BorderButton },
-
-  props: {
-    title: {
-      type: String,
-      default: null,
-    },
-
-    iconName: {
-      type: String,
-      default: null,
-    },
-
-    tags: {
-      type: Array,
-      default: null,
-    },
-
-    text: {
-      type: [Array, String],
-      default: null,
-    },
-  },
-
-  methods: {
-    startingGame() {
-      this.$emit('starting-game');
-    },
-  },
+  components: { Stopwatch },
+  mixins: [gameStartAndFinalModalMixin],
 };
 </script>
 
-<style scoped lang="stylus">
-.game-modal
-  position absolute
-  top 50%
-  left 50%
-  transform translate(-50%, -50%)
-  z-index 20
-  box-sizing border-box
-  display flex
-  flex-direction column
-  height 550px
-  width 700px
-  padding 30px
-  background-color #fff
-  box-shadow 0 3px 10px 2px rgba(0, 0, 0, 0.05)
-
-  &__icon
-    position absolute
-    top 20px
-    right 30px
-
-  &__title
-    margin-top 50px
-    font-size 25px
-    font-weight 700
-
-  &__tags
-    display flex
-    margin-top 20px
-
-  &__tag
-    font-weight: 300
-    background-color $violet-light
-    padding 2px 7px
-    &:not(:last-of-type)
-      margin-right: 10px
-
-  &__description
-    margin-top 30px
-
-  &__paragraph
-    font-size 18px
-    & + &
-      margin-top: 7px
-
-  &__controls
-    display flex
-    align-items center
-    justify-content space-between
-    margin auto 0 20px 0
-
-  &__settings
-    display flex
-
-  &__settings-btn
-    &:not(:last-of-type)
-      margin-right 10px
-</style>
+<style lang="stylus" src="./stylus/finalAndStartModal.styl"/>

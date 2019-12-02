@@ -1,8 +1,8 @@
 <template>
-<button
+<n-link
   class="border-btn"
   :class="[size]"
-  type="button"
+  :to="href"
   @click="handlerClick"
 >
   <svg-icon
@@ -16,16 +16,23 @@
   <template v-if="text">
     {{ text }}
   </template>
-</button>
+</n-link>
 </template>
 
 <script>
 import borderButtonMixin from './mixins/borderButtonMixin';
 
 export default {
-  name: 'BorderButton',
+  name: 'BorderLink',
 
   mixins: [borderButtonMixin],
+
+  props: {
+    href: {
+      type: String,
+      default: '',
+    },
+  },
 };
 </script>
 
