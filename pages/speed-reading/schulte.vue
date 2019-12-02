@@ -45,6 +45,7 @@
 import SchulteCard from '~/components/speedReading/schulte/SchulteCard';
 import SchulteSidebar from '~/components/speedReading/schulte/SchulteSidebar';
 import GameField from '~/components/shared/elements/GameField';
+import StopWatch from '~/helpers/stopWatch';
 
 export default {
   name: 'SchulteGame',
@@ -80,14 +81,17 @@ export default {
       currentCardNumber: 1,
       currentCssClass: 'five',
       cards: null,
+      stopWatch: null,
     };
   },
 
-  computed: {
+  created() {
+    this.stopWatch = new StopWatch();
   },
 
   mounted() {
     this.cards = this.shuffleCardsArray();
+    this.stopWatch.startWatch();
   },
 
   methods: {
@@ -187,6 +191,7 @@ export default {
     setGameOnPause() {
       this.gameStatus.played = false;
       this.gameStatus.pause = true;
+      this.stopWatch.stopWatch();
     },
 
     /**

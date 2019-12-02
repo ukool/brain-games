@@ -54,7 +54,6 @@
         size="xs"
         icon-name="full-screen"
       />
-      <Stopwatch />
     </div>
   </div>
 </div>
@@ -62,11 +61,10 @@
 
 <script>
 import gameStartAndFinalModalMixin from './mixins/gameStartAndFinalModalMixin';
-import Stopwatch from '../components/Stopwatch';
 
 export default {
   name: 'GameStartModal',
-  components: { Stopwatch },
+
   mixins: [gameStartAndFinalModalMixin],
 };
 </script>

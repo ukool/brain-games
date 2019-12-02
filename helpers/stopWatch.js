@@ -20,7 +20,7 @@ export default class StopWatch {
       this.stoppedDuration += (new Date() - this.timeStopped);
     }
 
-    this.started = setInterval(this.watchRunning, 10);
+    this.started = setInterval(this.watchRunning.bind(this), 10);
     this.running = true;
   }
 
@@ -28,8 +28,6 @@ export default class StopWatch {
     this.running = false;
     this.timeStopped = new Date();
     clearInterval(this.started);
-
-    this.$emit('stop-watch', this.time);
   }
 
   resetWatch() {
@@ -41,6 +39,14 @@ export default class StopWatch {
     this.time = '00:00:00.000';
   }
 
+  static addZeroPrefix(num, digit) {
+    let zero = '';
+    for (let i = 0; i < digit; i += 1) {
+      zero += '0';
+    }
+    return (zero + num).slice(-digit);
+  }
+
   watchRunning() {
     const currentTime = new Date();
     const timeElapsed = new Date(currentTime - this.timeBegan - this.stoppedDuration);
@@ -49,19 +55,10 @@ export default class StopWatch {
     const sec = timeElapsed.getUTCSeconds();
     const ms = timeElapsed.getUTCMilliseconds();
 
-    this.time =
-      `${this.zeroPrefix(hour, 2)}:${
-        this.zeroPrefix(min, 2)}:${
-        this.zeroPrefix(sec, 2)}.${
-        this.zeroPrefix(ms, 3)}
-      `;
-  }
-
-  zeroPrefix(num, digit) {
-    let zero = '';
-    for (let i = 0; i < digit; i += 1) {
-      zero += '0';
-    }
-    return (zero + num).slice(-digit);
+    this.time = `
+      ${StopWatch.addZeroPrefix(hour, 2)}:
+      ${StopWatch.addZeroPrefix(min, 2)}:
+      ${StopWatch.addZeroPrefix(sec, 2)}.
+      ${StopWatch.addZeroPrefix(ms, 3)}`;
   }
 }
