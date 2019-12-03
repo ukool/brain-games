@@ -30,6 +30,7 @@ module.exports = {
   plugins: [
     '~/plugins/globalComponents',
     { src: '~/plugins/v-click-outside', ssr: false },
+    { src: '~/plugins/firebase', ssr: false },
   ],
   /*
   ** Nuxt.js dev-modules
@@ -46,10 +47,6 @@ module.exports = {
     '@nuxtjs/axios',
     '@nuxtjs/svg-sprite',
     '@nuxtjs/style-resources',
-    // ['nuxt-stylus-resources-loader', [
-    //   resolve(__dirname, '~/assets/stylus/style.styl'),
-    //   resolve(__dirname, '~/assets/stylus/base/fonts.styl'),
-    // ]]
   ],
 
   styleResources: {
