@@ -64,7 +64,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import PairCard from '~/components/memory/pair/PairCard';
 import PairSidebar from '~/components/memory/pair/PairSidebar';
 
@@ -106,17 +105,10 @@ export default {
     };
   },
 
-  computed: {
-    ...mapState('plugStartGame', ['showPlugStartGame']),
-    ...mapState('countdown', ['showCountdown']),
-    ...mapState('resetGame', ['resetGame']),
-  },
-
   watch: {
     resetGame(value) {
       if (value) {
-        this.$store.commit('resetGame/startGame');
-        this.$store.commit('plugStartGame/showPlugStartGame');
+
         this.startGame();
       }
     },
@@ -124,11 +116,6 @@ export default {
 
   mounted() {
     this.startGame();
-  },
-
-  destroyed() {
-    this.$store.commit('plugStartGame/showPlugStartGame');
-    this.$store.commit('countdown/hideCountdown');
   },
 
   methods: {
@@ -303,14 +290,12 @@ export default {
 
     listenerChangeDifficultyLevel(level) {
       this.gameSettings.difficulty = level;
-      this.$store.commit('plugStartGame/showPlugStartGame');
 
       this.startGame();
     },
 
     listenerChangeImages(value) {
       this.gameSettings.images = value;
-      this.$store.commit('plugStartGame/showPlugStartGame');
 
       this.startGame();
     },

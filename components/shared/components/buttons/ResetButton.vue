@@ -36,7 +36,6 @@ export default {
 
   methods: {
     handlerClick() {
-      this.$store.commit('resetGame/resetGame');
       this.$emit('reset');
     },
   },

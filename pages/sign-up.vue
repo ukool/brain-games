@@ -60,6 +60,7 @@
             <FillButton
               class="authentication__btn"
               text="Регистрация"
+              @click="registerUser"
             />
           </form>
         </div>
@@ -71,7 +72,7 @@
 </template>
 
 <script>
-import firebase from 'firebase/app';
+import { mapActions } from 'vuex';
 import AuthenticationInfo from '~/components/authentication/authenticationInfo';
 import AuthenticationTabs from '~/components/authentication/authenticationTabs';
 import FillButton from '~/components/shared/components/buttons/FillButton';
@@ -97,14 +98,29 @@ export default {
     };
   },
 
+  computed: {
+
+  },
+
   methods: {
-    googleSignIn(email, password) {
-      firebase.auth().createUserWithEmailAndPassword(email, password).catch((error) => {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ...
-      });
+    ...mapActions([
+      'registerUser',
+    ]),
+
+    registerUser() {
+      const user = {
+        email: this.email,
+        password: this.password,
+      };
+      console.log(user);
+      this.$store.dispatch('registerUser', user)
+        .then(() => {
+          // this.submitStatus = 'OK'
+          this.$router.push('/');
+        })
+        .catch(err => {
+          this.submitStatus = err.message;
+        });
     },
   },
 };
