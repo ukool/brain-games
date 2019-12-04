@@ -1,0 +1,40 @@
+.fill-button
+  position relative
+  box-sizing border-box
+  display flex
+  height 50px
+  line-height 50px
+  border 1px solid $violet
+  color white
+  text-transform uppercase
+  &.md
+    min-width 180px
+    padding 0 15px
+  &:hover
+    &::before
+      transform scaleY(0)
+    .fill-button__text
+      color $violet
+  &.disabled
+    pointer-events none
+
+  &::before
+    content ''
+    position absolute
+    top 0
+    left 0
+    right 0
+    bottom 0
+    z-index 1
+    background-color $violet
+    transition transform .3s ease-in-out
+
+  &__text
+    z-index 15
+    width 100%
+    color $white
+    font-size 12px
+    font-weight 700
+    text-align center
+    letter-spacing 1px
+    transition color 0.3s ease-in-out

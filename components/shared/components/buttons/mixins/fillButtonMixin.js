@@ -5,11 +5,6 @@ export default {
       default: null,
     },
 
-    iconName: {
-      type: String,
-      default: null,
-    },
-
     size: {
       type: String,
       default: 'md',
@@ -17,12 +12,20 @@ export default {
         return ['md', 'sm', 'xs'].indexOf(value) !== -1;
       },
     },
-  },
 
-  computed: {
-    onlyIcon() {
-      if (this.iconName && !this.text) return 'only-icon';
-      return false;
+    wide: {
+      type: Boolean,
+      default: false,
+    },
+
+    light: {
+      type: Boolean,
+      default: false,
+    },
+
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
 
