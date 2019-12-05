@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
 import AuthenticationInfo from '~/components/authentication/authenticationInfo';
 import AuthenticationTabs from '~/components/authentication/authenticationTabs';
 import FillButton from '~/components/shared/components/buttons/FillButton';
@@ -99,27 +99,25 @@ export default {
   },
 
   computed: {
-
+    ...mapGetters('user', ['getLoadingStatus']),
   },
 
   methods: {
-    ...mapActions([
-      'registerUser',
-    ]),
-
     registerUser() {
       const user = {
         email: this.email,
         password: this.password,
       };
+
       console.log(user);
-      this.$store.dispatch('registerUser', user)
+      this.$store.dispatch('user/registerUser', user)
         .then(() => {
           // this.submitStatus = 'OK'
           this.$router.push('/');
         })
         .catch(err => {
-          this.submitStatus = err.message;
+          console.log(err);
+          // this.submitStatus = err.message;
         });
     },
   },

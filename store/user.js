@@ -3,24 +3,47 @@ import User from '~/helpers/User';
 
 export const state = () => ({
   user: null,
+  loading: null,
+  error: null,
 });
 
 export const mutations = {
   setUser(state, payload) {
     state.user = payload;
   },
+
+  setLoading(state, payload) {
+    state.loading = payload;
+  },
+
+  setError(state, payload) {
+    state.error = payload;
+  },
+
+  clearError(state) {
+    state.error = null;
+  },
 };
 
 export const actions = {
-  // Registration page
+  setLoading({ commit }, payload) {
+    commit('setLoading', payload);
+  },
+
+  setError({ commit }, payload) {
+    commit('setError', payload);
+  },
+
+  clearError({ commit }) {
+    commit('clearError');
+  },
+
   async registerUser({ commit }, { email, password }) {
     commit('clearError');
     commit('setLoading', true);
     try {
-      // logic
       const user = await firebase.auth().createUserWithEmailAndPassword(email, password);
       commit('setUser', new User(user.user.uid));
-
       commit('setLoading', false);
     } catch (error) {
       commit('setLoading', false);
@@ -28,15 +51,13 @@ export const actions = {
       throw error;
     }
   },
-  // Login page
+
   async loginUser({ commit }, { email, password }) {
     commit('clearError');
     commit('setLoading', true);
     try {
-      // logic
       const user = await firebase.auth().signInWithEmailAndPassword(email, password);
       commit('setUser', new User(user.user.uid));
-
       commit('setLoading', false);
     } catch (error) {
       commit('setLoading', false);
@@ -44,24 +65,23 @@ export const actions = {
       throw error;
     }
   },
-  // Logged
+
   loggedUser({ commit }, payload) {
-    // Send mutation new uid used helped Class
     commit('setUser', new User(payload.uid));
   },
-  // Logout
+
   logoutUser({ commit }) {
     firebase.auth().signOut();
-    // Send mutation null
     commit('setUser', null);
   },
 };
 
 export const getters = {
-  user(state) {
-    return state.user;
-  },
-  checkUser(state) {
-    return state.user !== null;
-  },
+  user: state => state.user,
+
+  checkUser: state => state.user !== null,
+
+  error: state => state.error,
+
+  getLoadingStatus: state => state.loading,
 };

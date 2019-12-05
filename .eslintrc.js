@@ -34,25 +34,10 @@ module.exports = {
                 alignAttributesVertically: true
             }
         ],
-        // TODO временно
-        // 'no-restricted-syntax': 'off',
-        // 'import/prefer-default-export': 'off',
-        // 'no-plusplus': 'off',
-        // 'no-restricted-globals': 'off',
-        // 'func-names': 'off',
         'import/no-extraneous-dependencies': 'off',
-        'vue/no-v-html': 'off',
-        // 'guard-for-in': 'off',
-        // 'no-shadow': 'off',
-        // 'no-param-reassign': 'off',
-        // 'consistent-return': 'off',
-        // 'brace-style': 'off',
-        // 'no-used-vars': 'on',
-        // 'no-unused-expressions': 'off',
-        // 'import/no-named-as-default-member': 'off',
-        // 'no-multi-assign': 'off',
-        // 'no-prototype-builtins': 'off',
-        'max-len': 'off',
+        "max-len": ["error", { code: 120 }],
+        "no-shadow": ["error", { "allow": ["state", "getters"] }],
+        "no-param-reassign": ["error", { "ignorePropertyModificationsFor": ["state"] }],
         'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
         'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off'
     },
