@@ -14,52 +14,37 @@
               <input
                 v-model="email"
                 class="authentication__input input"
-                :class="{ 'error' : errorsStatus.email }"
+                :class="{ 'error' : getError.status }"
                 type="email"
                 placeholder="Введите email"
               >
               <span
-                v-if="errorsStatus.email"
+                v-if="getError.status"
                 class="authentication__error"
               >
-                Email уже занят
+                {{ getError.message }}
               </span>
             </label>
             <label class="authentication__label">
               <input
                 v-model="password"
                 class="authentication__input input"
-                :class="{ 'error' : errorsStatus.password }"
+                :class="{ 'error' : getError.status }"
                 type="password"
                 placeholder="Введите пароль"
                 autocomplete="new-password"
               >
               <span
-                v-if="errorsStatus.password"
+                v-if="getError.status"
                 class="authentication__error"
               >
-                Пароли не совпадают
-              </span>
-            </label>
-            <label class="authentication__label">
-              <input
-                v-model="confirmPassword"
-                class="authentication__input input"
-                :class="{ 'error' : errorsStatus.password }"
-                type="password"
-                placeholder="Повторите пароль"
-                autocomplete="new-password"
-              >
-              <span
-                v-if="errorsStatus.password"
-                class="authentication__error"
-              >
-                Пароли не совпадают
+                {{ getError.message }}
               </span>
             </label>
             <FillButton
               class="authentication__btn"
               text="Регистрация"
+              :loading="getLoadingStatus"
               @click="registerUser"
             />
           </form>
@@ -90,16 +75,16 @@ export default {
     return {
       email: '',
       password: '',
-      confirmPassword: '',
-      errorsStatus: {
-        email: false,
-        password: false,
-      },
     };
   },
 
   computed: {
-    ...mapGetters('user', ['getLoadingStatus']),
+    ...mapGetters(
+      'user', [
+        'getLoadingStatus',
+        'getError',
+      ],
+    ),
   },
 
   methods: {

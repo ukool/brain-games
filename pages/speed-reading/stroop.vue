@@ -3,7 +3,7 @@
   <div class="container game">
     <div class="row">
       <div class="game__field">
-        <Loader
+        <FigureLoader
           v-if="!answers.length"
         />
         <StroopCard
@@ -29,13 +29,13 @@
 </template>
 
 <script>
-import Loader from '~/components/shared/Loader.vue';
+import FigureLoader from '~/components/shared/components/loaders/FigureLoader.vue';
 import StroopCard from '~/components/speedReading/stroop/StroopCard';
 import StroopSidebar from '~/components/speedReading/stroop/StroopSidebar';
 
 export default {
   components: {
-    Loader,
+    FigureLoader,
     StroopCard,
     StroopSidebar,
   },

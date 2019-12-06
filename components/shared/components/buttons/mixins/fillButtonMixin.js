@@ -27,6 +27,11 @@ export default {
       type: Boolean,
       default: false,
     },
+
+    loading: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   methods: {

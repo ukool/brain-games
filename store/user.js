@@ -4,7 +4,10 @@ import User from '~/helpers/User';
 export const state = () => ({
   user: null,
   loading: null,
-  error: null,
+  error: {
+    status: false,
+    message: null,
+  },
 });
 
 export const mutations = {
@@ -17,11 +20,22 @@ export const mutations = {
   },
 
   setError(state, payload) {
-    state.error = payload;
+    state.error.status = true;
+
+    if (payload === 'The email address is already in use by another account.') {
+      state.error.message = 'Email уже занят';
+    } else if (payload === 'The email address is badly formatted.') {
+      state.error.message = 'Некорректный email';
+    } else if (payload === 'The password must be 6 characters long or more.') {
+      state.error.message = 'Пароль должен быть не меньше 6-ти символов';
+    } else {
+      state.error.message = 'Неверный email или пароль';
+    }
   },
 
   clearError(state) {
-    state.error = null;
+    state.error.status = false;
+    state.error.message = null;
   },
 };
 
@@ -77,11 +91,11 @@ export const actions = {
 };
 
 export const getters = {
-  user: state => state.user,
+  getUser: state => state.user,
 
   checkUser: state => state.user !== null,
 
-  error: state => state.error,
+  getError: state => state.error,
 
   getLoadingStatus: state => state.loading,
 };

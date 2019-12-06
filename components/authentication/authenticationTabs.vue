@@ -3,14 +3,14 @@
   <n-link
     class="registration-tabs__btn"
     :to="{ name: 'sign-up'}"
-    :class="{'disabled' : $route.name === 'sign-up'}"
+    :class="{ 'active' : $route.name === 'sign-up' }"
   >
     Регистрация
   </n-link>
   <n-link
     class="registration-tabs__btn"
     :to="{ name: 'sign-in'}"
-    :class="{'disabled' : $route.name === 'sign-in'}"
+    :class="{ 'active' : $route.name === 'sign-in' }"
   >
     Войти
   </n-link>
@@ -30,15 +30,19 @@ export default {
 
   &__btn
     width calc(50% - 5px)
-    line-height: 25px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
+    line-height 25px
+    font-size 12px
+    font-weight 700
+    letter-spacing 1px
     text-align center
-    text-transform: uppercase;
-    border-bottom 1px solid $black
-    &.disabled
-      opacity 0.2
+    text-transform uppercase
+    opacity 0.3
+    border-bottom 1px solid transparent
+    transition opacity 0.3s ease-in-out
+    &.active
+      opacity 1
       pointer-events none
-      border-color transparent
+      border-bottom-color $black
+    &:hover
+      opacity 1
 </style>
