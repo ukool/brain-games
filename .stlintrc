@@ -1,0 +1,23 @@
+{
+    "reporter": "raw",
+    "watch": false,
+    "extends": ["stlint-v4fire", "./styleLintConfig.json"],
+    "rules": {
+        "color": false,
+        "colons": ["always"],
+        "depthControl": {
+            "indentPref": "space"
+        }
+    },
+    "path": "./src",
+    "excludes": ["node_modules/"],
+    "stylusParserOptions": {},
+    "brackets": ["never"],
+    "quotePref": ["single"],
+    "reportOptions": {
+        "columnSplitter": " | ",
+        "maxWidth": 70,
+        "minWidth": 70,
+        "trancate": false
+    }
+}

@@ -44,7 +44,7 @@
 <script>
 import SchulteCard from '~/components/speedReading/schulte/SchulteCard';
 import SchulteSidebar from '~/components/speedReading/schulte/SchulteSidebar';
-import GameField from '~/components/shared/elements/GameField';
+import GameField from '~/components/shared/layouts/GameField';
 import StopWatch from '~/helpers/stopWatch';
 
 export default {

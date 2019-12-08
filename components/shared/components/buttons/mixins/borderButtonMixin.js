@@ -17,6 +17,11 @@ export default {
         return ['md', 'sm', 'xs'].indexOf(value) !== -1;
       },
     },
+
+    wide: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   computed: {

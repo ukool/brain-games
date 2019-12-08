@@ -1,7 +1,7 @@
 <template>
 <n-link
   class="border-btn"
-  :class="[size]"
+  :class="[ size, wide ? 'wide' : null ]"
   :to="href"
   @click="handlerClick"
 >
@@ -10,8 +10,8 @@
     class="border-btn__icon"
     :class="onlyIcon"
     :name="iconName"
-    width="16"
-    height="16"
+    width="20"
+    height="20"
   />
   <template v-if="text">
     {{ text }}

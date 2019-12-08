@@ -42,7 +42,7 @@
 import Dropdown from '~/components/shared/components/Dropdown';
 import Stopwatch from '~/components/shared/components/Stopwatch';
 import ResetButton from '~/components/shared/components/buttons/ResetButton';
-import Sidebar from '~/components/shared/elements/Sidebar';
+import Sidebar from '~/components/shared/layouts/Sidebar';
 
 export default {
   name: 'PairSidebar',
