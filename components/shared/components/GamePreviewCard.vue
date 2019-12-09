@@ -7,8 +7,8 @@
   <svg-icon
     class="game-preview__icon"
     :name="simulator.iconName"
-    width="60"
-    height="60"
+    width="65"
+    height="65"
   />
 
   <h2 class="game-preview__title">
@@ -29,6 +29,13 @@
       :wide="true"
     />
   </div>
+  <svg-icon
+    class="game-preview__shape"
+    :name="`shape/shape-${randomShapeNumber}`"
+    :fill="randomShapeColor"
+    width="300"
+    height="300"
+  />
 </n-link>
 </template>
 
@@ -46,6 +53,34 @@ export default {
       default: null,
     },
   },
+
+  data() {
+    return {
+      colors: [
+        '#ecdaff',
+        '#a8dab4',
+        '#d0edf5',
+        '#fad12d',
+        '#f78da7',
+        // '#9900ef',
+        '#8ed1fc',
+        '#fcb900',
+      ],
+      currentColor: '',
+    };
+  },
+
+  computed: {
+    randomShapeNumber() {
+      return Math.floor(Math.random() * 23);
+    },
+
+    randomShapeColor() {
+      const randomNumber = Math.floor(Math.random() * this.colors.length - 1);
+      return this.colors[randomNumber];
+    },
+  },
+
 };
 </script>
 
@@ -53,6 +88,7 @@ export default {
 .game-preview
   position relative
   box-sizing border-box
+  overflow hidden
   display flex
   flex-direction column
   align-items flex-start
@@ -60,7 +96,7 @@ export default {
   height 400px
   padding 30px 20px
   border 1px solid $black
-  // box-shadow: 0 0 3px 2px #4e4e4e;
+  transition box-shadow 0.3s ease-in-out
   &::before,
   &::after
     content ''
@@ -77,6 +113,7 @@ export default {
     bottom 0
 
   &:hover
+    box-shadow 0 0 3px 2px rgba($violet, 0.3)
     &::before,
     &::after
       width 100%
@@ -119,4 +156,12 @@ export default {
   &__button
     width 100%
     margin-top 30px
+
+  &__shape
+    position absolute
+    z-index -1
+    top 40%
+    right 0
+    transform translateY(-50%)
+    opacity 0.7
 </style>
