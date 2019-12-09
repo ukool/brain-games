@@ -47,7 +47,7 @@ module.exports = {
     '@nuxtjs/axios',
     '@nuxtjs/svg-sprite',
     '@nuxtjs/style-resources',
-    ['vue-scrollto/nuxt', { duration: 300 }],
+    ['vue-scrollto/nuxt', { duration: 600 }],
   ],
 
   styleResources: {

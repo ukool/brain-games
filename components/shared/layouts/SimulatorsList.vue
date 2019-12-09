@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import GamePreviewCard from '~/components/shared/layouts/GamePreviewCard';
+import GamePreviewCard from '~/components/shared/components/GamePreviewCard';
 
 export default {
   name: 'SimulatorsList',
@@ -52,9 +52,10 @@ export default {
     font-size 45px
 
   &__row
-    margin 50px -15px 0 -15px
+    margin-top 50px
 
   &__item
+    width calc(100% / 4 - 10px)
     margin 0 15px
 
 </style>

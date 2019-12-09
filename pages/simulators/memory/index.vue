@@ -1,6 +1,6 @@
 <template>
 <SimulatorsList
-  simulators-title="Развитие памяти"
+  simulators-title="Тренажеры для развитие памяти"
   :simulators="simulators"
 />
 </template>

@@ -1,5 +1,8 @@
 <template>
-<div class="game-preview">
+<n-link
+  class="game-preview"
+  :to="simulator.page"
+>
   <span class="game-preview__lines" />
   <svg-icon
     class="game-preview__icon"
@@ -15,31 +18,27 @@
   <p class="game-preview__description">
     {{ simulator.description }}
   </p>
-<!--  Таблица Шульте представляет собой таблицу, в ячейках которой
-    хаотичным образом размещены последовательно идущие числа.-->
-<!-- Нужно найти все числа по порядку. -->
   <p class="game-preview__target">
     {{ simulator.target }}
   </p>
 
   <div class="game-preview__button">
-    <BorderLink
+    <BorderButton
       text="Играть"
       icon-name="play"
-      :href="simulator.page"
       :wide="true"
     />
   </div>
-</div>
+</n-link>
 </template>
 
 <script>
-import BorderLink from '~/components/shared/components/buttons/BorderLink';
+import BorderButton from './buttons/BorderButton';
 
 export default {
   name: 'GamePreviewCard',
 
-  components: { BorderLink },
+  components: { BorderButton },
 
   props: {
     simulator: {
@@ -57,7 +56,7 @@ export default {
   display flex
   flex-direction column
   align-items flex-start
-  width 350px
+  width 100%
   height 400px
   padding 30px 20px
   border 1px solid $black
