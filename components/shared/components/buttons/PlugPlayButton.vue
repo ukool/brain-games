@@ -3,7 +3,7 @@
   <button
     class="plug-play__btn"
     type="button"
-    @click="handlerClick"
+    @click="handleClick"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -37,13 +37,33 @@
       />
     </svg>
   </button>
+  <transition name="fade">
+    <Countdown
+      v-if="startCountdown"
+      :start-timer="startCountdown"
+      @countdown-final="countdownFinalListener"
+    />
+  </transition>
 </div>
 </template>
 
 <script>
 export default {
+  name: 'PlugPlayButton',
+
+  data() {
+    return {
+      startCountdown: false,
+    };
+  },
+
   methods: {
-    handlerClick() {
+    handleClick() {
+      this.startCountdown = true;
+    },
+
+    countdownFinalListener() {
+      this.startCountdown = false;
       this.$emit('play');
     },
   },
@@ -62,7 +82,6 @@ export default {
     z-index 30
     width 100%
     height 100%
-    background-color rgba($white, 0.7)
 
   &__btn
     display inline-block

@@ -1,11 +1,12 @@
 <template>
 <div class="countdown">
-  <p
-    v-if="!showTimer"
-    class="countdown__text"
-  >
-    Приготовьтесь
-  </p>
+  <div class="countdown__inner">
+    <p
+      v-if="!showTimer"
+      class="countdown__text"
+    >
+      Приготовьтесь
+    </p>
 
     <p
       v-if="showTimer"
@@ -13,12 +14,11 @@
     >
       {{ timer }}
     </p>
-
+  </div>
 </div>
 </template>
 
 <script>
-
 export default {
   name: 'Countdown',
 
@@ -42,6 +42,10 @@ export default {
     }, 1000);
   },
 
+  beforeDestroy() {
+    this.timer = 0;
+  },
+
   methods: {
     startCountdown() {
       this.showTimer = true;
@@ -52,7 +56,7 @@ export default {
 
       setTimeout(() => {
         clearInterval(timer);
-        this.$emit('contdown-final');
+        this.$emit('countdown-final');
         this.timer = 3;
       }, 3100);
     },
@@ -69,10 +73,14 @@ export default {
   width 100%
   height 100%
   display flex
-  flex-direction column
   justify-content center
   align-items center
-  background-color #fff
+  background-color $white
+
+  &__inner
+    flex-direction column
+    justify-content center
+    align-items center
 
   &__text
     text-transform uppercase

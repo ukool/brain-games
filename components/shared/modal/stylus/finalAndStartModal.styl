@@ -6,12 +6,21 @@
   z-index 20
   box-sizing border-box
   display flex
-  flex-direction column
-  height 550px
-  width 700px
-  padding 30px
-  background-color #fff
-  box-shadow 0 3px 10px 2px rgba(0, 0, 0, 0.05)
+  justify-content center
+  align-items center
+  height 100%
+  width 100%
+  background-color $white
+
+  &__inner
+    position relative
+    height 550px
+    width 700px
+    display flex
+    flex-direction column
+    padding 30px
+    background-color $white
+    box-shadow 0 3px 10px 2px rgba(0, 0, 0, 0.05)
 
   &__icon
     position absolute
@@ -40,7 +49,7 @@
 
   &__total-list
     margin-top 15px
-    
+
   &__total-item
     & + &
       margin-top 7px

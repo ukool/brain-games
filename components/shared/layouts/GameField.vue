@@ -2,16 +2,19 @@
 <main class="game">
   <section class="game__container flex-container container">
     <div class="row game__row">
-      <div class="game__field">
-        <slot
-          v-show="startGame"
-          name="game"
-        />
+      <div class="game__inner">
         <transition name="fade">
           <GameStartModal
             v-if="!startGame"
             :simulator-info="simulatorInfo"
             @starting-game="startingCountdown"
+          />
+        </transition>
+
+        <transition name="fade">
+          <Countdown
+            v-if="showCountdown"
+            @countdown-final="startingGame"
           />
         </transition>
 
@@ -22,25 +25,25 @@
           />
         </transition>
 
-        <transition name="fade">
-          <PlugPlayButton
-            v-if="gamePause"
-            @play="startingGameAfterPause"
+        <div class="game__field">
+          <slot
+            v-show="startGame"
+            name="game"
           />
-        </transition>
 
-        <transition name="fade">
-          <Countdown
-            v-if="showCountdown"
-            @contdown-final="startingGame"
-          />
-        </transition>
-      </div>
-      <div
-        v-show="startGame"
-        class="game-sidebar"
-      >
-        <slot name="sidebar" />
+          <transition name="fade">
+            <PlugPlayButton
+              v-if="gamePause"
+              @play="startingGameAfterPause"
+            />
+          </transition>
+        </div>
+        <div
+          v-show="startGame"
+          class="game__sidebar"
+        >
+          <slot name="sidebar" />
+        </div>
       </div>
     </div>
   </section>
@@ -111,7 +114,7 @@ export default {
 <style scoped lang="stylus">
 .game
   position relative
-  min-height calc(100vh - 61px - 71px) // TODO костылина - переделать
+  height 100%
   display flex
   align-items center
 
@@ -123,10 +126,17 @@ export default {
     height 100%
     min-height 100%
 
+  &__inner
+    position relative
+    width 100%
+    display flex
+    align-items flex-start
+
   &__field
     position relative
     display flex
     justify-content center
+    align-self center
     flex-wrap wrap
     width 75%
     margin-right auto
@@ -138,5 +148,6 @@ export default {
     transform translateX(-50%)
 
   &__sidebar
+    align-self center
     width 23%
 </style>

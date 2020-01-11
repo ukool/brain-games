@@ -9,7 +9,10 @@
   <template v-slot:game>
     <div
       class="game__wrapper"
-      :class="currentCssClass"
+      :class="[
+        currentCssClass,
+        { 'disabled': gameStatus.pause}
+      ]"
     >
       <SchulteCard
         v-for="card in cards"
@@ -259,6 +262,18 @@ export default {
       width 90%
     &.nine
       width 100%
+    &.disabled
+      pointer-events none
+      background-color white
+      &::before
+        content ''
+        position absolute
+        top -20px
+        left 0
+        bottom -20px
+        width 100%
+        background $white
+        z-index 20
 
   &__card
     &.four
