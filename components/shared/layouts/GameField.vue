@@ -10,6 +10,7 @@
         <transition name="fade">
           <GameStartModal
             v-if="!startGame"
+            :simulator-info="simulatorInfo"
             @starting-game="startingCountdown"
           />
         </transition>
@@ -60,6 +61,11 @@ export default {
 
   props: {
     modalData: {
+      type: Object,
+      default: null,
+    },
+
+    simulatorInfo: {
       type: Object,
       default: null,
     },

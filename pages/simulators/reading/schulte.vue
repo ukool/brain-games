@@ -1,5 +1,6 @@
 <template>
 <GameField
+  :simulator-info="simulatorInfo"
   :game-pause="gameStatus.pause"
   :game-final="gameStatus.final"
   @start-game="setGameOnPlayed"
@@ -42,8 +43,9 @@
 </template>
 
 <script>
-import SchulteCard from '~/components/speedReading/schulte/SchulteCard';
-import SchulteSidebar from '~/components/speedReading/schulte/SchulteSidebar';
+import firebase from 'firebase/app';
+import SchulteCard from '~/components/reading/schulte/SchulteCard';
+import SchulteSidebar from '~/components/reading/schulte/SchulteSidebar';
 import GameField from '~/components/shared/layouts/GameField';
 import StopWatch from '~/helpers/stopWatch';
 
@@ -82,7 +84,14 @@ export default {
       currentCssClass: 'five',
       cards: null,
       stopWatch: null,
+      simulatorInfo: null,
     };
+  },
+
+  asyncData() {
+    return firebase.database().ref('simulatorsInfo/reading/schulte')
+      .once('value')
+      .then(snap => ({ simulatorInfo: snap.val() }));
   },
 
   created() {

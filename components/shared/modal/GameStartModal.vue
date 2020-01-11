@@ -2,33 +2,38 @@
 <div class="game-modal">
   <svg-icon
     class="game-modal__icon"
-    name="sudoku"
+    :name="simulatorInfo.iconName"
     width="90"
     height="90"
   />
 
   <h2 class="game-modal__title">
-    Таблица Шульте
+    {{ simulatorInfo.title }}
   </h2>
 
-  <ul class="game-modal__tags">
-    <li class="game-modal__tag">
-      Точность памяти
-    </li>
-    <li class="game-modal__tag">
-      Объем памяти
-    </li>
-    <li class="game-modal__tag">
-      Память
+  <ul
+    v-if="simulatorInfo.tags && simulatorInfo.tags.length"
+    class="game-modal__tags"
+  >
+    <li
+      v-for="(tag, index) in simulatorInfo.tags"
+      :key="`${index}_tag`"
+      class="game-modal__tag"
+    >
+      {{ tag }}
     </li>
   </ul>
 
-  <div class="game-modal__description">
-    <p class="game-modal__paragraph">
-      Точность памяти — способность воспроизвести информацию без искажения. Это важное качество памяти может пригодиться во многих случаях жизни.
-    </p>
-    <p class="game-modal__paragraph">
-      Человечество вырвалось на просторы Галактики. Но перемещаться в дальнем космосе можно только гиперпрыжками, используя строгую последовательность особых точек пространства. Секрет этих путей пока есть только у высокоразвитой расы космических пришельцев. Но только пока...
+  <div
+    v-if="simulatorInfo.description"
+    class="game-modal__description"
+  >
+    <p
+      v-for="(paragraph, index) in simulatorInfo.description"
+      :key="`${index}_paragraph`"
+      class="game-modal__paragraph"
+    >
+      {{ paragraph }}
     </p>
   </div>
 
@@ -66,6 +71,13 @@ export default {
   name: 'GameStartModal',
 
   mixins: [gameStartAndFinalModalMixin],
+
+  props: {
+    simulatorInfo: {
+      type: Object,
+      default: null,
+    },
+  },
 };
 </script>
 

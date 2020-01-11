@@ -76,7 +76,7 @@ export default {
     },
 
     randomShapeColor() {
-      const randomNumber = Math.floor(Math.random() * this.colors.length - 1);
+      const randomNumber = Math.floor(Math.random() * (this.colors.length - 1));
       return this.colors[randomNumber];
     },
   },
@@ -163,5 +163,5 @@ export default {
     top 40%
     right 0
     transform translateY(-50%)
-    opacity 0.7
+    opacity 0.6
 </style>

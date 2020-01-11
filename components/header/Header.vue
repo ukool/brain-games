@@ -49,6 +49,14 @@
               </ul>
             </transition>
           </li>
+          <li class="header__item">
+            <n-link
+              class="header__link"
+              :to="{ name: 'sign-in'}"
+            >
+              Личный кабинет
+            </n-link>
+          </li>
         </ul>
       </nav>
     </div>

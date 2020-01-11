@@ -11,9 +11,9 @@ const firebaseConfig = {
   authDomain: 'simulators-70d7e.firebaseapp.com',
   databaseURL: 'https://simulators-70d7e.firebaseio.com',
   projectId: 'simulators-70d7e',
-  storageBucket: 'project-id.appspot.com',
-  messagingSenderId: 'messaging-sender-id',
-  appId: 'app-id',
+  storageBucket: 'simulators-70d7e.appspot.com',
+  messagingSenderId: '556028555053',
+  appId: '1:556028555053:web:921560d1f44f6447b76da4',
 };
 
 
@@ -23,5 +23,9 @@ if (!firebase.apps.length) {
 }
 
 // const app = firebase.initializeApp(firebaseConfig);
+let db;
+if (app) {
+  db = app.database().ref();
+}
 
-export const db = app.database();
+export default db;

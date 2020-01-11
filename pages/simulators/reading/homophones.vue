@@ -24,7 +24,7 @@
 
 <script>
 import homophones from '~/supportingData/homophones';
-import HomophonesCard from '~/components/speedReading/homophones/HomophonesCard';
+import HomophonesCard from '~/components/reading/homophones/HomophonesCard';
 
 export default {
   components: {

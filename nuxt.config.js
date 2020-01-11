@@ -30,7 +30,7 @@ module.exports = {
   plugins: [
     '~/plugins/globalComponents',
     { src: '~/plugins/v-click-outside', ssr: false },
-    { src: '~/plugins/firebase', ssr: false },
+    { src: '~/plugins/firebase', ssr: true },
   ],
   /*
   ** Nuxt.js dev-modules
@@ -83,6 +83,7 @@ module.exports = {
   ** Build configuration
   */
   build: {
+    vendor: ['firebase'],
     /*
     ** You can extend webpack config here
     */

@@ -207,7 +207,7 @@
         <p class="hero__links">
           Пишите:
           <a
-            class="hero__link bottom-two-line"
+            class="hero__link line-to-top"
             href="tg://resolve?domain=ukool"
             target="_blank"
             rel="nofollow"
@@ -215,7 +215,7 @@
             telegram
           </a>,
           <a
-            class="hero__link bottom-two-line"
+            class="hero__link line-to-top"
             href="https://github.com/ukool/brain-games/issues"
             target="_blank"
             rel="nofollow"
@@ -223,7 +223,7 @@
             github
           </a>,
           <a
-            class="hero__link bottom-two-line"
+            class="hero__link line-to-top"
             href="mailto:d_ukolov@bk.ru"
             rel="nofollow"
           >
@@ -252,14 +252,14 @@ export default {
         {
           title: 'Скорочтение',
           description: 'Вжух и прочитал',
-          page: '/simulators/speed-reading',
+          page: '/simulators/reading',
           imageSrc: '/img/index/speed.svg',
           gameAmount: 1,
         },
         {
           title: 'Устный счет',
           description: 'Вжух и посчитал',
-          page: '/simulators/math',
+          page: '/simulators/mind',
           imageSrc: '/img/index/math.svg',
           gameAmount: 1,
         },
@@ -311,11 +311,14 @@ export default {
         margin-top 10px
 
     &__links
+      display inline-flex
       margin-top 50px
       font-size 35px
 
     &__link
       font-weight 300
+      &:first-of-type
+        margin-left 10px
 
     &__list
       margin-top 35px

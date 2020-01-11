@@ -30,8 +30,8 @@
 
 <script>
 import FigureLoader from '~/components/shared/components/loaders/FigureLoader.vue';
-import StroopCard from '~/components/speedReading/stroop/StroopCard';
-import StroopSidebar from '~/components/speedReading/stroop/StroopSidebar';
+import StroopCard from '~/components/reading/stroop/StroopCard';
+import StroopSidebar from '~/components/reading/stroop/StroopSidebar';
 
 export default {
   components: {

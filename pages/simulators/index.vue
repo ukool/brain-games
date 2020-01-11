@@ -7,93 +7,48 @@
           Тренажеры:
         </span>
         <ul class="simulators__sidebar-list">
-          <li class="simulators__sidebar-item">
+          <li
+            v-for="(simulator, index) in sidebarSimulators"
+            :key="`${index}_sidebar-simulator`"
+            class="simulators__sidebar-item"
+          >
             <a
               class="simulators__sidebar-link bottom-two-line"
               href="#"
-              v-scroll-to="'#memory'"
+              v-scroll-to="`#${simulator.domId}`"
             >
-              Для памяти
-            </a>
-          </li>
-          <li class="simulators__sidebar-item">
-            <a
-              class="simulators__sidebar-link bottom-two-line"
-              href="#"
-              v-scroll-to="'#reading'"
-            >
-              Для скорочтения
-            </a>
-          </li>
-          <li class="simulators__sidebar-item">
-            <a
-              class="simulators__sidebar-link bottom-two-line"
-              href="#"
-              v-scroll-to="'#math'"
-            >
-              Для мышления
+              {{ simulator.title }}
             </a>
           </li>
         </ul>
       </aside>
       <div class="simulators__inner">
-        <div class="simulators__item">
-          <n-link
-            id="memory"
-            class="simulators__title line-to-top"
-            to="simulators/memory"
+<!--        <FigureLoader v-if="!simulatorsList" />-->
+        <template >
+          <div
+            v-for="(simulatorItem, index) in simulatorsList"
+            :key="`${index}_simulatorItem`"
+            class="simulators__item"
           >
-            Тренажеры для памяти
-          </n-link>
-          <div class="simulators__list">
-            <div
-              v-for="(simulator, index) in simulatorsMemory"
-              :key="`${index}_memory`"
-              class="simulators__unit"
+            <n-link
+              :id="simulatorItem.page"
+              class="simulators__title line-to-top"
+              :to="`simulators/${simulatorItem.page}`"
             >
-              <GamePreviewCard :simulator="simulator" />
-            </div>
-            <div class="simulators__unit space" />
-          </div>
-        </div>
-
-        <div class="simulators__item">
-          <n-link
-            id="reading"
-            class="simulators__title line-to-top"
-            to="simulators/speed-reading"
-          >
-            Тренажеры для скорочтения
-          </n-link>
-          <div class="simulators__list">
-            <div
-              v-for="(simulator, index) in simulatorsSpeedReading"
-              :key="`${index}_read`"
-              class="simulators__unit"
-            >
-              <GamePreviewCard :simulator="simulator" />
+              {{ simulatorItem.title }}
+            </n-link>
+            <div class="simulators__list">
+              <div
+                v-for="(simulator, i) in simulatorItem.simulators"
+                :key="`${i}_${simulatorItem.title}_simulator`"
+                class="simulators__unit"
+              >
+                <GamePreviewCard :simulator="simulator" />
+              </div>
+              <div class="simulators__unit space" />
             </div>
           </div>
-        </div>
-
-        <div class="simulators__item">
-          <n-link
-            id="math"
-            class="simulators__title line-to-top"
-            to="simulators/math"
-          >
-            Тренажеры для мышления
-          </n-link>
-          <div class="simulators__list">
-            <div
-              v-for="(simulator, index) in simulatorsMath"
-              :key="`${index}_math`"
-              class="simulators__unit"
-            >
-              <GamePreviewCard :simulator="simulator" />
-            </div>
-          </div>
-        </div>
+        </template>
       </div>
     </div>
   </div>
@@ -101,63 +56,41 @@
 </template>
 
 <script>
+import firebase from 'firebase/app';
+
 import GamePreviewCard from '~/components/shared/components/GamePreviewCard';
+import FigureLoader from '../../components/shared/components/loaders/FigureLoader';
 
 export default {
   name: 'SimulatorsPage',
-  components: { GamePreviewCard },
+  components: { FigureLoader, GamePreviewCard },
 
   data() {
     return {
-      simulatorsMemory: [
-        {
-          iconName: 'pair',
-          name: 'Найди пару',
-          description: 'На игровом поле имеются переврнутые карточки, под каждой из которой, находится изображение. При клике на карточку появляется изображение. Карточке следует найти пару',
-          target: 'Найди всем картам пару',
-          page: 'simulators/memory/pair',
-        },
-        {
-          iconName: 'number',
-          name: 'Запомни число',
-          description: 'На игровом поле на несколько секунд появляются и затем исчезают цифры',
-          target: 'Запомни как можно больше чисел',
-          page: 'simulators/memory/remember-number',
-        },
-      ],
-      simulatorsSpeedReading: [
-        {
-          iconName: 'sudoku',
-          name: 'Таблица Шульте',
-          description: 'Таблица Шульте представляет собой таблицу, в ячейках которой хаотичным образом размещены последовательно идущие числа',
-          target: 'Найди все числа по порядку',
-          page: 'simulators/speed-reading/schulte',
-        },
-        {
-          iconName: 'stroop',
-          name: 'Тест струпа',
-          description: 'На игровом поле на несколько секунд появляются и затем исчезают цифры',
-          target: 'Запомни как можно больше чисел',
-          page: 'simulators/speed-reading/stroop',
-        },
-        {
-          iconName: 'homophones',
-          name: 'Омофоны',
-          description: 'На игровом поле на несколько секунд появляются и затем исчезают цифры.',
-          target: 'Найди все омофоны',
-          page: 'simulators/speed-reading/homophones',
-        },
-      ],
-      simulatorsMath: [
-        {
-          iconName: 'calculator',
-          name: 'Усный счет',
-          description: 'Таблица Шульте представляет собой таблицу, в ячейках которой хаотичным образом размещены последовательно идущие числа.',
-          target: 'Найди все числа по порядку',
-          page: 'simulators/math/consider',
-        },
-      ],
+      simulatorsList: null,
+      sidebarSimulators: null,
     };
+  },
+
+  asyncData() {
+    return firebase.database().ref('simulatorsList')
+      .once('value')
+      .then((snap) => {
+        const simulatorsList = snap.val();
+        const sidebarSimulators = [];
+
+        Object.keys(simulatorsList).forEach((item) => {
+          sidebarSimulators.push({
+            title: simulatorsList[item].title,
+            domId: simulatorsList[item].page,
+          });
+        });
+
+        return {
+          simulatorsList,
+          sidebarSimulators,
+        };
+      });
   },
 };
 </script>
@@ -187,6 +120,7 @@ export default {
         margin-top 7px
 
   &__inner
+    position relative
     width 75%
     margin-left auto
 
