@@ -1,23 +1,23 @@
 <template>
-<div class="card">
-  <div
-    class="card__wrapper"
-    :style="{ backgroundColor: getBgColor() }"
-    :class="[
-      $props.card.status,
-      { 'no-animation': !$props.animationCards },
-      { 'no-fill' : !$props.fillCards }
-    ]"
+<div
+  class="card"
+  :style="{ backgroundColor: backgroundColor }"
+  :class="[
+    card.status,
+    { 'no-animation': !animationCards },
+    { 'no-fill' : !fillCards && !coloredCards },
+    { 'colored-cards' : coloredCards },
+    { 'colored-cards-no-fill' : coloredCards && !fillCards },
+  ]"
+>
+  <button
+    class="card__button"
+    :class="{ 'error' : error }"
+    type="button"
+    @click="clickHandler(card.number)"
   >
-    <button
-      class="card__button"
-      :class="{ 'error' : $props.error }"
-      type="button"
-      @click="clickHandler($props.card.number)"
-    >
-      {{ $props.card.number }}
-    </button>
-  </div>
+    {{ card.number }}
+  </button>
 </div>
 </template>
 
@@ -52,11 +52,13 @@ export default {
     },
   },
 
-  methods: {
-    getBgColor() {
-      return this.$props.coloredCards ? this.getRandomColor() : null;
+  computed: {
+    backgroundColor() {
+      return this.coloredCards ? this.getRandomColor() : null;
     },
+  },
 
+  methods: {
     getRandomColor() {
       const letters = '0123456789ABCDEF';
       let color = '#';
@@ -75,38 +77,53 @@ export default {
 
 <style lang="stylus" scoped>
 .card
-  &__wrapper
-    position relative
-    display flex
-    align-items center
-    justify-content center
-    box-sizing border-box
-    margin 1px
+  position relative
+  display flex
+  align-items center
+  justify-content center
+  box-sizing border-box
+  margin 1px
+  border 1px solid $black
+  color $black
+  border-radius 3px
+  transition border-color 0.2s ease-in-out
+  box-shadow 1px 1px 5px $violet
+  &::after
+    content ''
+    display block;
     padding-top 100%
-    border 1px solid $black
+  &:hover
+    border-color $violet
+
+  &.success > .card__button
+    background-color $pink
+    border-color $blue
+    color $blue
+    pointer-events none
+
+  &.success.no-fill > .card__button
+    background-color transparent
+    border-color $black
     color $black
-    border-radius 3px
-    transition border-color 0.2s ease-in-out
-    box-shadow 1px 1px 5px $violet
-    &:hover
-      border-color $violet
 
-    &.success
-      background $pink !important
-      border-color $blue !important
-      color $blue !important
-      pointer-events none
+  &.success.colored-cards  > .card__button
+    background-color white !important
+    border-color $black !important
+    color $black !important
 
-    &.success.no-fill
-      background-color transparent !important
-      border-color #000 !important
-      color $black !important
+  &.success.colored-cards.colored-cards-no-fill > .card__button
+    background-color transparent !important
+    border-color $black !important
+    color $white !important
 
-    &.error
-      animation shake 0.2s
+  &.colored-cards
+    color white
 
-    &.no-animation
-      animation none !important
+  &.error
+    animation shake 0.2s
+
+  &.no-animation
+    animation none !important
 
   &__button
     position absolute
@@ -115,21 +132,13 @@ export default {
     width 100%
     height 100%
 
-@keyframes shake {
-  10%, 90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-
-  20%, 80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%, 60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
+@keyframes shake
+  10%, 90%
+    transform translate3d(-1px, 0, 0)
+  20%, 80%
+    transform translate3d(2px, 0, 0)
+  30%, 50%, 70%
+    transform translate3d(-4px, 0, 0)
+  40%, 60%
+    transform translate3d(4px, 0, 0)
 </style>

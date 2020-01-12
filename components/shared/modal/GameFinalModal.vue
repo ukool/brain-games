@@ -3,27 +3,31 @@
   <div class="game-modal__inner">
     <svg-icon
       class="game-modal__icon"
-      name="sudoku"
+      :name="simulatorInfo.iconName"
       width="90"
       height="90"
     />
 
     <h2 class="game-modal__title">
-      Таблица Шульте
+      {{ simulatorInfo.title }}
     </h2>
 
     <p class="game-modal__total">
       Результаты игры:
     </p>
     <ul class="game-modal__total-list">
-      <li class="game-modal__total-item">
-        Время: 120 сек
+      <li
+        v-for="(data, index) in finalData"
+        :key="`${index}_data`"
+        class="game-modal__total-item"
+      >
+        {{ data.title }} : {{ data.value }}
       </li>
-      <li class="game-modal__total-item">
-        Ходов:
-      </li>
-      <li class="game-modal__total-item">
-        Сложноость:
+      <li
+        v-if="time"
+        class="game-modal__total-item"
+      >
+        Затрачено время: {{ time }}
       </li>
     </ul>
 
@@ -51,9 +55,28 @@ import BorderLink from '../components/buttons/BorderLink';
 export default {
   name: 'GameFinalModal',
 
-  components: { BorderLink },
+  components: {
+    BorderLink,
+  },
 
   mixins: [gameStartAndFinalModalMixin],
+
+  props: {
+    simulatorInfo: {
+      type: Object,
+      default: null,
+    },
+
+    finalData: {
+      type: Object,
+      default: null,
+    },
+
+    time: {
+      type: String,
+      default: null,
+    },
+  },
 };
 </script>
 

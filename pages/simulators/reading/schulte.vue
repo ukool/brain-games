@@ -3,6 +3,7 @@
   :simulator-info="simulatorInfo"
   :game-pause="gameStatus.pause"
   :game-final="gameStatus.final"
+  :final-modal-data="gameFinalData"
   @start-game="setGameOnPlayed"
   @start-game-after-pause="setGameOnPlayed"
 >
@@ -10,32 +11,36 @@
     <div
       class="game__wrapper"
       :class="[
-        currentCssClass,
-        { 'disabled': gameStatus.pause}
+        gameCardSize,
+        { 'disabled': gameStatus.pause }
       ]"
     >
+      <p
+        v-if="gameSettings.tip.enabled && gameStatus.played"
+        class="game__tip"
+      >
+        Найдите число {{ currentCardNumber }}
+      </p>
+      <span
+        v-if="gameSettings.dotInCenter.enabled && gameStatus.played"
+        class="game__dot-in-center"
+      />
       <SchulteCard
         v-for="card in cards"
-        :key="`${card.number}_number`"
+        :key="`${card.number}_shulte-card`"
         :card="card"
-        :fill-cards="gameSettings.highlight"
-        :colored-cards="gameSettings.coloredCards"
-        :animation-cards="gameSettings.animation"
+        :fill-cards="gameSettings.highlight.enabled"
+        :colored-cards="gameSettings.coloredCards.enabled"
+        :animation-cards="gameSettings.animation.enabled"
         class="game__card"
-        :class="currentCssClass"
+        :class="gameCardSize"
         @card-click="compareCardNumbers"
       />
-    </div>
-    <div
-      v-if="gameSettings.tip"
-      class="game__tip"
-    >
-      Найдите число {{ currentCardNumber }}
     </div>
   </template>
 
   <template v-slot:sidebar>
-    <SchulteSidebar
+    <Sidebar
       :settings="gameSettings"
       @change-difficulty="changeDifficultyLevel"
       @change-settings="changeGameSettings"
@@ -48,31 +53,77 @@
 <script>
 import firebase from 'firebase/app';
 import SchulteCard from '~/components/reading/schulte/SchulteCard';
-import SchulteSidebar from '~/components/reading/schulte/SchulteSidebar';
 import GameField from '~/components/shared/layouts/GameField';
-import StopWatch from '~/helpers/stopWatch';
+import Sidebar from '~/components/shared/layouts/Sidebar';
 
 export default {
   name: 'SchulteGame',
 
   components: {
+    Sidebar,
     GameField,
     SchulteCard,
-    SchulteSidebar,
   },
 
   data() {
     return {
       gameSettings: {
+        difficulty: {
+          title: 'Сложность',
+          value: '5x5',
+          name: 'difficulty',
+          options: {
+            default: {
+              value: '5x5',
+              title: '5x5',
+            },
+            list: [
+              { value: '3x3', title: '3x3', selected: false },
+              { value: '4x4', title: '4x4', selected: false },
+              { value: '5x5', title: '5x5', selected: false },
+              { value: '6x6', title: '6x6', selected: false },
+              { value: '7x7', title: '7x7', selected: false },
+            ],
+          },
+          type: 'selectable',
+        },
+        tip: {
+          title: 'Показывать подсказку',
+          enabled: true,
+          name: 'tip',
+          type: 'switchable',
+        },
+        highlight: {
+          title: 'Закрашивать угаданные карточки',
+          enabled: true,
+          name: 'highlight',
+          type: 'switchable',
+        },
+        coloredCards: {
+          title: 'Цветные карточки',
+          enabled: false,
+          name: 'coloredCards',
+          type: 'switchable',
+        },
+        // orally: {
+        //   title: 'Устная игра',
+        //   enabled: false,
+        //   name: 'orally',
+        //   type: 'switchable',
+        // },
+        animation: {
+          title: 'Анимации',
+          enabled: true,
+          name: 'animation',
+          type: 'switchable',
+        },
+        dotInCenter: {
+          title: 'Точка в центре',
+          enabled: false,
+          name: 'dotInCenter',
+          type: 'switchable',
+        },
         cardAmount: 25,
-        difficulty: '5x5',
-        highlight: true,
-        coloredCards: false,
-        orally: false,
-        animation: true,
-        sounds: false,
-        animatedBackground: false,
-        tip: true,
       },
       gameStatus: {
         played: false,
@@ -83,12 +134,47 @@ export default {
         moves: 0,
         time: 0,
       },
+      gameFinalData: {
+        difficulty: {
+          title: 'Сложность',
+          value: null,
+        },
+        moves: {
+          title: 'Количество ходов',
+          value: null,
+        },
+      },
       currentCardNumber: 1,
-      currentCssClass: 'five',
       cards: null,
-      stopWatch: null,
       simulatorInfo: null,
     };
+  },
+
+  computed: {
+    gameCardSize() {
+      let size;
+
+      switch (this.gameSettings.difficulty.value) {
+      case '3x3':
+        size = 'three';
+        break;
+      case '4x4':
+        size = 'four';
+        break;
+      case '5x5':
+        size = 'five';
+        break;
+      case '6x6':
+        size = 'six';
+        break;
+      case '7x7':
+        size = 'seven';
+        break;
+      default:
+      }
+
+      return size;
+    },
   },
 
   asyncData() {
@@ -97,13 +183,8 @@ export default {
       .then(snap => ({ simulatorInfo: snap.val() }));
   },
 
-  created() {
-    this.stopWatch = new StopWatch();
-  },
-
   mounted() {
     this.cards = this.shuffleCardsArray();
-    this.stopWatch.startWatch();
   },
 
   methods: {
@@ -132,8 +213,8 @@ export default {
     },
 
     /**
-     * Сравнивает карточку на которую кликнули,
-     * с карточкой которая должна быть следующей
+     * Сравнивает номер карточки на которую кликнули,
+     * с текущим номером
      * @param number
      */
     compareCardNumbers(number) {
@@ -153,9 +234,9 @@ export default {
       if (this.currentCardNumber === this.gameSettings.cardAmount) {
         this.setGameOnFinal();
         this.resetGame();
-      } else {
-        this.currentCardNumber += 1;
       }
+
+      if (this.currentCardNumber === number) this.currentCardNumber += 1;
     },
 
     findCardByNumber(number) {
@@ -168,7 +249,7 @@ export default {
      */
     changeDifficultyLevel(value) {
       this.setGameOnPause();
-      this.gameSettings.difficulty = value;
+      this.gameSettings.difficulty.value = value;
       this.gameSettings.cardAmount = value[0] * value[2];
 
       this.resetGame(true);
@@ -180,8 +261,17 @@ export default {
      * @param settingsName
      */
     changeGameSettings(value, settingsName) {
+      const gameMustContinue = settingsName.includes('tip')
+        || settingsName.includes('animation')
+        || settingsName.includes('dotInCenter');
+
+      if (gameMustContinue) {
+        this.gameSettings[settingsName].enabled = value;
+        return;
+      }
+
       this.setGameOnPause();
-      this.gameSettings[settingsName] = value;
+      this.gameSettings[settingsName].enabled = value;
       this.resetGame(true);
     },
 
@@ -190,7 +280,6 @@ export default {
      * @param pause - ставит игру на паузу
      */
     resetGame(pause = false) {
-      this.getCurrentClass();
       this.currentCardNumber = 1;
       this.cards = this.shuffleCardsArray();
 
@@ -203,7 +292,6 @@ export default {
     setGameOnPause() {
       this.gameStatus.played = false;
       this.gameStatus.pause = true;
-      this.stopWatch.stopWatch();
     },
 
     /**
@@ -221,27 +309,9 @@ export default {
     setGameOnFinal() {
       this.gameStatus.played = false;
       this.gameStatus.final = true;
-    },
 
-    getCurrentClass() {
-      switch (this.gameSettings.difficulty) {
-      case '5x5':
-        this.currentCssClass = 'five';
-        break;
-      case '6x6':
-        this.currentCssClass = 'six';
-        break;
-      case '7x7':
-        this.currentCssClass = 'seven';
-        break;
-      case '8x8':
-        this.currentCssClass = 'eight';
-        break;
-      case '9x9':
-        this.currentCssClass = 'nine';
-        break;
-      default:
-      }
+      this.gameFinalData.difficulty.value = this.gameSettings.difficulty.value;
+      this.gameFinalData.moves.value = this.gameResult.moves;
     },
   },
 };
@@ -251,20 +321,17 @@ export default {
   &__wrapper
     display flex
     flex-wrap wrap
-    &.four,
-    &.five
-      width 50%
-    &.six
-      width 70%
+    &.three
+      width 25%
+    &.four
+      width 35%
+    &.five,
+    &.six,
     &.seven
-      width 75%
-    &.eight
-      width 90%
-    &.nine
-      width 100%
+      width 50%
+
     &.disabled
       pointer-events none
-      background-color white
       &::before
         content ''
         position absolute
@@ -276,24 +343,28 @@ export default {
         z-index 20
 
   &__card
+    &.three
+      width calc(100% / 3 - 2px)
     &.four
       width calc(100% / 4 - 2px)
     &.five
       width calc(100% / 5 - 2px)
+      &::after
+        padding-top 90%
     &.six
       width calc(100% / 6 - 2px)
-      /deep/ .card__wrapper
-        padding-top 85%
     &.seven
       width calc(100% / 7 - 2px)
-      /deep/ .card__wrapper
-        padding-top 70%
-    &.eight
-      width calc(100% / 8 - 2px)
-      /deep/ .card__wrapper
-        padding-top 50%
-    &.nine
-      width calc(100% / 9 - 2px)
-      /deep/ .card__wrapper
-        padding-top 50%
+
+  &__dot-in-center
+    position absolute
+    top 50%
+    left 50%
+    z-index 20
+    width 25px
+    height 25px
+    pointer-events none
+    background-color rgba($red, 0.5)
+    border-radius 50%
+    transform translate(-50%, -50%)
 </style>

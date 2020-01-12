@@ -61,4 +61,22 @@ export default class StopWatch {
       ${StopWatch.addZeroPrefix(sec, 2)}.
       ${StopWatch.addZeroPrefix(ms, 3)}`;
   }
+
+  getFormattedTime() {
+    if (this.time === '00:00:00.000') return '0';
+
+    const arrayFromTimeString = this.time.split(':');
+    let [hours, min, sec] = arrayFromTimeString;
+
+    if (parseInt(hours, 10) > 0) hours = `${hours} ч. `;
+    else hours = '';
+
+    if (parseInt(min, 10) > 0) min = `${min} мин. `;
+    else min = '';
+
+    if (parseInt(sec, 10) > 0) sec = `${parseInt(sec, 10)} сек.`;
+    else sec = '';
+
+    return `${hours}${min}${sec}`;
+  }
 }

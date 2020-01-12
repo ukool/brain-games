@@ -1,7 +1,7 @@
 <template>
 <div class="select">
   <p class="select__title">
-    {{ $props.title }}:
+    {{ title }}:
   </p>
 
   <div class="select__inner">
@@ -27,7 +27,7 @@
       v-click-outside="hideSelectList"
     >
       <li
-        v-for="item in $props.selectList.list"
+        v-for="item in selectList.list"
         :key="item.name"
         class="select__item"
       >
@@ -71,7 +71,7 @@ export default {
 
   data() {
     return {
-      selectedItem: this.$props.selectList.default.title,
+      selectedItem: this.selectList.default.title,
       visibleSelectList: false,
     };
   },

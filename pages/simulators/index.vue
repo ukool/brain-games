@@ -24,7 +24,7 @@
       </aside>
       <div class="simulators__inner">
 <!--        <FigureLoader v-if="!simulatorsList" />-->
-        <template >
+        <template>
           <div
             v-for="(simulatorItem, index) in simulatorsList"
             :key="`${index}_simulatorItem`"
@@ -33,7 +33,7 @@
             <n-link
               :id="simulatorItem.page"
               class="simulators__title line-to-top"
-              :to="`simulators/${simulatorItem.page}`"
+              :to="`/simulators/${simulatorItem.page}`"
             >
               {{ simulatorItem.title }}
             </n-link>
@@ -57,13 +57,15 @@
 
 <script>
 import firebase from 'firebase/app';
-
 import GamePreviewCard from '~/components/shared/components/GamePreviewCard';
 import FigureLoader from '../../components/shared/components/loaders/FigureLoader';
 
 export default {
   name: 'SimulatorsPage',
-  components: { FigureLoader, GamePreviewCard },
+  components: {
+    FigureLoader,
+    GamePreviewCard,
+  },
 
   data() {
     return {

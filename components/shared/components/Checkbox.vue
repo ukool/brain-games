@@ -1,18 +1,19 @@
 <template>
 <div class="checkbox">
   <p
-    v-if="$props.title"
+    v-if="item"
     class="checkbox__title"
   >
-    {{ $props.title }}
+    {{ item.title }}
   </p>
 
   <label class="checkbox__label">
     <input
-      v-model="checked"
       class="checkbox__input"
+      :value="value"
       type="checkbox"
-      @change="clickHandler($event)"
+      :checked="isChecked"
+      @change="changeHandle"
     >
   </label>
 </div>
@@ -23,36 +24,41 @@ export default {
   name: 'Checkbox',
 
   model: {
-    prop: 'checked',
+    prop: 'value',
     event: 'change',
   },
 
   props: {
+    value: {
+      type: [Boolean, String, Number, Array],
+      default: null,
+    },
+
     title: {
       type: String,
       default: null,
     },
 
-    value: {
-      type: Boolean,
-      default: false,
-    },
-
-    name: {
-      type: String,
-      default: '',
+    item: {
+      type: Object,
+      default: null,
     },
   },
 
-  data() {
-    return {
-      checked: this.value,
-    };
+  computed: {
+    isChecked() {
+      return this.value;
+    },
   },
 
   methods: {
-    clickHandler($event) {
-      this.$emit('checked', $event.target.checked, this.name);
+    changeHandle() {
+      let updatedValue;
+
+      if (typeof this.value === 'boolean') {
+        updatedValue = !this.value;
+        this.$emit('change', updatedValue, this.item.name);
+      }
     },
   },
 };

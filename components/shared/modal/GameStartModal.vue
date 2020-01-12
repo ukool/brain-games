@@ -58,7 +58,8 @@
         <BorderButton
           class="game-modal__settings-btn"
           size="xs"
-          icon-name="full-screen"
+          :icon-name="fullScreenMode ? 'size': 'full-screen'"
+          @click="fullScreenHandler"
         />
       </div>
     </div>
@@ -78,6 +79,19 @@ export default {
     simulatorInfo: {
       type: Object,
       default: null,
+    },
+  },
+
+  computed: {
+    fullScreenMode() {
+      return this.$store.getters['settings/getFullScreenModeStatus'];
+    },
+  },
+
+  methods: {
+    fullScreenHandler() {
+      const invertFullScreenMode = !this.fullScreenMode;
+      this.$store.commit('settings/setFullScreenMode', invertFullScreenMode);
     },
   },
 };
