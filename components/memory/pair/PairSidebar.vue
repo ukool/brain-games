@@ -1,24 +1,6 @@
 <template>
 <Sidebar>
   <template v-slot:content>
-    <h1 class="sidebar__title">
-      Найди пару
-    </h1>
-
-    <Dropdown
-      class="sidebar__select"
-      :title="'Сложность'"
-      :select-list="difficultyLevels"
-      @click-select="changeDifficultyListener"
-    />
-
-    <Dropdown
-      class="sidebar__select"
-      :title="'Изображения'"
-      :select-list="cardsImage"
-      @click-select="changeCardsImage"
-    />
-
     <ul class="sidebar__info-list">
       <li class="sidebar__item">
         Ходов: {{ $props.moves }}
@@ -30,18 +12,12 @@
         />
       </li>
     </ul>
-
-    <ResetButton
-      class="sidebar__btn-reset"
-    />
   </template>
 </Sidebar>
 </template>
 
 <script>
-import Dropdown from '~/components/shared/components/Dropdown';
 import Stopwatch from '~/components/shared/components/Stopwatch';
-import ResetButton from '~/components/shared/components/buttons/ResetButton';
 import Sidebar from '~/components/shared/layouts/Sidebar';
 
 export default {
@@ -49,9 +25,7 @@ export default {
 
   components: {
     Sidebar,
-    Dropdown,
     Stopwatch,
-    ResetButton,
   },
 
   props: {

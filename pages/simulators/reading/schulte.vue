@@ -7,7 +7,7 @@
   @start-game="setGameOnPlayed"
   @start-game-after-pause="setGameOnPlayed"
 >
-  <template v-slot:game>
+  <template #game>
     <div
       class="game__wrapper"
       :class="[
@@ -39,7 +39,7 @@
     </div>
   </template>
 
-  <template v-slot:sidebar>
+  <template #sidebar>
     <Sidebar
       :settings="gameSettings"
       @change-difficulty="changeDifficultyLevel"
@@ -245,12 +245,11 @@ export default {
 
     /**
      * Изменяет сложность уровня игры
-     * @param value
      */
-    changeDifficultyLevel(value) {
+    changeDifficultyLevel(settingName, settingValue) {
       this.setGameOnPause();
-      this.gameSettings.difficulty.value = value;
-      this.gameSettings.cardAmount = value[0] * value[2];
+      this.gameSettings[settingName].value = settingValue;
+      this.gameSettings.cardAmount = settingValue[0] * settingValue[2];
 
       this.resetGame(true);
     },

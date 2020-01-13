@@ -58,7 +58,7 @@ export default {
         clearInterval(timer);
         this.$emit('countdown-final');
         this.timer = 3;
-      }, 3100);
+      }, 3000);
     },
   },
 };
@@ -69,7 +69,7 @@ export default {
   position absolute
   top 0
   left 0
-  z-index 40
+  z-index 1001
   width 100%
   height 100%
   display flex

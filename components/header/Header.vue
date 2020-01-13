@@ -156,7 +156,7 @@ export default {
     padding 15px
     box-sizing border-box
     background-color white
-    z-index 10
+    z-index 1020
     // width 185px
 
   &__sublink

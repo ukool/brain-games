@@ -13,7 +13,7 @@
         class="sidebar__select"
         :select-list="setting.options"
         :title="setting.title"
-        @click-select="changeDifficultyListener"
+        @click-select="changeDifficultyListener($event, setting.name)"
       />
     </li>
   </ul>
@@ -114,8 +114,9 @@ export default {
   },
 
   methods: {
-    changeDifficultyListener(value) {
-      this.$emit('change-difficulty', value);
+    changeDifficultyListener(value, name) {
+      console.log(name, value);
+      this.$emit('change-difficulty', name, value);
     },
 
     changeHandle(value, name) {

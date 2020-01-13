@@ -78,9 +78,9 @@ export default {
 
   methods: {
     clickHandler(value) {
-      this.$emit('click-select', value.value);
       this.visibleSelectList = false;
       this.selectedItem = value.title;
+      this.$emit('click-select', value.value);
     },
 
     hideSelectList() {

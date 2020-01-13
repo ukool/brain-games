@@ -1,6 +1,7 @@
 <template>
 <div class="plug-play absolute">
   <button
+    v-if="!startCountdown"
     class="plug-play__btn"
     type="button"
     @click="handleClick"
@@ -79,9 +80,10 @@ export default {
     position absolute
     top 0
     left 0
-    z-index 30
+    z-index 1001
     width 100%
     height 100%
+    background-color $white
 
   &__btn
     display inline-block

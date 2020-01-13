@@ -1,41 +1,40 @@
 <template>
-<div class="test">
+<div
+  class="card"
+  :class="{ 'disabled' : card.flip}"
+  @click="showingBackSide"
+>
   <div
-    class="card"
-    @click="showingBackSide"
+    class="card__container"
+    :class="{ 'flip': card.flip }"
   >
-    <div
-      class="card__container"
-      :class="{ 'flip': $props.card.flip }"
-    >
-      <div class="card__inner front">
+    <div class="card__inner front">
+      <svg-icon
+        class="card__icon-question"
+        name="question"
+        width="70"
+        height="70"
+      />
+    </div>
+
+    <div class="card__inner back">
+      <svg-icon
+        v-if="!card.success"
+        class="card__icon-main"
+        :name="`${iconSet}/${iconSet}-${card.imageIndex}`"
+        width="90"
+        height="90"
+      />
+
+      <transition name="fade">
         <svg-icon
-          name="question"
-          width="70"
-          height="70"
+          v-if="card.success"
+          class="card__icon-success"
+          name="success"
+          width="90"
+          height="90"
         />
-        {{ $props.card.imageIndex }}
-      </div>
-
-      <div class="card__inner back">
-        <template v-if="!$props.card.success">
-          <svg-icon
-            :name="`${this.$props.name}/${this.$props.name}-${this.$props.card.imageIndex}`"
-            width="90"
-            height="90"
-          />
-          {{ this.$props.card.imageIndex }}
-        </template>
-
-        <template v-else>
-          <svg-icon
-            name="success"
-            width="90"
-            height="90"
-          />
-          <!-- {{ this.$props.card.imageIndex }} -->
-        </template>
-      </div>
+      </transition>
     </div>
   </div>
 </div>
@@ -43,7 +42,7 @@
 
 <script>
 export default {
-  name: 'CardMemory',
+  name: 'PairCard',
 
   props: {
     card: {
@@ -51,7 +50,7 @@ export default {
       default: null,
     },
 
-    name: {
+    iconSet: {
       type: String,
       default: 'fruit',
     },
@@ -65,7 +64,12 @@ export default {
 
   methods: {
     showingBackSide() {
-      this.$emit('card-click', this.$props.card.id, this.$props.card.imageIndex);
+      const cardData = {
+        id: this.card.id,
+        imageIndex: this.card.imageIndex,
+      };
+
+      this.$emit('card-click', cardData);
     },
 
   },
@@ -76,14 +80,18 @@ export default {
 .card
   position relative
   box-sizing border-box
-  margin-bottom 10px
   border 1px solid rgba(#000, 0.1)
   border-radius 5px
   box-shadow 5px 5px rgba(#000, 0.01)
   cursor pointer
   perspective 1000px
   width 100%
-  padding-top 100%
+  &::after
+    content ''
+    display block;
+    padding-top 100%
+  &.disabled
+    pointer-events none
 
   &__container
     position absolute
@@ -97,7 +105,6 @@ export default {
 
     &.flip
       transform rotateY(180deg)
-      pointer-events none
 
   &__inner
     position absolute
@@ -115,4 +122,19 @@ export default {
 
     &.back
       transform rotateY(180deg)
+
+  &__icon-main,
+  &__icon-question,
+  &__icon-success
+    display block
+    height auto
+
+  &__icon-main
+    width 90%
+
+  &__icon-question
+    width 60%
+
+  &__icon-success
+    width 50%
 </style>
