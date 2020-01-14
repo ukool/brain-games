@@ -1,66 +1,45 @@
 <template>
 <div class="card">
   <div class="card__numbers">
-    <template v-if="$props.level === 'easy'">
+    <div
+      v-for="(symbols, index) in splittedCurrentNumber"
+      :key="`${index}_symbol`"
+      class="card__box"
+    >
       <div
-        v-for="(symbol, index) in currentNumber"
-        :key="`${index}_symbol`"
-        class="card__box"
+        class="card__symbol"
       >
-        <div
-          v-if="showNumbers"
-          class="card__symbol"
-        >
-          {{ symbol }}
-        </div>
         <svg-icon
-          v-else
+          v-if="!showNumbers"
           class="card__icon"
           name="question"
         />
+        <template v-else-if="showNumbers">
+          {{ symbols }}
+        </template>
       </div>
-    </template>
-    <template v-else>
-      <div
-        v-for="(symbols, index) in fillGameCards()"
-        :key="`${index}_symbol`"
-        class="card__box"
-      >
-        <div
-          v-if="showNumbers"
-          class="card__symbol"
-        >
-          {{ symbols.join('') }}
-        </div>
-        <svg-icon
-          v-else
-          class="card__icon"
-          name="question"
-        />
-      </div>
-    </template>
+    </div>
   </div>
 
   <div class="card__answers">
     <p class="card__label">
       Ваш ответ:
-      {{ currentNumber }}
     </p>
     <div class="card__inputs">
       <div
-        v-for="(input, index) in numberLength"
+        v-for="(input, index) in answerFieldsQuantity"
         :key="`${index}_input`"
         class="card__input-box"
-        :class="answerCss[index]"
       >
         <input
-          :ref="`input${index}`"
-          v-model="answerPart[index]"
+          :ref="`input_${index}`"
+          :value="fragmentedAnswer[index]"
           class="card__input"
+          :class="answerCss[index]"
           type="text"
           :disabled="disabledInputs"
-          :maxlength="maxLengthField"
-          @input="handleInput($event.target.value, index)"
+          :maxlength="numberInFiled"
+          @input="inputHandle($event.target.value, index)"
         >
       </div>
     </div>
@@ -81,15 +60,19 @@ export default {
       type: Number,
       default: 3,
     },
-    maxLengthField: {
+    numberInFiled: {
       type: Number,
-      default: 1,
+      default: 0,
+    },
+    visibleTime: {
+      type: Number,
+      default: 1200,
     },
     statusEndGame: {
       type: Boolean,
       default: false,
     },
-    level: {
+    difficulty: {
       type: String,
       default: 'easy',
     },
@@ -97,9 +80,9 @@ export default {
 
   data() {
     return {
-      showNumbers: true,
+      showNumbers: false,
       disabledInputs: false,
-      answerPart: {},
+      fragmentedAnswer: {},
       answerFull: '',
       answerCss: [],
       currentNumberLength: null,
@@ -109,9 +92,32 @@ export default {
   },
 
   computed: {
-    // currentNumberLength() {
-    //   return this.$props.currentNumber.length - 1;
-    // },
+    splittedCurrentNumber() {
+      const arrayNumbers = String(this.currentNumber).split('');
+
+      let symbols = [];
+
+      if (this.difficulty === 'easy') {
+        symbols = arrayNumbers;
+      }
+
+      if (this.difficulty === 'medium') {
+        symbols = this.arrayToChunk(arrayNumbers, 2);
+      }
+
+      if (this.difficulty === 'hard') {
+        symbols = this.arrayToChunk(arrayNumbers, 3);
+      }
+
+      return symbols;
+    },
+
+    answerFieldsQuantity() {
+      if (this.difficulty === 'medium') return this.numberLength / 2;
+      if (this.difficulty === 'hard') return this.numberLength / 3;
+
+      return this.numberLength;
+    },
   },
 
   watch: {
@@ -125,10 +131,7 @@ export default {
   },
 
   mounted() {
-    this.fillAnswerPartObject();
-
-    // this.$refs.input_4.focus();
-    // this.$nextTick(() => this.$refs.input_4.focus())
+    this.fillFragmentedAnswerObject();
   },
 
   methods: {
@@ -139,75 +142,100 @@ export default {
       setTimeout(() => {
         this.disabledInputs = false;
         this.showNumbers = false;
-      }, 1100);
+        this.$nextTick(() => this.$refs.input_0[0].focus());
+      }, this.visibleTime);
     },
 
-    fillGameCards() {
-      const symbols = [];
-      if (this.$props.level === 'medium') {
-        for (let i = 1; i < this.$props.numberLength * 2; i += 2) {
-          symbols.push([this.$props.currentNumber[i - 1], this.$props.currentNumber[i]]);
-        }
-      } else if (this.$props.level === 'hard') {
-        for (let i = 1; i < this.$props.numberLength * 3; i += 3) {
-          symbols.push([this.$props.currentNumber[i - 1], this.$props.currentNumber[i], this.$props.currentNumber[i + 1]]);
-        }
+    resetGame() {
+      this.fragmentedAnswer = {};
+      this.fillFragmentedAnswerObject();
+      this.answerFull = '';
+      this.answerCss = [];
+    },
+
+    arrayToChunk(array, size) {
+      let chunkedArray = [];
+      let index = 0;
+      while (index < array.length) {
+        chunkedArray.push(array.slice(index, size + index));
+        index += size;
       }
-      return symbols;
+
+      chunkedArray = chunkedArray.map(item => item.join(''));
+
+      return chunkedArray;
     },
 
-    handleInput(value, index) {
-      this.answerPart[index] = value.replace(/[^0-9]/g, '');
+    inputHandle(value, index) {
+      const regExpOnlyNumbers = /[^0-9]/g;
+      const hasLetterInValue = regExpOnlyNumbers.test(value);
 
-      const answerIsFull = this.checkAnswerPartArray();
+      if (hasLetterInValue) {
+        this.$refs[`input_${index}`][0].value = '';
+        this.$refs[`input_${index}`][0].focus();
+        return;
+      }
 
+      this.fragmentedAnswer[index] = value.replace(regExpOnlyNumbers, '');
+
+      if (value.length === this.numberInFiled && index < this.splittedCurrentNumber.length - 1) {
+        this.$refs[`input_${index + 1}`][0].focus();
+      }
+      const answerIsFull = this.checkFullAnswer();
       if (answerIsFull) {
-        this.answerFull = Object.values(this.answerPart).join('');
-        this.checkAnswer();
+        this.answerFull = Object.values(this.fragmentedAnswer).join('');
+        this.checkFragmentedAnswer();
         this.disabledInputs = true;
 
         this.submitAnswer();
       }
     },
 
-    fillAnswerPartObject() {
-      for (let i = 1; i <= this.$props.numberLength - 1; i += 1) {
-        this.answerPart[i] = '';
+    fillFragmentedAnswerObject() {
+      for (let i = 0; i <= this.answerFieldsQuantity - 1; i += 1) {
+        this.fragmentedAnswer[i] = '';
       }
     },
 
-    checkAnswerPartArray() {
-      let answerLength;
-
-      if (this.$props.level === 'easy') answerLength = 1;
-      else if (this.$props.level === 'medium') answerLength = 2;
-      else if (this.$props.level === 'hard') answerLength = 3;
-
-      return Object.values(this.answerPart).every(item => item !== '' && item.length === answerLength);
+    checkFullAnswer() {
+      return Object.values(this.fragmentedAnswer).every(item => item !== '' && item.length === this.numberInFiled);
     },
 
-    resetGame() {
-      this.answerPart = {};
-      this.fillAnswerPartObject();
-      this.answerFull = '';
-      this.answerCss = [];
-    },
-
-    checkAnswer() {
-      for (let i = 1; i <= this.$props.numberLength; i += 1) {
-        if (this.$props.currentNumber[i] === this.answerFull[i]) {
+    checkFragmentedAnswer() {
+      Object.values(this.fragmentedAnswer).forEach((item, index) => {
+        if (item === this.splittedCurrentNumber[index]) {
           this.answerCss.push('success');
         } else {
           this.answerCss.push('error');
         }
-      }
+      });
     },
-
-    // кастомные события
 
     submitAnswer() {
       this.$emit('submit-answer', this.answerFull);
     },
+
+    // keyupHandler({ code }, index) {
+    //   const hasMaxLengthValueInInput = this.fragmentedAnswer[index].length >= 2;
+    //
+    //   if (code === 'ArrowRight' && index < this.splittedCurrentNumber.length - 1) {
+    //     if (this.difficulty === 'easy') {
+    //       this.$refs[`input_${index + 1}`][0].select();
+    //     } else if (hasMaxLengthValueInInput) {
+    //       this.$refs[`input_${index + 1}`][0].focus();
+    //     }
+    //   } else if (code === 'ArrowLeft' && index > 0) {
+    //     if (this.difficulty === 'easy') {
+    //       this.$refs[`input_${index - 1}`][0].select();
+    //     } else if (!hasMaxLengthValueInInput) {
+    //       this.$refs[`input_${index - 1}`][0].focus();
+    //     }
+    //   }
+    //
+    //   // if (this.fragmentedAnswer[index].length === 0 && index > 0) {
+    //   //   this.$refs[`input_${index - 1}`][0].focus();
+    //   // }
+    // },
   },
 };
 </script>
@@ -225,8 +253,9 @@ export default {
     display flex
     justify-content center
     align-items center
-    width 50px
-    height 50px
+    box-sizing border-box
+    width 60px
+    height 60px
     border 1px solid $violet-dark
     & + &
       margin-left 1px
@@ -253,15 +282,12 @@ export default {
     display flex
     justify-content center
     align-items center
-    width 50px
-    height 50px
-    border 1px solid $blue
+    box-sizing border-box
+    width 60px
+    height 60px
+
     & + &
       margin-left 1px
-    &.error
-      border-color $red
-    &.success
-      border-color $green
 
   &__input
     display block
@@ -269,4 +295,13 @@ export default {
     height 100%
     font-size 25px
     text-align center
+    box-sizing border-box
+    border 1px solid $blue
+    &:focus
+      border-color $violet-dark
+
+.error
+  border-color $red
+.success
+  border-color $green
 </style>

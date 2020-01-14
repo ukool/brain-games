@@ -42,7 +42,7 @@
   <template #sidebar>
     <Sidebar
       :settings="gameSettings"
-      @change-difficulty="changeDifficultyLevel"
+      @change-difficulty="changeSwitchableSettings"
       @change-settings="changeGameSettings"
       @reset="resetGame(true)"
     />
@@ -246,7 +246,7 @@ export default {
     /**
      * Изменяет сложность уровня игры
      */
-    changeDifficultyLevel(settingName, settingValue) {
+    changeSwitchableSettings(settingName, settingValue) {
       this.setGameOnPause();
       this.gameSettings[settingName].value = settingValue;
       this.gameSettings.cardAmount = settingValue[0] * settingValue[2];

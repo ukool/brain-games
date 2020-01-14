@@ -35,6 +35,10 @@
     </li>
   </ul>
 
+  <div class="sidebar__info">
+    <slot name="info" />
+  </div>
+
   <ResetButton
     class="sidebar__btn-reset"
     :text="'Начать заново'"
@@ -115,7 +119,6 @@ export default {
 
   methods: {
     changeDifficultyListener(value, name) {
-      console.log(name, value);
       this.$emit('change-difficulty', name, value);
     },
 
@@ -148,7 +151,7 @@ export default {
     & + &
       margin-top 15px
 
-  &__info-list
+  &__info
     margin-top 30px
 
   &__info-item

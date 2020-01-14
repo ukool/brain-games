@@ -101,7 +101,6 @@ export default {
     },
 
     handlerChecked(value, name) {
-      console.log(value, name);
       this.$emit('change-settings', value, name);
     },
 

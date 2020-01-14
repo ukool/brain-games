@@ -1,225 +1,284 @@
 <template>
-<section class="section game">
-  <div class="container">
-    <div class="row">
-      <div class="game__field">
-        <PlugPlayButton
-          v-if="!gameStatus.start"
-          @play="listenerPlay"
-        />
-        <transition name="fade">
-          <Countdown
-            v-show="showTimer && !gameStatus.start"
-            class="game__start"
-            :start-timer="showTimer"
-          />
-        </transition>
-
-        <RememberNumberCard
-          :current-number="currentNumber"
-          :number-length="gameSettings.numberLength"
-          :status-end-game="gameStatus.complete"
-          :level="gameSettings.difficulty"
-          :max-length-field="gameSettings.maxLengthField"
-          @submit-answer="listenerSubmitAnswer"
-        />
-      </div>
-
-      <aside class="game__sidebar">
-        <RememberNumberSidebar
-          :settings="gameSettings"
-          @change-difficulty="listenerChangeGameDifficulty"
-          @change-amoun-round="listenerChangeAmounRound"
-          @change-settings="listenerChangeSettings"
-          @reset="startGame"
-          @start-game="listenerStartGame"
-        />
-      </aside>
+<GameField
+  :simulator-info="simulatorInfo"
+  :game-pause="gameStatus.pause"
+  :game-final="gameStatus.final"
+  :final-modal-data="gameFinalData"
+>
+  <template #game>
+    <div class="game__field">
+      <RememberNumberCard
+        :current-number="currentNumber"
+        :number-length="configDifficulty[difficulty].numberLength"
+        :status-end-game="gameStatus.complete"
+        :visible-time="configDifficulty[difficulty].visibleTime"
+        :difficulty="difficulty"
+        :number-in-filed="configDifficulty[difficulty].numberInFiled"
+        @submit-answer="checkSubmitAnswer"
+      />
     </div>
-  </div>
-</section>
+  </template>
+
+
+  <template #sidebar>
+    <Sidebar
+      :settings="gameSettings"
+      @change-difficulty="changeSwitchableSettings"
+      @reset="resetGame"
+    >
+      <template #info>
+        Текущий раунд: {{ currentRound }}
+      </template>
+    </Sidebar>
+  </template>
+</GameField>
 </template>
 
 <script>
+import firebase from 'firebase/app';
+import GameField from '~/components/shared/layouts/GameField';
+import Sidebar from '~/components/shared/layouts/Sidebar';
 import RememberNumberCard from '~/components/memory/rememberNumber/RememberNumberCard';
-import RememberNumberSidebar from '~/components/memory/rememberNumber/RememberNumberSidebar';
 
 export default {
+  name: 'RememberNumberSimulator',
+
   components: {
+    GameField,
+    Sidebar,
     RememberNumberCard,
-    RememberNumberSidebar,
   },
 
   data() {
     return {
       gameSettings: {
-        difficulty: 'easy',
-        rounds: 10,
-        numberLength: 4,
-        maxLengthField: 1,
-        deleayMS: 1500,
-        infinityGame: false,
+        difficulty: {
+          title: 'Сложность',
+          value: 'easy',
+          name: 'difficulty',
+          options: {
+            default: {
+              value: 'easy',
+              title: 'легкий',
+            },
+            list: [
+              { value: 'easy', title: 'легкий' },
+              { value: 'medium', title: 'средний' },
+              { value: 'hard', title: 'сложный' },
+            ],
+          },
+          type: 'selectable',
+        },
+        rounds: {
+          title: 'Раундов',
+          value: 10,
+          name: 'rounds',
+          options: {
+            default: {
+              value: 10,
+              title: 10,
+            },
+            list: [
+              { value: 10, title: 10 },
+              { value: 15, title: 15 },
+              { value: 20, title: 20 },
+            ],
+          },
+          type: 'selectable',
+        },
       },
-
+      configDifficulty: {
+        easy: {
+          visibleTime: 1100,
+          numberLength: 4,
+          minimalNumberLength: 4,
+          numberInFiled: 1,
+        },
+        medium: {
+          visibleTime: 1000,
+          numberLength: 6,
+          minimalNumberLength: 6,
+          numberInFiled: 2,
+        },
+        hard: {
+          visibleTime: 900,
+          numberLength: 9,
+          minimalNumberLength: 9,
+          numberInFiled: 3,
+        },
+      },
       gameResult: {
         correctAnswers: 0,
         incorrectAnswers: 0,
       },
-
+      gameFinalData: {
+        difficulty: {
+          title: 'Сложность',
+          value: null,
+        },
+        correctAnswers: {
+          title: 'Правильных ответов',
+          value: null,
+        },
+        incorrectAnswers: {
+          title: 'Неправильных ответов',
+          value: null,
+        },
+        rounds: {
+          title: 'Количество раундов',
+          value: null,
+        },
+      },
       gameStatus: {
-        start: false,
-        complete: false,
-        currentRound: 0,
+        played: false,
+        final: false,
+        pause: false,
       },
       showTimer: false,
       userAnswer: null,
       currentNumber: null,
+      infinityGame: false,
+      currentRound: 1,
+      simulatorInfo: null,
     };
+  },
+
+  computed: {
+    difficulty() {
+      return this.gameSettings.difficulty.value;
+    },
+  },
+
+  asyncData() {
+    return firebase.database().ref('simulatorsInfo/memory/remember-number')
+      .once('value')
+      .then(snap => ({ simulatorInfo: snap.val() }));
   },
 
   mounted() {
     this.startGame();
-    // this.gameResult.start = true;
   },
 
   methods: {
-    generateRandomNumber() {
-      const randomNumber = Math.floor(Math.random() * 9);
+    /**
+     * Устанавливает игру в режим "игра начата"
+     */
+    setGameOnPlayed() {
+      this.gameStatus.played = true;
+      this.gameStatus.pause = false;
+      this.gameStatus.final = false;
 
-      return randomNumber;
+      this.startGame();
     },
 
-    fillCurrentNumber(maxLengnt = this.gameSettings.numberLength) {
+    /**
+     * Устанавливает игру в режим паузы
+     */
+    setGameOnPause() {
+      this.gameStatus.played = false;
+      this.gameStatus.pause = true;
+    },
+
+    /**
+     * Устанавливает игру в режим "игра закончена"
+     */
+    setGameOnFinal() {
+      this.gameStatus.played = false;
+      this.gameStatus.final = true;
+
+      this.gameFinalData.difficulty.value = this.gameSettings.difficulty.value;
+      this.gameFinalData.correctAnswers.value = this.gameResult.correctAnswers;
+      this.gameFinalData.incorrectAnswers.value = this.gameResult.incorrectAnswers;
+      this.gameFinalData.rounds.value = this.gameSettings.rounds.value;
+    },
+
+    startGame() {
+      this.currentNumber = this.fillCurrentNumber();
+    },
+    /**
+     * Сбрасывает игру
+     */
+    resetGame() {
+      this.startGame();
+      this.currentRound = 1;
+      // this.gameCards = this.fillGameCardsArray();
+    },
+
+    generateRandomNumber() {
+      return Math.floor(Math.random() * 9);
+    },
+
+    fillCurrentNumber() {
+      const maxLength = this.configDifficulty[this.difficulty].numberLength;
       const currentNumber = [];
 
-      for (let i = 1; i <= maxLengnt; i += 1) {
+      for (let i = 1; i <= maxLength; i += 1) {
         currentNumber.push(this.generateRandomNumber());
       }
 
       return currentNumber.join('');
     },
 
-    startGame(numberLength) {
-      if (this.gameSettings.difficulty === 'easy') {
-        this.startEasyGame(numberLength);
-      } else if (this.gameSettings.difficulty === 'medium') {
-        this.startMediumGame(numberLength);
-      } else if (this.gameSettings.difficulty === 'hard') {
-        this.startHardGame(numberLength);
-      }
-
-      this.gameStatus.currentRound += 1;
-    },
-
-    startEasyGame(numberLength = 4) {
-      this.gameSettings.maxLengthField = 1;
-      this.gameSettings.numberLength = numberLength;
-      this.currentNumber = this.fillCurrentNumber();
-    },
-
-    startMediumGame(numberLength = 3) {
-      this.gameSettings.maxLengthField = 2;
-      this.gameSettings.numberLength = numberLength;
-
-      this.currentNumber = this.fillCurrentNumber(this.gameSettings.numberLength * 2);
-    },
-
-    startHardGame(numberLength = 3) {
-      this.gameSettings.maxLengthField = 3;
-      this.gameSettings.numberLength = numberLength;
-
-      this.currentNumber = this.fillCurrentNumber(this.gameSettings.numberLength * 3);
-    },
-
-    // TODO нужно считать правильно
-    stopGame() {
-      this.currentNumber = '----';
-    },
-
-    addingNumbersLength() {
+    increaseNumbersLength() {
       if (this.gameResult.correctAnswers % 3 !== 0) return;
 
-      this.gameSettings.numberLength += 1;
-      this.gameSettings.deleayMS -= 100;
-    },
-
-    increaceNumberLength() {
-      if (this.gameSettings.numberLength > 4 && this.gameSettings.difficulty === 'easy') {
-        this.gameSettings.numberLength -= 1;
-        this.gameSettings.deleayMS -= 100;
-      } else if (this.gameSettings.numberLength > 3 && this.gameSettings.difficulty === 'medium') {
-        this.gameSettings.numberLength -= 1;
-        this.gameSettings.deleayMS -= 100;
-      } else if (this.gameSettings.numberLength > 3 && this.gameSettings.difficulty === 'hard') {
-        this.gameSettings.numberLength -= 1;
-        this.gameSettings.deleayMS -= 100;
+      if (this.difficulty === 'easy') {
+        this.configDifficulty.easy.numberLength += 1;
+      } else if (this.difficulty === 'medium') {
+        this.configDifficulty.medium.numberLength += 2;
+      } else if (this.difficulty === 'hard') {
+        this.configDifficulty.hard.numberLength += 3;
       }
+
+      this.configDifficulty[this.difficulty].visibleTime -= 50;
     },
 
-    // Слушатели кастомных событий
+    decreaseNumberLength() {
+      const { numberLength, minimalNumberLength } = this.configDifficulty[this.difficulty];
 
-    listenerPlay() {
-      this.showTimer = true;
+      if (numberLength > minimalNumberLength && this.difficulty === 'easy') {
+        this.configDifficulty.easy.numberLength -= 1;
+      } else if (numberLength > minimalNumberLength && this.difficulty === 'medium') {
+        this.configDifficulty.medium.numberLength -= 2;
+      } else if (numberLength > minimalNumberLength && this.difficulty === 'hard') {
+        this.configDifficulty.hard.numberLength -= 3;
+      }
 
-      setTimeout(() => {
-        this.showTimer = false;
-        this.gameStatus.start = true;
-        this.startGame();
-      }, 4100);
+      this.configDifficulty[this.difficulty].visibleTime += 50;
     },
 
-    listenerStartGame() {
-      this.gameStatus.start = true;
-      this.startGame();
-
-      setTimeout(() => {
-        this.gameStatus.start = false;
-      }, 4100);
-    },
-
-    listenerSubmitAnswer(answer) {
+    checkSubmitAnswer(answer) {
       let rightAnswer;
+      const difficulty = this.gameSettings.difficulty.value;
+      const delay = this.configDifficulty[difficulty].visibleTime;
 
       setTimeout(() => {
         rightAnswer = Number(answer) === Number(this.currentNumber);
 
         if (rightAnswer) {
           this.gameResult.correctAnswers += 1;
-          this.addingNumbersLength();
+          this.increaseNumbersLength();
         } else {
           this.gameResult.incorrectAnswers += 1;
-          this.increaceNumberLength();
+          this.decreaseNumberLength();
         }
 
-        if (this.gameStatus.currentRound >= this.gameSettings.rounds && !this.gameSettings.infinityGame) {
-          console.log('stop game');
-          this.gameStatus.complete = true;
-          this.stopGame();
+        this.currentRound += 1;
+
+        if (this.currentRound >= this.gameSettings.rounds.value && !this.gameSettings.infinityGame) {
+          this.setGameOnFinal();
           return;
         }
 
-        this.startGame(this.gameSettings.numberLength);
-      }, this.gameSettings.deleayMS);
+        this.startGame();
+      }, delay);
     },
 
-    listenerChangeGameDifficulty(level) {
-      this.gameSettings.difficulty = level;
-      this.gameStatus.start = false;
-      if (level === 'easy') {
-        this.startEasyGame();
-      } else if (level === 'medium') {
-        this.startMediumGame();
-      } else if (level === 'hard') {
-        this.startHardGame();
-      }
-    },
+    changeSwitchableSettings(settingName, settingValue) {
+      this.setGameOnPause();
+      this.gameSettings[settingName].value = settingValue;
 
-    listenerChangeAmounRound(amount) {
-      this.gameSettings.amount = amount;
-    },
-
-    listenerChangeSettings(value, name) {
-      this.gameSettings[name] = value;
+      this.resetGame();
     },
   },
 };
