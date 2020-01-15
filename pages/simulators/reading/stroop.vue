@@ -1,130 +1,158 @@
 <template>
-<section class="section">
-  <div class="container game">
-    <div class="row">
-      <div class="game__field">
-        <FigureLoader
-          v-if="!answers.length"
-        />
-        <StroopCard
-          v-if="answers.length"
-          :current-card="currentCard"
-          :answers="answers"
-          @click-btn-answer="listenerClickBtnAnswer"
-        />
-      </div>
-
-      <aside class="game__sidebar">
-        <StroopSidebar
-          :settings="gameSettings"
-          @change-difficulty="listenerChangeDifficulty"
-          @change-amoun-round="listenerChangeAmountRound"
-          @change-settings="listenerChangeSetting"
-          @reset="startGame"
-        />
-      </aside>
+<GameField
+  :simulator-info="simulatorInfo"
+  :game-pause="gameStatus.pause"
+  :game-final="gameStatus.final"
+  :final-modal-data="gameFinalData"
+>
+  <template #game>
+    <div class="stroop">
+      <StroopCard
+        v-if="answers.length"
+        :round-card="roundColors"
+        :answers="answers"
+        :difficulty="difficulty"
+        :error-card-index="errorCardIndex"
+        @click-to-answer="checkAnswer"
+      />
     </div>
-  </div>
-</section>
+  </template>
+  <template #sidebar>
+    <Sidebar
+      :settings="gameSettings"
+      @change-difficulty="changeSwitchableSettings"
+      @reset="resetGame"
+    >
+      <template #info>
+        Текущий раунд: {{ currentRound }}
+      </template>
+    </Sidebar>
+  </template>
+</GameField>
 </template>
 
 <script>
-import FigureLoader from '~/components/shared/components/loaders/FigureLoader.vue';
+import firebase from 'firebase/app';
+import colors from '~/helpers/colorsForStroopSimulator';
 import StroopCard from '~/components/reading/stroop/StroopCard';
-import StroopSidebar from '~/components/reading/stroop/StroopSidebar';
+import GameField from '~/components/shared/layouts/GameField';
+import Sidebar from '~/components/shared/layouts/Sidebar';
+import { shuffleArray, searchDuplicateItem } from '~/helpers/functions';
 
 export default {
+  name: 'StroopSimulator',
+
   components: {
-    FigureLoader,
+    GameField,
+    Sidebar,
     StroopCard,
-    StroopSidebar,
   },
 
   data() {
     return {
       gameSettings: {
-        difficulty: 'easy',
-        language: 'rus',
-        rounds: 10,
-        cardsAnswerCount: 4,
-        english: false,
+        difficulty: {
+          title: 'Сложность',
+          value: 'easy',
+          name: 'difficulty',
+          options: {
+            default: {
+              value: 'easy',
+              title: 'легкий',
+            },
+            list: [
+              { value: 'easy', title: 'легкий' },
+              { value: 'medium', title: 'средний' },
+              { value: 'hard', title: 'сложный' },
+            ],
+          },
+          type: 'selectable',
+        },
+        language: {
+          title: 'Язык',
+          value: 'rus',
+          name: 'language',
+          options: {
+            default: {
+              value: 'rus',
+              title: 'русский',
+            },
+            list: [
+              { value: 'rus', title: 'русский' },
+              { value: 'eng', title: 'английский' },
+            ],
+          },
+          type: 'selectable',
+        },
+        rounds: {
+          title: 'Раундов',
+          value: 10,
+          name: 'rounds',
+          options: {
+            default: {
+              value: 10,
+              title: 10,
+            },
+            list: [
+              { value: 10, title: 10 },
+              { value: 15, title: 15 },
+              { value: 20, title: 20 },
+            ],
+          },
+          type: 'selectable',
+        },
+      },
+      configDifficulty: {
+        easy: {
+          quantityColorNames: 1,
+          quantityAnswers: 4,
+        },
+        medium: {
+          quantityColorNames: 2,
+          quantityAnswers: 4,
+        },
+        hard: {
+          quantityColorNames: 3,
+          quantityAnswers: 4,
+        },
       },
       gameResult: {
         correctAnswers: 0,
         incorrectAnswers: 0,
       },
       gameStatus: {
-        start: false,
-        complete: false,
+        played: false,
+        final: false,
+        pause: false,
       },
-      currentCard: {
-        hexColor: '',
-        name: '',
-        id: null,
-      },
-
-      colors: [
-        {
-          rusName: 'красный',
-          engName: 'red',
-          hexColor: '#FF0000',
-          id: 0,
-        },
-        {
-          rusName: 'зеленый',
-          engName: 'green',
-          hexColor: '#008000',
-          id: 1,
-        },
-        {
-          rusName: 'синий',
-          engName: 'blue',
-          hexColor: '#0000FF',
-          id: 2,
-        },
-        {
-          rusName: 'оранжевый',
-          engName: 'orange',
-          hexColor: '#FFA500',
-          id: 3,
-        },
-        {
-          rusName: 'желтый',
-          engName: 'yellow',
-          hexColor: '#ffff4c',
-          id: 4,
-        },
-        {
-          rusName: 'фиолетовый',
-          engName: 'violet',
-          hexColor: '#EE82EE',
-          id: 5,
-        },
-        {
-          rusName: 'серый',
-          engName: 'gray',
-          hexColor: '#808080',
-          id: 6,
-        },
-        {
-          rusName: 'черный',
-          engName: 'black',
-          hexColor: '#000000',
-          id: 7,
-        },
-        {
-          rusName: 'коричневый',
-          engName: 'brown',
-          hexColor: '#8B4513',
-          id: 8,
-        },
-      ],
+      errorCardIndex: null,
+      roundColors: [],
+      gameFinalData: {},
       answers: [],
+      currentRound: 1,
+      colors,
+      simulatorInfo: null,
     };
   },
 
+  computed: {
+    difficulty() {
+      return this.gameSettings.difficulty.value;
+    },
+
+    language() {
+      return this.gameSettings.language.value;
+    },
+  },
+
+  asyncData() {
+    return firebase.database().ref('simulatorsInfo/reading/schulte')
+      .once('value')
+      .then(snap => ({ simulatorInfo: snap.val() }));
+  },
+
   mounted() {
-    this.startGame();
+    this.setGameOnPlayed();
   },
 
   destroyed() {
@@ -134,166 +162,259 @@ export default {
 
   methods: {
     /**
-     * Генерирует случайное число где максимальное число это длинна массива colors
+     * Устанавливает игру в режим игры
      */
-    generateRandomNumber() {
-      const randomNumber = Math.floor(Math.random() * this.colors.length);
+    setGameOnPlayed() {
+      this.gameStatus.played = true;
+      this.gameStatus.pause = false;
+      this.gameStatus.final = false;
 
-      return randomNumber;
-    },
-
-    /**
-     * Заполняет текущую активную карточку
-     */
-    fillCurrentCard() {
-      const randomId = this.generateRandomNumber();
-      const randomItem = this.colors.find(item => item.id === randomId);
-
-      this.currentCard.hexColor = randomItem.hexColor;
-      this.currentCard.id = randomItem.id;
-
-      if (this.gameSettings.difficulty !== 'hard') {
-        this.currentCard.name = this.colors[this.generateRandomNumber()][`${this.gameSettings.language}Name`];
-      } else {
-        this.currentCard.name = this.colors[this.generateRandomNumber()].rusName;
-      }
-    },
-
-    /**
-     * Заполняет массив с ответами: одним правильным и тремя неправильными
-     */
-    fillAnswersArray() {
-      const rightColorValue = this.currentCard.hexColor;
-      const rightAnswerId = this.currentCard.id;
-
-      this.answers = [];
-
-      this.answers.push({
-        name: '',
-        hexColor: rightColorValue,
-        id: rightAnswerId,
-      });
-
-      if (this.gameSettings.difficulty === 'easy') {
-        this.answers[0].name = this.colors.find(item => item.id === rightAnswerId)[`${this.gameSettings.language}Name`];
-      } else if (this.gameSettings.difficulty === 'medium') {
-        this.answers[0].name = this.colors[this.generateRandomNumber()][`${this.gameSettings.language}Name`];
-      } else if (this.gameSettings.difficulty === 'hard') {
-        this.answers[0].name = this.colors[this.generateRandomNumber()][`${this.gameSettings.language}Name`];
-      }
-
-      let i = 0;
-
-      while (i < 3) {
-        const randomNumber = this.generateRandomNumber();
-        const random = this.gameSettings.difficulty === 'easy' ? randomNumber : this.generateRandomNumber();
-
-        if (!this.searchDublicateValue(this.answers, randomNumber)) {
-          this.answers.push({
-            name: this.colors[random][`${this.gameSettings.language}Name`],
-            hexColor: this.colors[randomNumber].hexColor,
-            id: this.colors[randomNumber].id,
-            error: false,
-          });
-
-          i += 1;
-        }
-      }
-
-      this.shuffleAnswersArray();
-    },
-
-    /**
-     * Ищет дубликаты
-     */
-    searchDublicateValue(array, value) {
-      let dublicate = false;
-
-      array.forEach((item) => {
-        if (item.id === value) {
-          dublicate = true;
-        }
-      });
-
-      return dublicate;
-    },
-
-    /**
-     * Перемешивает массив с ответами
-     */
-    shuffleAnswersArray() {
-      this.answers.sort(() => Math.random() - 0.5);
-      this.answers.sort(() => Math.random() - 0.5);
+      this.startGame();
     },
 
     /**
      * Запускает или перезапускает игру
      */
     startGame() {
-      this.fillCurrentCard();
-      this.fillAnswersArray();
+      this.roundColors = this.generateRoundCards();
+      this.answers = this.fillAnswersArray();
     },
 
-    // Слушатели кастомных событий
-    listenerClickBtnAnswer(id) {
-      const clickCard = this.answers.find(item => item.id === id);
+    /**
+     * Устанавливает игру в режим паузы
+     */
+    setGameOnPause() {
+      this.gameStatus.played = false;
+      this.gameStatus.pause = true;
+    },
 
-      if (clickCard.id === this.currentCard.id) {
+    /**
+     * Устанавливает игру в режим "игра закончена"
+     */
+    setGameOnFinal() {
+      this.gameStatus.played = false;
+      this.gameStatus.final = true;
+
+      // this.gameFinalData.difficulty.value = this.gameSettings.difficulty.value;
+      // this.gameFinalData.moves.value = this.gameResult.moves;
+    },
+
+    /**
+     * Сбрасывает игру
+     */
+    resetGame() {
+      this.startGame();
+      this.currentRound = 1;
+    },
+
+    /**
+     * Генерирует случайное число где максимальное число это длинна массива colors
+     */
+    generateRandomNumber() {
+      return Math.floor(Math.random() * this.colors.length);
+    },
+
+    /**
+     * Заполняет текущую активную карточку
+     */
+    generateRoundCards() {
+      const { quantityColorNames } = this.configDifficulty[this.difficulty];
+
+      const fillCards = (index, acc) => {
+        if (index === quantityColorNames) return this.shuffleArray(acc);
+
+        const randomId = this.generateRandomNumber();
+        const randomItem = this.colors.find(item => item.id === randomId);
+
+        const randomName = this.colors[this.generateRandomNumber()][this.language];
+
+        if (!this.searchDuplicateItem(acc, 'id', randomId)) {
+          acc.push({
+            id: randomItem.id,
+            color: randomItem.color,
+            name: randomName,
+          });
+          return fillCards(index + 1, acc);
+        }
+
+        return fillCards(index, acc);
+      };
+
+      return fillCards(0, []);
+    },
+
+    /**
+     * Заполняет массив с ответами: одним правильным и тремя неправильными
+     */
+    fillAnswersArray() {
+      this.answers = [];
+
+      let correctAnswer = [];
+
+      this.roundColors.forEach((item) => {
+        const name = this.colors.find(i => i.id === item.id)[this.language];
+        correctAnswer.push({
+          color: item.color,
+          name,
+        });
+      });
+
+      correctAnswer = this.shuffleArray(correctAnswer);
+
+      let incorrectAnswers;
+      if (this.difficulty === 'easy') {
+        incorrectAnswers = this.fillEasyAnswers();
+      } else {
+        incorrectAnswers = this.fillMediumAndHardAnswers();
+      }
+
+      let allAnswers = [correctAnswer, ...incorrectAnswers];
+      allAnswers = this.shuffleArray(allAnswers);
+
+      return allAnswers;
+    },
+
+    fillEasyAnswers() {
+      const maxLengthIncorrectAnswers = this.configDifficulty[this.difficulty].quantityAnswers - 1;
+      const correctColorName = this.colors.find(item => item.id === this.roundColors[0].id)[this.language];
+
+      const fillingArray = (index, acc) => {
+        if (index === maxLengthIncorrectAnswers) return acc;
+
+        const randomId = this.generateRandomNumber();
+        const { color } = this.colors.find(item => item.id === randomId);
+        const name = this.colors[this.generateRandomNumber()][this.language];
+
+        if (!this.comparisonAnswers(acc, 'name') && name !== correctColorName) {
+          acc.push([{
+            color,
+            name,
+          }]);
+          return fillingArray(index + 1, acc);
+        }
+        return fillingArray(index, acc);
+      };
+
+      return fillingArray(0, []);
+    },
+
+    fillMediumAndHardAnswers() {
+      const maxLengthIncorrectAnswers = this.configDifficulty[this.difficulty].quantityAnswers - 1;
+
+      const fillAnswers = (index, acc) => {
+        if (index === maxLengthIncorrectAnswers) return this.shuffleArray(acc);
+
+        const supportingArray = this.fillInnerArrayForMediumAndHardAnswers(0, []);
+        acc.push(supportingArray);
+        return fillAnswers(index + 1, acc);
+      };
+
+      return fillAnswers(0, []);
+    },
+
+    fillInnerArrayForMediumAndHardAnswers() {
+      const { quantityColorNames } = this.configDifficulty[this.difficulty];
+
+      const fillInnersAnswers = (count, acc) => {
+        if (count === quantityColorNames) return this.shuffleArray(acc, 2);
+        if (!this.comparisonAnswers(acc, 'name')) {
+          const randomNumber = this.generateRandomNumber();
+          const { color } = this.colors[randomNumber];
+          const name = this.colors[randomNumber][this.language];
+
+          acc.push({ name, color });
+          return fillInnersAnswers(count + 1, acc);
+        }
+
+        return fillInnersAnswers(count, acc);
+      };
+
+      return fillInnersAnswers(0, []);
+    },
+
+    comparisonAnswers(answer, propName) {
+      const answers = [];
+      const corrects = [];
+
+      answer.forEach((item) => {
+        answers.push(item[propName]);
+      });
+
+      this.roundColors.forEach((item) => {
+        corrects.push(item[propName]);
+      });
+
+      let coincidence = 0;
+
+      corrects.forEach((item) => {
+        if (answers.includes(item)) coincidence += 1;
+      });
+
+      return coincidence === corrects.length;
+    },
+
+    checkAnswer({ answer, index }) {
+      // const answers = [];
+      // const corrects = [];
+      //
+      // answer.forEach((item) => {
+      //   answers.push(item);
+      // });
+      //
+      // console.log('answers', answers);
+      //
+      // this.roundColors.forEach((item) => {
+      //   console.log(2222, item);
+      //   corrects.push(item[0].color);
+      // });
+      //
+      // console.log('corrects', corrects);
+      //
+      // let coincidence = 0;
+      //
+      // corrects.forEach((item) => {
+      //   console.log(1111, item);
+      //   if (answers.includes(item)) coincidence += 1;
+      // });
+      const coincidence = this.comparisonAnswers(answer, 'color');
+
+      if (coincidence) {
         this.gameResult.correctAnswers += 1;
+        console.log(this.gameResult.correctAnswers, this.gameSettings.rounds.value);
+        console.log(this.gameResult.correctAnswers === this.gameSettings.rounds.value);
+        if (this.gameResult.correctAnswers === this.gameSettings.rounds.value) {
+          this.setGameOnFinal();
+        }
+        this.currentRound += 1;
         this.startGame();
       } else {
-        clickCard.error = true;
+        this.errorCardIndex = index;
         setTimeout(() => {
-          clickCard.error = false;
+          this.errorCardIndex = null;
         }, 200);
         this.gameResult.incorrectAnswers += 1;
       }
-
-      if (this.gameResult.correctAnswers === this.gameSettings.rounds) {
-        this.gameStatus.complete = true;
-      }
     },
 
-    /**
-     * Слушает событие смены уровня сложности
-     */
-    listenerChangeDifficulty(level) {
-      this.gameSettings.difficulty = level;
-      this.startGame();
+    changeSwitchableSettings(settingName, settingValue) {
+      this.setGameOnPause();
+      this.gameSettings[settingName].value = settingValue;
+
+      this.resetGame();
     },
 
-    /**
-     * Слушает событие смены колиства раундов
-     */
-    listenerChangeAmountRound(amount) {
-      this.gameSettings.rounds = amount;
-      this.startGame();
-    },
-
-    /**
-     * Слушает изменения событий чекбокса
-     */
-    listenerChangeSetting(value, name) {
-      if (name === 'english' && value) {
-        this.gameSettings.language = 'eng';
-        this.startGame();
-      } else if (name === 'english' && !value) {
-        this.gameSettings.language = 'rus';
-        this.startGame();
-      }
-    },
+    shuffleArray,
+    searchDuplicateItem,
   },
 };
 </script>
 
 <style lang="stylus" scoped>
-.game
-  &__field
-    position relative
-    display flex
-    justify-content center
-    flex-wrap wrap
-    width 75%
-    margin-right auto
-    background-color #fff
+.stroop
+  position relative
+  display flex
+  justify-content center
+  flex-wrap wrap
+  width 100%
+  background-color $white
 </style>

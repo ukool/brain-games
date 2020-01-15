@@ -189,6 +189,45 @@ export default {
 
   methods: {
     /**
+     * Сбрасывает игру
+     * @param pause - ставит игру на паузу
+     */
+    resetGame(pause = false) {
+      this.currentCardNumber = 1;
+      this.cards = this.shuffleCardsArray();
+
+      if (pause) this.setGameOnPause();
+    },
+
+    /**
+     * Устанавливает игру в режим паузы
+     */
+    setGameOnPause() {
+      this.gameStatus.played = false;
+      this.gameStatus.pause = true;
+    },
+
+    /**
+     * Устанавливает игру в режим игры
+     */
+    setGameOnPlayed() {
+      this.gameStatus.played = true;
+      this.gameStatus.pause = false;
+      this.gameStatus.final = false;
+    },
+
+    /**
+     * Устанавливает игру в режим "игра закончена"
+     */
+    setGameOnFinal() {
+      this.gameStatus.played = false;
+      this.gameStatus.final = true;
+
+      this.gameFinalData.difficulty.value = this.gameSettings.difficulty.value;
+      this.gameFinalData.moves.value = this.gameResult.moves;
+    },
+
+    /**
      * Генерирует массив карточек
      * в завимости от количества cardAmount в gameSettings
      * @returns { Array }
@@ -272,45 +311,6 @@ export default {
       this.setGameOnPause();
       this.gameSettings[settingsName].enabled = value;
       this.resetGame(true);
-    },
-
-    /**
-     * Сбрасывает игру
-     * @param pause - ставит игру на паузу
-     */
-    resetGame(pause = false) {
-      this.currentCardNumber = 1;
-      this.cards = this.shuffleCardsArray();
-
-      if (pause) this.setGameOnPause();
-    },
-
-    /**
-     * Устанавливает игру в режим паузы
-     */
-    setGameOnPause() {
-      this.gameStatus.played = false;
-      this.gameStatus.pause = true;
-    },
-
-    /**
-     * Устанавливает игру в режим игры
-     */
-    setGameOnPlayed() {
-      this.gameStatus.played = true;
-      this.gameStatus.pause = false;
-      this.gameStatus.final = false;
-    },
-
-    /**
-     * Устанавливает игру в режим "игра закончена"
-     */
-    setGameOnFinal() {
-      this.gameStatus.played = false;
-      this.gameStatus.final = true;
-
-      this.gameFinalData.difficulty.value = this.gameSettings.difficulty.value;
-      this.gameFinalData.moves.value = this.gameResult.moves;
     },
   },
 };

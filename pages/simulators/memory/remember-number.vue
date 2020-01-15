@@ -54,7 +54,7 @@ export default {
       gameSettings: {
         difficulty: {
           title: 'Сложность',
-          value: 'easy',
+          value: 'medium',
           name: 'difficulty',
           options: {
             default: {
