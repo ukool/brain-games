@@ -1,23 +1,20 @@
 <template>
-<div>
-<button
+<div
   class="homophones-card"
   :class="{
     'error' : card.error,
     'success': card.success,
   }"
-  type="button"
   @click="handleClick(card.valueFirst, card.valueSecond)"
 >
-  <div class="homophones-card__inner">
+  <p class="homophones-card__inner">
     <span class="homophones-card__text">
       {{ card.valueFirst.toLowerCase() }}
     </span>
     <span class="homophones-card__text">
       {{ card.valueSecond.toLowerCase() }}
     </span>
-  </div>
-</button>
+  </p>
 </div>
 </template>
 
@@ -29,6 +26,10 @@ export default {
     card: {
       type: Object,
       default: null,
+    },
+    difficulty: {
+      type: String,
+      default: '',
     },
   },
 
@@ -43,10 +44,15 @@ export default {
 <style lang="stylus" scoped>
 .homophones-card
   position relative
-  width 100%
-  padding-top 100%
   box-sizing border-box
+  width 100%
   border 1px solid $violet-dark
+  cursor pointer
+  transition background-color 0.2s ease-in-out
+  &::after
+    content ''
+    display block
+    padding-top 100%
   &.error
     animation shake 0.2s
     pointer-events none
@@ -67,24 +73,7 @@ export default {
     align-items center
 
   &__text
+    user-select none
     & + &
       margin-top 5px
-
-@keyframes shake {
-  10%, 90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-
-  20%, 80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%, 60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
 </style>
