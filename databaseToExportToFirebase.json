@@ -55,7 +55,7 @@
           "description": "Таблица Шульте представляет собой таблицу, в ячейках которой хаотичным образом размещены последовательно идущие числа.",
           "iconName": "calculator",
           "name": "Усный счет",
-          "page": "/simulators/mind/consider",
+          "page": "/simulators/mind/verbal-counting",
           "target": "Найди все числа по порядку"
         }
       ]

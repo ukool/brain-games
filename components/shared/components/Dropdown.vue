@@ -100,11 +100,13 @@ export default {
 
   &__title
     font-size 16px
+    user-select none
 
   &__selected
     position relative
     display flex
     align-items center
+    user-select none
     border-bottom 1px solid $black
 
   &__icon-arrow

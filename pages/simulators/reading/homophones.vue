@@ -285,7 +285,6 @@ export default {
       return fillCards(0, []);
     },
 
-    // Слушатели кастомных событий
     changeSwitchableSettings(settingName, settingValue) {
       this.setGameOnPause();
       this.settings[settingName].value = settingValue;

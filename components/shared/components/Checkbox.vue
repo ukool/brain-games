@@ -7,9 +7,13 @@
     {{ item.title }}
   </p>
 
-  <label class="checkbox__label">
+  <label
+    class="checkbox__label"
+    :class="{ 'disabled' : item.disabled }"
+  >
     <input
       class="checkbox__input"
+      :class="{ 'disabled' : item.disabled }"
       :value="value"
       type="checkbox"
       :checked="isChecked"
@@ -75,9 +79,14 @@ export default {
     width 40px
     height 20px
     cursor pointer
-
+    &.disabled
+      pointer-events none
+      opacity 0.4
     ../__title + &
       margin-left auto
+
+  &__title
+    user-select none
 
   &__input
     appearance none
@@ -118,6 +127,7 @@ export default {
     &:focus:not(:checked):not(:disabled)::after
       left -1px
 
-    &:disabled
-      opacity 0.5
+    &.disabled
+      pointer-events none
+      opacity 0.4
 </style>
