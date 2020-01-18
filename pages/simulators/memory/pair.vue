@@ -1,44 +1,58 @@
 <template>
-<GameField
+<SimulatorField
   :simulator-info="simulatorInfo"
-  :game-pause="gameStatus.pause"
-  :game-final="gameStatus.final"
-  :final-modal-data="gameFinalData"
-  @start-game="setGameOnPlayed"
-  @start-game-after-pause="setGameOnPlayed"
+  :simulator-pause="status.pause"
+  :simulator-final="status.final"
+  :final-data="finalData"
+  @start-simulator="startSimulator"
+  @start-simulator-after-pause="startSimulator"
 >
-  <template #game>
-    <div class="game__wrapper">
-      <div
-        v-show="gameStatus.played"
-        class="game__main"
-      >
-        <PairCard
-          v-for="(card, index) in gameCards"
-          :key="`${index}_card`"
-          :card="card"
-          :icon-set="gameSettings.cardsImage.value"
-          class="game__card"
-          :class="gameSettings.difficulty.value"
-          @card-click="handleClick"
-        />
-      </div>
+  <template #simulator>
+    <div class="pair">
+      <transition name="fade">
+        <div
+          v-if="showSimulator"
+          class="pair__main"
+        >
+          <PairCard
+            v-for="(card, index) in roundCards"
+            :key="`${index}_card`"
+            :card="card"
+            :icon-set="settings.cardsImage.value"
+            class="pair__card"
+            :class="settings.difficulty.value"
+            @card-click="handleClick"
+          />
+        </div>
+      </transition>
     </div>
   </template>
   <template #sidebar>
     <Sidebar
-      :settings="gameSettings"
-      @change-difficulty="changeDifficultyLevel"
-      @reset="resetGame(true)"
-    />
+      :settings="settings"
+      @change-selectable="changeSelectableSettings"
+      @reset="resetSimulator"
+    >
+      <template #info>
+        <ul class="sidebar-list">
+          <li class="sidebar-item">
+            Текущий раунд: {{ roundData.currentRound }}
+          </li>
+          <li class="sidebar-item">
+            Осталось найти пар: {{ remainsFind }}
+          </li>
+        </ul>
+      </template>
+    </Sidebar>
   </template>
-</GameField>
+</SimulatorField>
 </template>
 
 <script>
 import firebase from 'firebase/app';
+import { shuffleArray, searchDuplicateItem } from '~/helpers/functions';
 import PairCard from '~/components/memory/pair/PairCard';
-import GameField from '~/components/shared/layouts/GameField';
+import SimulatorField from '~/components/shared/layouts/SimulatorField';
 import Sidebar from '~/components/shared/layouts/Sidebar';
 
 export default {
@@ -46,17 +60,18 @@ export default {
 
   components: {
     Sidebar,
-    GameField,
+    SimulatorField,
     PairCard,
   },
 
   data() {
     return {
-      gameSettings: {
+      settings: {
         difficulty: {
           title: 'Сложность',
           value: 'easy',
           name: 'difficulty',
+          description: 'легкий',
           options: {
             default: {
               value: 'easy',
@@ -74,6 +89,7 @@ export default {
           title: 'Изображения',
           value: 'animal',
           name: 'cardsImage',
+          description: 'животные',
           options: {
             default: {
               value: 'animal',
@@ -89,24 +105,52 @@ export default {
           },
           type: 'selectable',
         },
-        picturesQuantity: 20,
-        cardQuantity: 10,
-        flipDelay: {
-          easy: 1200,
-          medium: 1100,
-          hard: 900,
+        rounds: {
+          title: 'Раундов',
+          value: 5,
+          name: 'rounds',
+          options: {
+            default: {
+              value: 5,
+              title: 5,
+            },
+            list: [
+              { value: 1, title: 1 },
+              { value: 5, title: 5 },
+              { value: 10, title: 10 },
+              { value: 15, title: 15 },
+            ],
+          },
+          type: 'selectable',
         },
       },
-      gameResult: {
-        moves: 0,
-        correctAnswersCount: 0,
+      configDifficulty: {
+        easy: {
+          cardsQuantity: 10,
+          flipDelay: 1300,
+          picturesQuantity: 20,
+        },
+        medium: {
+          cardsQuantity: 15,
+          flipDelay: 1200,
+          picturesQuantity: 20,
+        },
+        hard: {
+          cardsQuantity: 21,
+          flipDelay: 1100,
+          picturesQuantity: 21,
+        },
       },
-      gameStatus: {
+      results: {
+        correctAnswers: 0,
+        incorrectAnswers: 0,
+      },
+      status: {
         played: false,
         final: false,
         pause: false,
       },
-      gameFinalData: {
+      finalData: {
         difficulty: {
           title: 'Сложность',
           value: null,
@@ -115,13 +159,17 @@ export default {
           title: 'Изображения',
           value: null,
         },
-        cardQuantity: {
+        cardsQuantity: {
           title: 'Количество карточек',
           value: null,
         },
-        moves: {
-          title: 'Количество ходов',
+        correctAnswers: {
+          title: 'Правильных ответов',
           value: null,
+        },
+        incorrectAnswers: {
+          title: 'Неправильных ответов',
+          value: 0,
         },
       },
       flippedCards: {
@@ -133,9 +181,28 @@ export default {
         time: null,
         maxFlipTime: 0,
       },
-      gameCards: [],
+      roundData: {
+        cardsFlipped: 0,
+        currentRound: 1,
+      },
+      roundCards: [],
+      pauseBeforeNewRound: false,
       simulatorInfo: null,
     };
+  },
+
+  computed: {
+    difficulty() {
+      return this.settings.difficulty.value;
+    },
+
+    showSimulator() {
+      return !!(this.roundCards && this.roundCards.length && !this.pauseBeforeNewRound && this.status.played);
+    },
+
+    remainsFind() {
+      return this.configDifficulty[this.difficulty].cardsQuantity - this.roundData.cardsFlipped;
+    },
   },
 
   watch: {
@@ -158,89 +225,69 @@ export default {
       .then(snap => ({ simulatorInfo: snap.val() }));
   },
 
+  mounted() {
+    this.startSimulator();
+  },
+
   methods: {
-    /**
-     * Устанавливает игру в режим "игра начата"
-     */
-    setGameOnPlayed() {
-      this.gameStatus.played = true;
-      this.gameStatus.pause = false;
-      this.gameStatus.final = false;
-
-      this.startGame();
+    setSimulatorOnPlayed() {
+      this.status.played = true;
+      this.status.final = false;
+      this.status.pause = false;
     },
 
-    /**
-     * Устанавливает игру в режим паузы
-     */
-    setGameOnPause() {
-      this.gameStatus.played = false;
-      this.gameStatus.pause = true;
+    setSimulatorOnPause() {
+      this.status.played = false;
+      this.status.final = false;
+      this.status.pause = true;
     },
 
-    /**
-     * Устанавливает игру в режим "игра закончена"
-     */
-    setGameOnFinal() {
-      this.gameStatus.played = false;
-      this.gameStatus.final = true;
+    setSimulatorOnFinal() {
+      this.status.played = false;
+      this.status.final = true;
+      this.status.pause = false;
 
-      this.gameFinalData.difficulty.value = this.gameSettings.difficulty.title;
-      this.gameFinalData.moves.value = this.gameResult.moves;
-      this.gameFinalData.cardsImage.value = this.gameSettings.cardsImage.title;
-      this.gameFinalData.cardQuantity.value = this.gameSettings.cardQuantity;
-      this.gameFinalData.cardsImage.value = this.gameSettings.cardsImage.title;
+      this.finalData.difficulty.value = this.settings.difficulty.description;
+      this.finalData.cardsImage.value = this.settings.cardsImage.description;
+      this.finalData.correctAnswers.value = this.results.correctAnswers;
+      this.finalData.incorrectAnswers.value = this.results.incorrectAnswers;
+      this.finalData.cardsQuantity.value = this.configDifficulty[this.difficulty].cardsQuantity * 2;
     },
 
-    startGame() {
-      if (this.gameSettings.difficulty.value === 'easy') this.startEasyGame();
-      else if (this.gameSettings.difficulty.value === 'medium') this.startMediumGame();
-      else if (this.gameSettings.difficulty.value === 'hard') this.startHardGame();
+    startSimulator() {
+      this.roundData.cardsFlipped = 0;
+      this.setSimulatorOnPlayed();
+      this.roundCards = this.fillGameCardsArray();
+      this.roundCards = this.shuffleArray(this.roundCards);
     },
 
-    startEasyGame() {
-      this.gameSettings.cardQuantity = 10;
-      this.gameCards = this.fillGameCardsArray();
-    },
-
-    startMediumGame() {
-      this.gameSettings.cardQuantity = 15;
-      this.gameCards = this.fillGameCardsArray();
-    },
-
-    startHardGame() {
-      this.gameSettings.cardQuantity = 21;
-      this.gameSettings.picturesQuantity = 21;
-      this.gameCards = this.fillGameCardsArray();
-    },
-
-    /**
-     * Сбрасывает игру
-     */
-    resetGame() {
-      this.setGameOnPause();
-      this.gameCards = this.fillGameCardsArray();
+    resetSimulator() {
+      this.roundData.cardsFlipped = 0;
+      this.roundData.currentRound = 1;
+      this.setSimulatorOnPause();
+      this.roundCards = [];
     },
 
     /**
      * Генирирует случайное число от 0 до количевства изображений
      */
     generateRandomNumber() {
-      return Math.floor(Math.random() * this.gameSettings.picturesQuantity);
+      return Math.floor(Math.random() * this.configDifficulty[this.difficulty].picturesQuantity);
     },
 
     /**
-     * Заполняет массив gameCards
+     * Заполняет массив roundCards
      */
     fillGameCardsArray() {
-      const maxArrayLength = this.gameSettings.cardQuantity;
+      const maxArrayLength = this.configDifficulty[this.difficulty].cardsQuantity;
+      console.log(maxArrayLength);
 
       const fillCardsArray = (index, acc) => {
         if (index === maxArrayLength) return acc;
 
         const randomNumber = this.generateRandomNumber();
 
-        if (!this.searchDuplicateValue(acc, randomNumber)) {
+        if (!this.searchDuplicateItem(acc, 'imageIndex', randomNumber)) {
           acc.push(
             {
               imageIndex: randomNumber,
@@ -258,24 +305,8 @@ export default {
       cardsArray.forEach((item, index) => {
         item.id = index + 1;
       });
-      cardsArray = this.shuffleArray(cardsArray);
 
       return cardsArray;
-    },
-
-    /**
-     * Ищет дубликаты в массиве
-     */
-    searchDuplicateValue(array, value) {
-      let duplicate = false;
-
-      array.forEach((item) => {
-        if (item.imageIndex === value) {
-          duplicate = true;
-        }
-      });
-
-      return duplicate;
     },
 
     /**
@@ -290,29 +321,14 @@ export default {
     },
 
     /**
-     * Перемешивает массив
-     */
-    shuffleArray(array, quantity = 3) {
-      const sort = () => Math.random() - 0.5;
-
-      const shuffle = (index) => {
-        if (index === quantity) return array;
-        array.sort(sort);
-        return shuffle(index + 1);
-      };
-
-      return shuffle(0);
-    },
-
-    /**
      * Ищет карту в массиве карточек игры и возвращает ее
      */
     findGameCard(id) {
-      return this.gameCards.find(item => item.id === id);
+      return this.roundCards.find(item => item.id === id);
     },
 
     /**
-     * Сравнивает перевернутые карты
+     * Сравнивает перевернутые карточки
      */
     comparesCards() {
       if (this.flippedCards.first.imageIndex === this.flippedCards.second.imageIndex) {
@@ -323,18 +339,29 @@ export default {
           this.flippedCards.second = null;
         }, 300);
 
-        this.gameResult.correctAnswersCount += 1;
-
-        if (this.gameSettings.cardQuantity === this.gameResult.correctAnswersCount) {
-          this.setGameOnFinal();
-        }
+        this.results.correctAnswers += 1;
+        this.roundData.cardsFlipped += 1;
       } else {
+        this.results.incorrectAnswers += 1;
         setTimeout(() => {
           this.flippedCards.first.flip = false;
           this.flippedCards.second.flip = false;
           this.flippedCards.first = null;
           this.flippedCards.second = null;
         }, 300);
+      }
+
+      if (this.configDifficulty[this.difficulty].cardsQuantity === this.roundData.cardsFlipped) {
+        if (this.roundData.currentRound === this.settings.rounds.value) {
+          this.setSimulatorOnFinal();
+        } else {
+          this.roundData.currentRound += 1;
+          this.pauseBeforeNewRound = true;
+          this.startSimulator();
+          setTimeout(() => {
+            this.pauseBeforeNewRound = false;
+          }, 200);
+        }
       }
     },
 
@@ -343,28 +370,37 @@ export default {
         this.firstClickOnCard.time = Date.now();
 
         this.firstClickOnCard.maxFlipTime = Date.now()
-          + this.gameSettings.flipDelay[this.gameSettings.difficulty.value];
+          + this.configDifficulty[this.difficulty].flipDelay;
 
         this.firstClickOnCard.timer = setInterval(() => {
           this.firstClickOnCard.time = Date.now();
-        }, 100);
+        }, 200);
 
         this.flippedCards.first = this.findGameCard(id);
         this.flippedCards.first.flip = true;
-        this.gameResult.moves += 1;
+        this.results.correctAnswers += 1;
       } else if (!this.flippedCards.second) {
         clearInterval(this.firstClickOnCard.timer);
         this.flippedCards.second = this.findGameCard(id);
         this.flippedCards.second.flip = true;
-        this.gameResult.moves += 1;
+        this.results.correctAnswers += 1;
         this.comparesCards();
       }
     },
 
-    changeDifficultyLevel(settingName, settingValue) {
-      this.setGameOnPause();
-      this.gameSettings[settingName].value = settingValue;
+    /**
+     * Изменяет настройки игры
+     * @param settingName - имя настройки в объекте settings
+     * @param settingValue - новое значение настройки
+     */
+    changeSelectableSettings(settingName, settingValue) {
+      this.setSimulatorOnPause();
+      this.settings[settingName].value = settingValue;
+      this.settings[settingName].description = settingValue;
     },
+
+    shuffleArray,
+    searchDuplicateItem,
   },
 };
 </script>
@@ -373,12 +409,12 @@ export default {
 .section
   margin-top 50px
 
-.game
-  &__wrapper
-    position relative
-    display flex
-    justify-content center
-    width 100%
+.pair
+  position relative
+  display flex
+  justify-content center
+  align-self center
+  width 100%
 
   &__main
     display flex

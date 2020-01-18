@@ -13,7 +13,6 @@
         v-model="userAnswer"
         type="text"
         class="condition__input"
-        :class="[userAnswerIsCorrect]"
         @keypress.enter="handleSubmit"
         @input="handleInput($event.target.value)"
       >
@@ -46,10 +45,6 @@ export default {
       type: String,
       default: null,
     },
-    correctAnswer: {
-      type: Number,
-      default: null,
-    },
   },
 
   data() {
@@ -59,7 +54,6 @@ export default {
         hasError: false,
         message: 'Введите ответ',
       },
-      userAnswerIsCorrect: null,
     };
   },
 
@@ -72,12 +66,6 @@ export default {
       if (!this.userAnswer) {
         this.error.hasError = true;
         return;
-      }
-
-      if (this.userAnswer === this.correctAnswer) {
-        this.userAnswerIsCorrect = 'success';
-      } else {
-        this.userAnswerIsCorrect = 'error';
       }
 
       this.$emit('submit-answer', this.userAnswer);
@@ -132,10 +120,6 @@ export default {
     border 1px solid $blue
     &:focus
       border-color $violet-dark
-  .error
-    border-color $red
-  .success
-    border-color $green
 
   &__error
     position absolute

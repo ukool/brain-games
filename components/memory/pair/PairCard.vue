@@ -49,7 +49,6 @@ export default {
       type: Object,
       default: null,
     },
-
     iconSet: {
       type: String,
       default: 'fruit',

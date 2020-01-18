@@ -1,43 +1,43 @@
 <template>
-<div class="game-modal">
-  <div class="game-modal__inner">
+<div class="simulator-modal">
+  <div class="simulator-modal__inner">
     <svg-icon
-      class="game-modal__icon"
+      class="simulator-modal__icon"
       :name="simulatorInfo.iconName"
       width="90"
       height="90"
     />
 
-    <h2 class="game-modal__title">
+    <h2 class="simulator-modal__title">
       {{ simulatorInfo.title }}
     </h2>
 
-    <p class="game-modal__total">
+    <p class="simulator-modal__total">
       Результаты игры:
     </p>
-    <ul class="game-modal__total-list">
+    <ul class="simulator-modal__total-list">
       <li
         v-for="(data, index) in finalData"
         :key="`${index}_data`"
-        class="game-modal__total-item"
+        class="simulator-modal__total-item"
       >
         {{ data.title }} : {{ data.value }}
       </li>
       <li
         v-if="time"
-        class="game-modal__total-item"
+        class="simulator-modal__total-item"
       >
         Затрачено время: {{ time }}
       </li>
     </ul>
 
-    <div class="game-modal__controls">
+    <div class="simulator-modal__controls">
       <BorderButton
         text="Еще раз"
         icon-name="play"
         @click="startingGame"
       />
-      <div class="game-modal__settings">
+      <div class="simulator-modal__settings">
         <BorderLink
           href="/"
           text="К тренажерам"
@@ -49,29 +49,27 @@
 </template>
 
 <script>
-import gameStartAndFinalModalMixin from './mixins/gameStartAndFinalModalMixin';
-import BorderLink from '../components/buttons/BorderLink';
+import simulatorStartAndFinalModalMixin from './mixins/simulatorStartAndFinalModalMixin';
+import BorderLink from '~/components/shared/components/buttons/BorderLink';
 
 export default {
-  name: 'GameFinalModal',
+  name: 'SimulatorFinalModal',
 
   components: {
     BorderLink,
   },
 
-  mixins: [gameStartAndFinalModalMixin],
+  mixins: [simulatorStartAndFinalModalMixin],
 
   props: {
     simulatorInfo: {
       type: Object,
       default: null,
     },
-
     finalData: {
       type: Object,
       default: null,
     },
-
     time: {
       type: String,
       default: null,
@@ -80,4 +78,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src="./stylus/finalAndStartModal.styl"/>
+<style lang="stylus" src="./stylus/simulatorFinalAndStartModal.styl"/>

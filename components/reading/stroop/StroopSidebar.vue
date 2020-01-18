@@ -80,7 +80,7 @@ export default {
 
   methods: {
     listenerChangeDifficulty(value) {
-      this.$emit('change-difficulty', value);
+      this.$emit('change-selectable', value);
     },
 
     listenerAmountRound(value) {
@@ -92,7 +92,7 @@ export default {
     },
 
     handlerChecked(value, name) {
-      this.$emit('change-settings', value, name);
+      this.$emit('change-switchable', value, name);
     },
   },
 };

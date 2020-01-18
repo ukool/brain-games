@@ -24,7 +24,6 @@ export default {
       type: String,
       default: 'Сбросить',
     },
-
     size: {
       type: String,
       default: 'md',

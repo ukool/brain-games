@@ -1,73 +1,90 @@
 <template>
-<GameField
+<SimulatorField
   :simulator-info="simulatorInfo"
-  :game-pause="gameStatus.pause"
-  :game-final="gameStatus.final"
-  :final-modal-data="gameFinalData"
-  @start-game="setGameOnPlayed"
-  @start-game-after-pause="setGameOnPlayed"
+  :simulator-pause="status.pause"
+  :simulator-final="status.final"
+  :final-data="finalData"
+  @start-simulator="startSimulator"
+  @start-simulator-after-pause="startSimulator"
 >
-  <template #game>
-    <div
-      class="game__wrapper"
-      :class="[
-        gameCardSize,
-        { 'disabled': gameStatus.pause }
-      ]"
-    >
-      <p
-        v-if="gameSettings.tip.enabled && gameStatus.played"
-        class="game__tip"
-      >
-        Найдите число {{ currentCardNumber }}
-      </p>
-      <span
-        v-if="gameSettings.dotInCenter.enabled && gameStatus.played"
-        class="game__dot-in-center"
-      />
-      <SchulteCard
-        v-for="card in cards"
-        :key="`${card.number}_shulte-card`"
-        :card="card"
-        :fill-cards="gameSettings.highlight.enabled"
-        :colored-cards="gameSettings.coloredCards.enabled"
-        :animation-cards="gameSettings.animation.enabled"
-        class="game__card"
-        :class="gameCardSize"
-        @card-click="compareCardNumbers"
-      />
+  <template #simulator>
+    <div class="schulte">
+      <transition name="fade">
+        <div
+          v-if="showSimulator"
+          class="schulte__wrapper"
+          :class="[
+            simulatorCardSize,
+            { 'disabled': status.pause }
+          ]"
+        >
+          <p
+            v-if="settings.tip.enabled && status.played"
+            class="schulte__tip"
+          >
+            Найдите число {{ cardNumberToBeClicked }}
+          </p>
+          <span
+            v-if="settings.dotInCenter.enabled && status.played"
+            class="schulte__dot-in-center"
+          />
+          <SchulteCard
+            v-for="card in roundCards"
+            :key="`${card.number}_schulte-card`"
+            :card="card"
+            :fill-cards="settings.highlight.enabled"
+            :colored-cards="settings.coloredCards.enabled"
+            :animation-cards="settings.animation.enabled"
+            class="schulte__card"
+            :class="simulatorCardSize"
+            @card-click="checkClickedCard"
+          />
+        </div>
+      </transition>
     </div>
   </template>
 
   <template #sidebar>
     <Sidebar
-      :settings="gameSettings"
-      @change-difficulty="changeSwitchableSettings"
-      @change-settings="changeGameSettings"
-      @reset="resetGame(true)"
-    />
+      :settings="settings"
+      @change-selectable="changeSelectableSettings"
+      @change-switchable="changeSwitchableSettings"
+      @reset="resetSimulator"
+    >
+      <template #info>
+        <ul class="sidebar-list">
+          <li class="sidebar-item">
+            Текущий раунд: {{ currentRound }}
+          </li>
+          <li class="sidebar-item">
+            Осталось найти: {{ remainsFind }}
+          </li>
+        </ul>
+      </template>
+    </Sidebar>
   </template>
-</GameField>
+</SimulatorField>
 </template>
 
 <script>
 import firebase from 'firebase/app';
+import { shuffleArray } from '~/helpers/functions';
 import SchulteCard from '~/components/reading/schulte/SchulteCard';
-import GameField from '~/components/shared/layouts/GameField';
+import SimulatorField from '~/components/shared/layouts/SimulatorField';
 import Sidebar from '~/components/shared/layouts/Sidebar';
 
 export default {
-  name: 'SchulteGame',
+  name: 'SchulteSimulator',
 
   components: {
     Sidebar,
-    GameField,
+    SimulatorField,
     SchulteCard,
   },
 
   data() {
     return {
-      gameSettings: {
+      settings: {
         difficulty: {
           title: 'Сложность',
           value: '5x5',
@@ -78,18 +95,36 @@ export default {
               title: '5x5',
             },
             list: [
-              { value: '3x3', title: '3x3', selected: false },
-              { value: '4x4', title: '4x4', selected: false },
-              { value: '5x5', title: '5x5', selected: false },
-              { value: '6x6', title: '6x6', selected: false },
-              { value: '7x7', title: '7x7', selected: false },
+              { value: '3x3', title: '3x3' },
+              { value: '4x4', title: '4x4' },
+              { value: '5x5', title: '5x5' },
+              { value: '6x6', title: '6x6' },
+              { value: '7x7', title: '7x7' },
+            ],
+          },
+          type: 'selectable',
+        },
+        rounds: {
+          title: 'Раундов',
+          value: 5,
+          name: 'rounds',
+          options: {
+            default: {
+              value: 5,
+              title: 5,
+            },
+            list: [
+              { value: 1, title: 1 },
+              { value: 5, title: 5 },
+              { value: 10, title: 10 },
+              { value: 15, title: 15 },
             ],
           },
           type: 'selectable',
         },
         tip: {
           title: 'Показывать подсказку',
-          enabled: true,
+          enabled: false,
           name: 'tip',
           type: 'switchable',
         },
@@ -105,12 +140,6 @@ export default {
           name: 'coloredCards',
           type: 'switchable',
         },
-        // orally: {
-        //   title: 'Устная игра',
-        //   enabled: false,
-        //   name: 'orally',
-        //   type: 'switchable',
-        // },
         animation: {
           title: 'Анимации',
           enabled: true,
@@ -123,38 +152,76 @@ export default {
           name: 'dotInCenter',
           type: 'switchable',
         },
-        cardAmount: 25,
       },
-      gameStatus: {
+      configDifficulty: {
+        '3x3': {
+          cardsQuantity: 9,
+        },
+        '4x4': {
+          cardsQuantity: 16,
+        },
+        '5x5': {
+          cardsQuantity: 25,
+        },
+        '6x6': {
+          cardsQuantity: 36,
+        },
+        '7x7': {
+          cardsQuantity: 49,
+        },
+      },
+      status: {
         played: false,
         final: false,
         pause: false,
       },
-      gameResult: {
-        moves: 0,
-        time: 0,
+      results: {
+        correctAnswers: 0,
+        incorrectAnswers: 0,
       },
-      gameFinalData: {
+      finalData: {
         difficulty: {
           title: 'Сложность',
           value: null,
         },
-        moves: {
-          title: 'Количество ходов',
-          value: null,
+        correctAnswers: {
+          title: 'Правильных ответов',
+          value: 0,
+        },
+        incorrectAnswers: {
+          title: 'Неправильных ответов',
+          value: 0,
+        },
+        rounds: {
+          title: 'Количество раундов',
+          value: 5,
         },
       },
-      currentCardNumber: 1,
-      cards: null,
+      roundCards: null,
+      cardNumberToBeClicked: 1,
+      currentRound: 1,
+      pauseBeforeNewRound: false,
       simulatorInfo: null,
     };
   },
 
   computed: {
-    gameCardSize() {
+    showSimulator() {
+      return !!(this.roundCards && this.roundCards.length && !this.pauseBeforeNewRound && this.status.played);
+    },
+
+    difficulty() {
+      return this.settings.difficulty.value;
+    },
+
+    remainsFind() {
+      return this.configDifficulty[this.difficulty].cardsQuantity - (this.cardNumberToBeClicked - 1);
+    },
+
+    simulatorCardSize() {
       let size;
 
-      switch (this.gameSettings.difficulty.value) {
+      switch (this.difficulty) {
       case '3x3':
         size = 'three';
         break;
@@ -184,71 +251,61 @@ export default {
   },
 
   mounted() {
-    this.cards = this.shuffleCardsArray();
+    this.startSimulator();
   },
 
   methods: {
-    /**
-     * Сбрасывает игру
-     * @param pause - ставит игру на паузу
-     */
-    resetGame(pause = false) {
-      this.currentCardNumber = 1;
-      this.cards = this.shuffleCardsArray();
-
-      if (pause) this.setGameOnPause();
+    setSimulatorOnPlayed() {
+      this.status.played = true;
+      this.status.final = false;
+      this.status.pause = false;
     },
 
-    /**
-     * Устанавливает игру в режим паузы
-     */
-    setGameOnPause() {
-      this.gameStatus.played = false;
-      this.gameStatus.pause = true;
+    setSimulatorOnPause() {
+      this.cardNumberToBeClicked = 1;
+      this.status.played = false;
+      this.status.final = false;
+      this.status.pause = true;
     },
 
-    /**
-     * Устанавливает игру в режим игры
-     */
-    setGameOnPlayed() {
-      this.gameStatus.played = true;
-      this.gameStatus.pause = false;
-      this.gameStatus.final = false;
+    setSimulatorOnFinal() {
+      this.status.played = false;
+      this.status.final = true;
+      this.status.pause = false;
+
+      this.finalData.difficulty.value = this.settings.difficulty.value;
+      this.finalData.correctAnswers.value = this.results.correctAnswers;
+      this.finalData.incorrectAnswers.value = this.results.incorrectAnswers;
+      this.finalData.rounds.value = this.settings.rounds.value;
     },
 
-    /**
-     * Устанавливает игру в режим "игра закончена"
-     */
-    setGameOnFinal() {
-      this.gameStatus.played = false;
-      this.gameStatus.final = true;
+    startSimulator() {
+      this.roundCards = [];
+      this.cardNumberToBeClicked = 1;
+      this.setSimulatorOnPlayed();
+      this.roundCards = this.generateRoundCardsArray();
+      this.roundCards = this.shuffleArray(this.roundCards);
+    },
 
-      this.gameFinalData.difficulty.value = this.gameSettings.difficulty.value;
-      this.gameFinalData.moves.value = this.gameResult.moves;
+    resetSimulator() {
+      this.cardNumberToBeClicked = 1;
+      this.roundCards = [];
+      this.setSimulatorOnPause();
     },
 
     /**
      * Генерирует массив карточек
-     * в завимости от количества cardAmount в gameSettings
+     * в завимости от уровня сложности configDifficulty
      * @returns { Array }
      */
-    generateCardsArray() {
-      return Array.from(Array(this.gameSettings.cardAmount).keys()).map(i => ({
+    generateRoundCardsArray() {
+      let roundCards = Array.from(Array(this.configDifficulty[this.difficulty].cardsQuantity).keys());
+      roundCards = roundCards.map(i => ({
         number: i + 1,
         status: null,
       }));
-    },
 
-    /**
-     * Перемешивает массив карточек
-     * @returns { Array }
-     */
-    shuffleCardsArray() {
-      const cardsArray = this.generateCardsArray();
-      cardsArray.sort(() => Math.random() - 0.5);
-      cardsArray.sort(() => Math.random() - 0.5);
-
-      return cardsArray;
+      return roundCards;
     },
 
     /**
@@ -256,70 +313,87 @@ export default {
      * с текущим номером
      * @param number
      */
-    compareCardNumbers(number) {
-      this.gameResult.moves += 1;
-
+    checkClickedCard(number) {
       const card = this.findCardByNumber(number);
 
-      if (number === this.currentCardNumber) {
+      if (number === this.cardNumberToBeClicked) {
         card.status = 'success';
+        this.cardNumberToBeClicked += 1;
+        this.results.correctAnswers += 1;
       } else {
         card.status = 'error';
+        this.results.incorrectAnswers += 1;
         setTimeout(() => {
           card.status = null;
         }, 500);
       }
 
-      if (this.currentCardNumber === this.gameSettings.cardAmount) {
-        this.setGameOnFinal();
-        this.resetGame();
+      if (this.cardNumberToBeClicked === this.configDifficulty[this.difficulty].cardsQuantity + 1) {
+        if (this.currentRound === this.settings.rounds.value) {
+          this.setSimulatorOnFinal();
+        } else {
+          this.currentRound += 1;
+          this.pauseBeforeNewRound = true;
+          this.startSimulator();
+          setTimeout(() => {
+            this.pauseBeforeNewRound = false;
+          }, 200);
+        }
       }
-
-      if (this.currentCardNumber === number) this.currentCardNumber += 1;
     },
 
     findCardByNumber(number) {
-      return this.cards.find(card => card.number === number);
-    },
-
-    /**
-     * Изменяет сложность уровня игры
-     */
-    changeSwitchableSettings(settingName, settingValue) {
-      this.setGameOnPause();
-      this.gameSettings[settingName].value = settingValue;
-      this.gameSettings.cardAmount = settingValue[0] * settingValue[2];
-
-      this.resetGame(true);
+      return this.roundCards.find(card => card.number === number);
     },
 
     /**
      * Изменяет настройки игры
-     * @param value
-     * @param settingsName
+     * @param settingName - имя настройки в объекте settings
+     * @param settingValue - новое значение настройки
      */
-    changeGameSettings(value, settingsName) {
-      const gameMustContinue = settingsName.includes('tip')
+    changeSelectableSettings(settingName, settingValue) {
+      this.setSimulatorOnPause();
+      this.settings[settingName].value = settingValue;
+      this.cardsQuantity = settingValue[0] * settingValue[2];
+
+      this.resetSimulator();
+    },
+
+    /**
+     * Изменяет настройки игры
+     * @param value - новое значение настройки
+     * @param settingsName - имя настройки в объекте settings
+     */
+    changeSwitchableSettings(value, settingsName) {
+      const simulatorMustContinue = settingsName.includes('tip')
         || settingsName.includes('animation')
         || settingsName.includes('dotInCenter');
 
-      if (gameMustContinue) {
-        this.gameSettings[settingsName].enabled = value;
+      if (simulatorMustContinue) {
+        this.settings[settingsName].enabled = value;
         return;
       }
 
-      this.setGameOnPause();
-      this.gameSettings[settingsName].enabled = value;
-      this.resetGame(true);
+      this.setSimulatorOnPause();
+      this.settings[settingsName].enabled = value;
+      this.resetSimulator();
     },
+
+    shuffleArray,
   },
 };
 </script>
 <style scoped lang="stylus">
-.game
+.schulte
+  display flex
+  justify-content center
+  align-items center
+  width 100%
+
   &__wrapper
     display flex
     flex-wrap wrap
+    position relative
     &.three
       width 25%
     &.four
@@ -335,9 +409,9 @@ export default {
         content ''
         position absolute
         top -20px
-        left 0
+        right -20px
         bottom -20px
-        width 100%
+        left -20px
         background $white
         z-index 20
 
@@ -354,6 +428,14 @@ export default {
       width calc(100% / 6 - 2px)
     &.seven
       width calc(100% / 7 - 2px)
+
+  &__tip
+    position absolute
+    top -12%
+    left 50%
+    transform translateX(-50%)
+    width 100%
+    text-align center
 
   &__dot-in-center
     position absolute

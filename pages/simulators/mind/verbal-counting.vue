@@ -1,26 +1,25 @@
 <template>
-<GameField
+<SimulatorField
   :simulator-info="simulatorInfo"
-  :game-pause="gameStatus.pause"
-  :game-final="gameStatus.final"
-  :final-modal-data="finalData"
-  @start-game="setGameOnPlayed"
-  @start-game-after-pause="setGameOnPlayed"
+  :simulator-pause="status.pause"
+  :simulator-final="status.final"
+  :final-data="finalData"
+  @start-simulator="startSimulator"
+  @start-simulator-after-pause="startSimulator"
 >
-  <template #game>
+  <template #simulator>
     <div class="counting">
       <transition name="fade">
         <ConsiderCard
-          v-if="!pauseBeforeNewRound"
-          :condition="condition"
-          :correct-answer="correctAnswer"
+          v-if="!pauseBeforeNewRound && status.played"
+          :condition="roundCondition"
           @submit-answer="checkAnswer"
         />
       </transition>
 
       <transition name="fade">
         <ResultModal
-          v-if="showResultModal && condition"
+          v-if="showResultModal && roundCondition"
           :correct-answer="correctAnswer"
           :answer-is-right="userAnswerAnswerIsRight"
         />
@@ -31,9 +30,9 @@
   <template #sidebar>
     <Sidebar
       :settings="settings"
-      @change-difficulty="changeSwitchableSettings"
-      @change-settings="changeGameSettings"
-      @reset="resetGame"
+      @change-selectable="changeSelectableSettings"
+      @change-switchable="changeSwitchableSettings"
+      @reset="resetSimulator"
     >
       <template #info>
         <ul class="sidebar-list">
@@ -44,12 +43,12 @@
       </template>
     </Sidebar>
   </template>
-</GameField>
+</SimulatorField>
 </template>
 
 <script>
 import firebase from 'firebase/app';
-import GameField from '~/components/shared/layouts/GameField';
+import SimulatorField from '~/components/shared/layouts/SimulatorField';
 import Sidebar from '~/components/shared/layouts/Sidebar';
 import ConsiderCard from '~/components/mind/verbalCounting/ConsiderCard';
 import ResultModal from '~/components/mind/verbalCounting/ResultModal';
@@ -59,7 +58,7 @@ export default {
 
   components: {
     ResultModal,
-    GameField,
+    SimulatorField,
     Sidebar,
     ConsiderCard,
   },
@@ -117,12 +116,6 @@ export default {
           disabled: false,
 
         },
-        // division: {
-        //   title: 'Деление',
-        //   enabled: true,
-        //   name: 'division',
-        //   type: 'switchable',
-        // },
         multiplication: {
           title: 'Умножение',
           enabled: true,
@@ -136,17 +129,12 @@ export default {
           maxNumber: 100,
         },
         medium: {
-          maxNumber: 999,
+          maxNumber: 1000,
         },
         hard: {
           maxNumber: 9999,
         },
       },
-      // gameSettings: {
-      //   treeDigit: false,
-      //   fourDigit: false,
-      //   cardsAnswerCount: 4,
-      // },
       finalData: {
         difficulty: {
           title: 'Сложность',
@@ -169,12 +157,12 @@ export default {
         correctAnswers: 0,
         incorrectAnswers: 0,
       },
-      gameStatus: {
+      status: {
         played: false,
         final: false,
         pause: false,
       },
-      condition: null,
+      roundCondition: null,
       operators: ['-', '+', '*'],
       hasOnlyOneOperator: false,
       previousOperator: null,
@@ -220,36 +208,27 @@ export default {
   },
 
   mounted() {
-    this.setGameOnPlayed();
+    this.setSimulatorOnPlayed();
   },
 
   methods: {
-    /**
-     * Устанавливает игру в режим "игра начата"
-     */
-    setGameOnPlayed() {
-      this.gameStatus.played = true;
-      this.gameStatus.pause = false;
-      this.gameStatus.final = false;
-
-      this.startGame();
+    setSimulatorOnPlayed() {
+      this.status.played = true;
+      this.status.final = false;
+      this.status.pause = false;
     },
 
-    /**
-     * Устанавливает игру в режим паузы
-     */
-    setGameOnPause() {
-      this.gameStatus.played = false;
-      this.gameStatus.pause = true;
+    setSimulatorOnPause() {
+      this.currentRound = 1;
+      this.status.played = false;
+      this.status.final = false;
+      this.status.pause = true;
     },
 
-    /**
-     * Устанавливает игру в режим "игра закончена"
-     */
-    setGameOnFinal() {
-      this.gameStatus.played = false;
-      this.gameStatus.pause = false;
-      this.gameStatus.final = true;
+    setSimulatorOnFinal() {
+      this.status.played = false;
+      this.status.final = true;
+      this.status.pause = false;
 
       this.finalData.difficulty.value = this.settings.difficulty.description;
       this.finalData.correctAnswers.value = this.results.correctAnswers;
@@ -257,22 +236,24 @@ export default {
       this.finalData.rounds.value = this.settings.rounds.value;
     },
 
-    startGame() {
+    startSimulator() {
+      this.setSimulatorOnPlayed();
       this.pauseBeforeNewRound = false;
 
-      this.condition = this.generateCondition();
-      this.correctAnswer = this.calculateAnswer(this.condition);
+      this.roundCondition = this.generateCondition();
+      this.correctAnswer = this.calculateAnswer(this.roundCondition);
     },
 
-    /**
-     * Сбрасывает игру
-     */
-    resetGame() {
+    resetSimulator() {
+      this.setSimulatorOnPause();
+      this.roundCondition = null;
+      this.correctAnswer = null;
+      this.userAnswer = null;
       this.pauseBeforeNewRound = true;
 
       setTimeout(() => {
         this.pauseBeforeNewRound = false;
-        this.startGame();
+        this.startSimulator();
         this.currentRound = 1;
       }, 700);
     },
@@ -306,26 +287,17 @@ export default {
       return generateOperator();
     },
 
-    calculateAnswer(condition) {
-      const splitConditions = condition.split(' ');
+    calculateAnswer(roundCondition) {
+      const splitConditions = roundCondition.split(' ');
       const firstOperator = Number(splitConditions[0]);
       const operand = splitConditions[1];
       const secondOperator = Number(splitConditions[2]);
 
       let answer;
 
-      switch (operand) {
-      case '+':
-        answer = firstOperator + secondOperator;
-        break;
-      case '-':
-        answer = firstOperator - secondOperator;
-        break;
-      case '*':
-        answer = firstOperator - secondOperator;
-        break;
-      default:
-      }
+      if (operand === '+') answer = firstOperator + secondOperator;
+      else if (operand === '-') answer = firstOperator - secondOperator;
+      else if (operand === '*') answer = firstOperator * secondOperator;
 
       return answer;
     },
@@ -343,30 +315,22 @@ export default {
         this.userAnswerAnswerIsRight = false;
       }
 
-      this.currentRound += 1;
-
-      if (this.currentRound === this.settings.rounds.value + 1) {
+      if (this.currentRound === this.settings.rounds.value) {
+        this.showResultModal = true;
         setTimeout(() => {
           this.showResultModal = false;
-          this.setGameOnFinal();
+          this.setSimulatorOnFinal();
         }, 1500);
       } else {
+        this.currentRound += 1;
         this.showResultModal = true;
         this.pauseBeforeNewRound = true;
 
         setTimeout(() => {
           this.showResultModal = false;
-          this.startGame();
+          this.startSimulator();
         }, 1500);
       }
-    },
-
-    changeSwitchableSettings(settingName, settingValue) {
-      this.setGameOnPause();
-      this.settings[settingName].value = settingValue;
-      this.settings[settingName].description = settingValue;
-
-      this.resetGame();
     },
 
     convertSettingNameToMathOperator(settingsName) {
@@ -389,7 +353,15 @@ export default {
       return settingName;
     },
 
-    changeGameSettings(value, settingsName) {
+    changeSelectableSettings(settingName, settingValue) {
+      this.setSimulatorOnPause();
+      this.settings[settingName].value = settingValue;
+      this.settings[settingName].description = settingValue;
+
+      this.setSimulatorOnPause();
+    },
+
+    changeSwitchableSettings(value, settingsName) {
       const operator = this.convertSettingNameToMathOperator(settingsName);
 
       if (value) {
@@ -401,8 +373,7 @@ export default {
         this.settings[settingsName].enabled = value;
       }
 
-      this.setGameOnPause();
-      this.resetGame();
+      this.setSimulatorOnPause();
     },
   },
 
@@ -414,4 +385,5 @@ export default {
   position relative
   width 300px
   height 300px
+  align-self center
 </style>

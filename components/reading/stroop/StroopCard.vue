@@ -39,6 +39,7 @@
 <script>
 export default {
   name: 'StroopCard',
+
   props: {
     roundCard: {
       type: Array,

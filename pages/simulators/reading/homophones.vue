@@ -1,15 +1,17 @@
 <template>
-<GameField
+<SimulatorField
   :simulator-info="simulatorInfo"
-  :game-pause="gameStatus.pause"
-  :game-final="gameStatus.final"
-  :final-modal-data="finalData"
+  :simulator-pause="status.pause"
+  :simulator-final="status.final"
+  :final-data="finalData"
+  @start-simulator="startSimulator"
+  @start-simulator-after-pause="startSimulator"
 >
-  <template #game>
+  <template #simulator>
     <div class="homophones">
       <transition name="fade">
         <div
-          v-if="gameStatus.played && !pauseBeforeNewRound"
+          v-if="status.played && !pauseBeforeNewRound"
           class="homophones__wrapper"
         >
           <template v-if="roundsCards.length">
@@ -32,13 +34,13 @@
   <template #sidebar>
     <Sidebar
       :settings="settings"
-      @change-difficulty="changeSwitchableSettings"
-      @reset="resetGame"
+      @change-selectable="changeSwitchableSettings"
+      @reset="resetSimulator"
     >
       <template #info>
         <ul class="sidebar-list">
           <li class="sidebar-item">
-            Текущий раунд: {{ currentRound }}
+            Текущий раунд: {{ roundData.currentRound }}
           </li>
           <li class="sidebar-item">
             Осталось найти: {{ remainsFind }}
@@ -47,14 +49,14 @@
       </template>
     </Sidebar>
   </template>
-</GameField>
+</SimulatorField>
 </template>
 
 <script>
 import firebase from 'firebase/app';
 import homophones from '~/helpers/homophones';
 import { shuffleArray, searchDuplicateItem } from '~/helpers/functions';
-import GameField from '~/components/shared/layouts/GameField';
+import SimulatorField from '~/components/shared/layouts/SimulatorField';
 import Sidebar from '~/components/shared/layouts/Sidebar';
 import HomophonesCard from '~/components/reading/homophones/HomophonesCard';
 
@@ -62,7 +64,7 @@ export default {
   name: 'HomophonesSimulator',
 
   components: {
-    GameField,
+    SimulatorField,
     Sidebar,
     HomophonesCard,
   },
@@ -110,20 +112,17 @@ export default {
         easy: {
           homophonesCards: 5,
           repeatCard: 15,
-          attempts: 7,
         },
         medium: {
           homophonesCards: 4,
           repeatCard: 21,
-          attempts: 6,
         },
         hard: {
           homophonesCards: 3,
           repeatCard: 27,
-          attempts: 4,
         },
       },
-      result: {
+      results: {
         correctAnswers: 0,
         incorrectAnswers: 0,
       },
@@ -145,16 +144,16 @@ export default {
           value: null,
         },
       },
-      gameStatus: {
+      status: {
         played: false,
         final: false,
         pause: false,
       },
-      round: {
+      roundData: {
         correctAnswers: 0,
+        currentRound: 1,
       },
       homophones,
-      currentRound: 1,
       homophonesCards: [],
       repeatCards: [],
       roundsCards: [],
@@ -169,7 +168,7 @@ export default {
     },
 
     remainsFind() {
-      return this.configDifficulty[this.difficulty].homophonesCards - this.round.correctAnswers;
+      return this.configDifficulty[this.difficulty].homophonesCards - this.roundData.correctAnswers;
     },
   },
 
@@ -180,44 +179,36 @@ export default {
   },
 
   mounted() {
-    this.setGameOnPlayed();
+    this.startSimulator();
   },
 
   methods: {
-    /**
-     * Устанавливает игру в режим "игра начата"
-     */
-    setGameOnPlayed() {
-      this.gameStatus.played = true;
-      this.gameStatus.pause = false;
-      this.gameStatus.final = false;
-
-      this.startGame();
+    setSimulatorOnPlayed() {
+      this.status.played = true;
+      this.status.final = false;
+      this.status.pause = false;
     },
 
-    /**
-     * Устанавливает игру в режим паузы
-     */
-    setGameOnPause() {
-      this.gameStatus.played = false;
-      this.gameStatus.pause = true;
+    setSimulatorOnPause() {
+      this.status.played = false;
+      this.status.final = false;
+      this.status.pause = true;
     },
 
-    /**
-     * Устанавливает игру в режим "игра закончена"
-     */
-    setGameOnFinal() {
-      this.gameStatus.played = false;
-      this.gameStatus.pause = false;
-      this.gameStatus.final = true;
+    setSimulatorOnFinal() {
+      this.status.played = false;
+      this.status.final = true;
+      this.status.pause = false;
 
       this.finalData.difficulty.value = this.settings.difficulty.description;
-      this.finalData.correctAnswers.value = this.result.correctAnswers;
-      this.finalData.incorrectAnswers.value = this.result.incorrectAnswers;
+      this.finalData.correctAnswers.value = this.results.correctAnswers;
+      this.finalData.incorrectAnswers.value = this.results.incorrectAnswers;
       this.finalData.rounds.value = this.settings.rounds.value;
     },
 
-    startGame() {
+    startSimulator() {
+      this.setSimulatorOnPlayed();
+      this.roundData.correctAnswers = 0;
       this.homophonesCards = this.fillHomophonesCards();
       this.repeatCards = this.fillCardsDuplicateWords();
       this.roundsCards = [...this.homophonesCards, ...this.repeatCards];
@@ -225,13 +216,9 @@ export default {
       this.roundsCards = this.shuffleArray(this.roundsCards, 4);
     },
 
-    /**
-     * Сбрасывает игру
-     */
-    resetGame() {
-      this.startGame();
-      this.currentRound = 1;
-      // this.gameCards = this.fillGameCardsArray();
+    resetSimulator() {
+      this.roundData.currentRound = 1;
+      this.setSimulatorOnPause();
     },
 
     /**
@@ -286,22 +273,22 @@ export default {
     },
 
     changeSwitchableSettings(settingName, settingValue) {
-      this.setGameOnPause();
+      this.setSimulatorOnPause();
       this.settings[settingName].value = settingValue;
       this.settings[settingName].description = settingValue;
 
-      this.resetGame();
+      this.resetSimulator();
     },
 
     listenerClickCard(valueFirst, valueSecond) {
       const clickedCard = this.roundsCards.find(item => item.valueFirst === valueFirst);
 
       if (valueFirst !== valueSecond) {
-        this.round.correctAnswers += 1;
-        this.result.correctAnswers += 1;
+        this.roundData.correctAnswers += 1;
+        this.results.correctAnswers += 1;
         clickedCard.success = true;
       } else if (valueFirst === valueSecond) {
-        this.result.incorrectAnswers += 1;
+        this.results.incorrectAnswers += 1;
         clickedCard.error = true;
 
         setTimeout(() => {
@@ -309,19 +296,17 @@ export default {
         }, 300);
       }
 
-      if (this.round.correctAnswers === this.configDifficulty[this.difficulty].homophonesCards) {
-        this.currentRound += 1;
-        this.round.correctAnswers = 0;
-        this.pauseBeforeNewRound = true;
-        this.setGameOnPlayed();
-
-        setTimeout(() => {
-          this.pauseBeforeNewRound = false;
-        }, 200);
-      }
-
-      if (this.currentRound === this.settings.rounds.value + 1) {
-        this.setGameOnFinal();
+      if (this.roundData.correctAnswers === this.configDifficulty[this.difficulty].homophonesCards) {
+        if (this.roundData.currentRound === this.settings.rounds.value) {
+          this.setSimulatorOnFinal();
+        } else {
+          this.pauseBeforeNewRound = true;
+          setTimeout(() => {
+            this.startSimulator();
+            this.pauseBeforeNewRound = false;
+            this.roundData.currentRound += 1;
+          }, 200);
+        }
       }
     },
 
@@ -336,6 +321,7 @@ export default {
   position relative
   display flex
   justify-content center
+  align-self center
   flex-wrap wrap
   width 100%
   background-color #fff

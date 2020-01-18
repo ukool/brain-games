@@ -27,7 +27,7 @@ export default {
 
   methods: {
     startingGame() {
-      this.$emit('starting-game');
+      this.$emit('start-simulator');
     },
   },
 };

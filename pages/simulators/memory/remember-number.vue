@@ -1,16 +1,21 @@
 <template>
-<GameField
+<SimulatorField
   :simulator-info="simulatorInfo"
-  :game-pause="gameStatus.pause"
-  :game-final="gameStatus.final"
-  :final-modal-data="gameFinalData"
+  :simulator-pause="status.pause"
+  :simulator-final="status.final"
+  :final-data="finalData"
+  @start-simulator="startSimulator"
+  @start-simulator-after-pause="startSimulatorAfterPause"
 >
-  <template #game>
-    <div class="game__field">
+  <template #simulator>
+    <div
+      v-if="!status.pause"
+      class="remember-number"
+    >
       <RememberNumberCard
-        :current-number="currentNumber"
+        :current-number="roundNumber"
         :number-length="configDifficulty[difficulty].numberLength"
-        :status-end-game="gameStatus.complete"
+        :status-end-game="status.complete"
         :visible-time="configDifficulty[difficulty].visibleTime"
         :difficulty="difficulty"
         :number-in-filed="configDifficulty[difficulty].numberInFiled"
@@ -22,21 +27,25 @@
 
   <template #sidebar>
     <Sidebar
-      :settings="gameSettings"
-      @change-difficulty="changeSwitchableSettings"
-      @reset="resetGame"
+      :settings="settings"
+      @change-selectable="changeSwitchableSettings"
+      @reset="resetSimulator"
     >
       <template #info>
-        Текущий раунд: {{ currentRound }}
+        <ul class="sidebar-list">
+          <li class="sidebar-item">
+            Текущий раунд: {{ currentRound }}
+          </li>
+        </ul>
       </template>
     </Sidebar>
   </template>
-</GameField>
+</SimulatorField>
 </template>
 
 <script>
 import firebase from 'firebase/app';
-import GameField from '~/components/shared/layouts/GameField';
+import SimulatorField from '~/components/shared/layouts/SimulatorField';
 import Sidebar from '~/components/shared/layouts/Sidebar';
 import RememberNumberCard from '~/components/memory/rememberNumber/RememberNumberCard';
 
@@ -44,18 +53,19 @@ export default {
   name: 'RememberNumberSimulator',
 
   components: {
-    GameField,
+    SimulatorField,
     Sidebar,
     RememberNumberCard,
   },
 
   data() {
     return {
-      gameSettings: {
+      settings: {
         difficulty: {
           title: 'Сложность',
-          value: 'medium',
+          value: 'easy',
           name: 'difficulty',
+          description: 'легкий',
           options: {
             default: {
               value: 'easy',
@@ -107,11 +117,11 @@ export default {
           numberInFiled: 3,
         },
       },
-      gameResult: {
+      results: {
         correctAnswers: 0,
         incorrectAnswers: 0,
       },
-      gameFinalData: {
+      finalData: {
         difficulty: {
           title: 'Сложность',
           value: null,
@@ -129,14 +139,14 @@ export default {
           value: null,
         },
       },
-      gameStatus: {
+      status: {
         played: false,
         final: false,
         pause: false,
       },
       showTimer: false,
       userAnswer: null,
-      currentNumber: null,
+      roundNumber: null,
       infinityGame: false,
       currentRound: 1,
       simulatorInfo: null,
@@ -145,7 +155,7 @@ export default {
 
   computed: {
     difficulty() {
-      return this.gameSettings.difficulty.value;
+      return this.settings.difficulty.value;
     },
   },
 
@@ -156,52 +166,51 @@ export default {
   },
 
   mounted() {
-    this.startGame();
+    this.startSimulator();
   },
 
   methods: {
-    /**
-     * Устанавливает игру в режим "игра начата"
-     */
-    setGameOnPlayed() {
-      this.gameStatus.played = true;
-      this.gameStatus.pause = false;
-      this.gameStatus.final = false;
-
-      this.startGame();
+    setSimulatorOnPlayed() {
+      this.status.played = true;
+      this.status.final = false;
+      this.status.pause = false;
     },
 
-    /**
-     * Устанавливает игру в режим паузы
-     */
-    setGameOnPause() {
-      this.gameStatus.played = false;
-      this.gameStatus.pause = true;
+    setSimulatorOnPause() {
+      this.status.played = false;
+      this.status.final = false;
+      this.status.pause = true;
     },
 
-    /**
-     * Устанавливает игру в режим "игра закончена"
-     */
-    setGameOnFinal() {
-      this.gameStatus.played = false;
-      this.gameStatus.final = true;
+    setSimulatorOnFinal() {
+      this.status.played = false;
+      this.status.final = true;
+      this.status.pause = false;
 
-      this.gameFinalData.difficulty.value = this.gameSettings.difficulty.value;
-      this.gameFinalData.correctAnswers.value = this.gameResult.correctAnswers;
-      this.gameFinalData.incorrectAnswers.value = this.gameResult.incorrectAnswers;
-      this.gameFinalData.rounds.value = this.gameSettings.rounds.value;
+      this.finalData.difficulty.value = this.settings.difficulty.description;
+      this.finalData.correctAnswers.value = this.results.correctAnswers;
+      this.finalData.incorrectAnswers.value = this.results.incorrectAnswers;
+      this.finalData.rounds.value = this.settings.rounds.value;
     },
 
-    startGame() {
-      this.currentNumber = this.fillCurrentNumber();
+    startSimulator() {
+      this.setSimulatorOnPlayed();
+      this.roundNumber = this.fillCurrentNumber();
     },
-    /**
-     * Сбрасывает игру
-     */
-    resetGame() {
-      this.startGame();
+
+    startSimulatorAfterPause() {
+      this.status.pause = false;
+
+      setTimeout(() => {
+        this.setSimulatorOnPlayed();
+        this.roundNumber = this.fillCurrentNumber();
+      }, 100);
+    },
+
+    resetSimulator() {
+      this.setSimulatorOnPause();
+      this.roundNumber = null;
       this.currentRound = 1;
-      // this.gameCards = this.fillGameCardsArray();
     },
 
     generateRandomNumber() {
@@ -210,17 +219,17 @@ export default {
 
     fillCurrentNumber() {
       const maxLength = this.configDifficulty[this.difficulty].numberLength;
-      const currentNumber = [];
+      let roundNumber = '';
 
       for (let i = 1; i <= maxLength; i += 1) {
-        currentNumber.push(this.generateRandomNumber());
+        roundNumber += this.generateRandomNumber();
       }
 
-      return currentNumber.join('');
+      return roundNumber;
     },
 
     increaseNumbersLength() {
-      if (this.gameResult.correctAnswers % 3 !== 0) return;
+      if (this.results.correctAnswers % 3 !== 0) return;
 
       if (this.difficulty === 'easy') {
         this.configDifficulty.easy.numberLength += 1;
@@ -249,59 +258,47 @@ export default {
 
     checkSubmitAnswer(answer) {
       let rightAnswer;
-      const difficulty = this.gameSettings.difficulty.value;
+      const difficulty = this.settings.difficulty.value;
       const delay = this.configDifficulty[difficulty].visibleTime;
 
       setTimeout(() => {
-        rightAnswer = Number(answer) === Number(this.currentNumber);
+        rightAnswer = Number(answer) === Number(this.roundNumber);
 
         if (rightAnswer) {
-          this.gameResult.correctAnswers += 1;
+          this.results.correctAnswers += 1;
           this.increaseNumbersLength();
         } else {
-          this.gameResult.incorrectAnswers += 1;
+          this.results.incorrectAnswers += 1;
           this.decreaseNumberLength();
         }
 
-        this.currentRound += 1;
-
-        if (this.currentRound >= this.gameSettings.rounds.value && !this.gameSettings.infinityGame) {
-          this.setGameOnFinal();
-          return;
+        if (this.currentRound === this.settings.rounds.value && !this.settings.infinityGame) {
+          this.setSimulatorOnFinal();
+        } else {
+          this.currentRound += 1;
+          this.startSimulator();
         }
-
-        this.startGame();
       }, delay);
     },
 
     changeSwitchableSettings(settingName, settingValue) {
-      this.setGameOnPause();
-      this.gameSettings[settingName].value = settingValue;
-
-      this.resetGame();
+      this.setSimulatorOnPause();
+      this.settings[settingName].value = settingValue;
+      this.settings[settingName].description = settingValue;
+      this.resetSimulator();
     },
   },
 };
 </script>
 
 <style lang="stylus" scoped>
-.game
-  &__field
-    position relative
-    display flex
-    justify-content center
-    flex-wrap wrap
-    width 75%
-    margin-right auto
-    background-color #fff
-
-  &__sidebar
-    width 23%
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
-}
+.remember-number
+  position relative
+  display flex
+  justify-content center
+  flex-wrap wrap
+  width 75%
+  margin-right auto
+  align-self center
+  background-color #fff
 </style>

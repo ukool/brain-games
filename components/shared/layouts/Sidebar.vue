@@ -119,11 +119,11 @@ export default {
 
   methods: {
     changeDifficultyListener(value, name) {
-      this.$emit('change-difficulty', name, value);
+      this.$emit('change-selectable', name, value);
     },
 
     changeHandle(value, name) {
-      this.$emit('change-settings', value, name);
+      this.$emit('change-switchable', value, name);
     },
 
     fullScreenHandler() {

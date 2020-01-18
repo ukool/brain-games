@@ -58,7 +58,7 @@ export default {
         clearInterval(timer);
         this.$emit('countdown-final');
         this.timer = 3;
-      }, 3000);
+      }, 3100);
     },
   },
 };

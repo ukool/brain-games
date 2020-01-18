@@ -1,25 +1,25 @@
 <template>
-<div class="game-modal">
-  <div class="game-modal__inner">
+<div class="simulator-modal">
+  <div class="simulator-modal__inner">
     <svg-icon
-      class="game-modal__icon"
+      class="simulator-modal__icon"
       :name="simulatorInfo.iconName"
       width="90"
       height="90"
     />
 
-    <h2 class="game-modal__title">
+    <h2 class="simulator-modal__title">
       {{ simulatorInfo.title }}
     </h2>
 
     <ul
       v-if="simulatorInfo.tags && simulatorInfo.tags.length"
-      class="game-modal__tags"
+      class="simulator-modal__tags"
     >
       <li
         v-for="(tag, index) in simulatorInfo.tags"
         :key="`${index}_tag`"
-        class="game-modal__tag"
+        class="simulator-modal__tag"
       >
         {{ tag }}
       </li>
@@ -27,36 +27,36 @@
 
     <div
       v-if="simulatorInfo.description"
-      class="game-modal__description"
+      class="simulator-modal__description"
     >
       <p
         v-for="(paragraph, index) in simulatorInfo.description"
         :key="`${index}_paragraph`"
-        class="game-modal__paragraph"
+        class="simulator-modal__paragraph"
       >
         {{ paragraph }}
       </p>
     </div>
 
-    <div class="game-modal__controls">
+    <div class="simulator-modal__controls">
       <BorderButton
         text="Начать игру"
         icon-name="play"
         @click="startingGame"
       />
-      <div class="game-modal__settings">
+      <div class="simulator-modal__settings">
         <BorderButton
-          class="game-modal__settings-btn"
+          class="simulator-modal__settings-btn"
           size="xs"
           icon-name="ques"
         />
         <BorderButton
-          class="game-modal__settings-btn"
+          class="simulator-modal__settings-btn"
           size="xs"
           icon-name="sound"
         />
         <BorderButton
-          class="game-modal__settings-btn"
+          class="simulator-modal__settings-btn"
           size="xs"
           :icon-name="fullScreenMode ? 'size': 'full-screen'"
           @click="fullScreenHandler"
@@ -68,12 +68,12 @@
 </template>
 
 <script>
-import gameStartAndFinalModalMixin from './mixins/gameStartAndFinalModalMixin';
+import simulatorStartAndFinalModalMixin from './mixins/simulatorStartAndFinalModalMixin';
 
 export default {
-  name: 'GameStartModal',
+  name: 'SimulatorStartModal',
 
-  mixins: [gameStartAndFinalModalMixin],
+  mixins: [simulatorStartAndFinalModalMixin],
 
   props: {
     simulatorInfo: {
@@ -97,4 +97,4 @@ export default {
 };
 </script>
 
-<style lang="stylus" src="./stylus/finalAndStartModal.styl"/>
+<style lang="stylus" src="./stylus/simulatorFinalAndStartModal.styl"/>

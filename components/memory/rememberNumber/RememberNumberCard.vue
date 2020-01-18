@@ -122,8 +122,8 @@ export default {
 
   watch: {
     currentNumber() {
-      this.resetGame();
-      this.startGame();
+      this.resetSimulator();
+      this.startSimulator();
     },
     statusEndGame(value) {
       if (value) this.disabledInputs = true;
@@ -135,7 +135,7 @@ export default {
   },
 
   methods: {
-    startGame() {
+    startSimulator() {
       this.disabledInputs = true;
       this.showNumbers = true;
 
@@ -146,7 +146,7 @@ export default {
       }, this.visibleTime);
     },
 
-    resetGame() {
+    resetSimulator() {
       this.fragmentedAnswer = {};
       this.fillFragmentedAnswerObject();
       this.answerFull = '';

@@ -30,22 +30,18 @@ export default {
       type: Object,
       default: null,
     },
-
     fillCards: {
       type: Boolean,
       default: true,
     },
-
     coloredCards: {
       type: Boolean,
       default: false,
     },
-
     animationCards: {
       type: Boolean,
       default: true,
     },
-
     error: {
       type: Boolean,
       default: false,
@@ -131,14 +127,5 @@ export default {
     left 0
     width 100%
     height 100%
-
-@keyframes shake
-  10%, 90%
-    transform translate3d(-1px, 0, 0)
-  20%, 80%
-    transform translate3d(2px, 0, 0)
-  30%, 50%, 70%
-    transform translate3d(-4px, 0, 0)
-  40%, 60%
-    transform translate3d(4px, 0, 0)
+    user-select none
 </style>

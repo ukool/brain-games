@@ -1,11 +1,13 @@
 <template>
-<GameField
+<SimulatorField
   :simulator-info="simulatorInfo"
-  :game-pause="gameStatus.pause"
-  :game-final="gameStatus.final"
-  :final-modal-data="gameFinalData"
+  :simulator-pause="status.pause"
+  :simulator-final="status.final"
+  :final-data="finalData"
+  @start-simulator="startSimulator"
+  @start-simulator-after-pause="startSimulator"
 >
-  <template #game>
+  <template #simulator>
     <div class="stroop">
       <StroopCard
         v-if="answers.length"
@@ -19,23 +21,23 @@
   </template>
   <template #sidebar>
     <Sidebar
-      :settings="gameSettings"
-      @change-difficulty="changeSwitchableSettings"
-      @reset="resetGame"
+      :settings="settings"
+      @change-selectable="changeSwitchableSettings"
+      @reset="resetSimulator"
     >
       <template #info>
         Текущий раунд: {{ currentRound }}
       </template>
     </Sidebar>
   </template>
-</GameField>
+</SimulatorField>
 </template>
 
 <script>
 import firebase from 'firebase/app';
 import colors from '~/helpers/colorsForStroopSimulator';
 import StroopCard from '~/components/reading/stroop/StroopCard';
-import GameField from '~/components/shared/layouts/GameField';
+import SimulatorField from '~/components/shared/layouts/SimulatorField';
 import Sidebar from '~/components/shared/layouts/Sidebar';
 import { shuffleArray, searchDuplicateItem } from '~/helpers/functions';
 
@@ -43,14 +45,14 @@ export default {
   name: 'StroopSimulator',
 
   components: {
-    GameField,
+    SimulatorField,
     Sidebar,
     StroopCard,
   },
 
   data() {
     return {
-      gameSettings: {
+      settings: {
         difficulty: {
           title: 'Сложность',
           value: 'easy',
@@ -116,18 +118,18 @@ export default {
           quantityAnswers: 4,
         },
       },
-      gameResult: {
+      results: {
         correctAnswers: 0,
         incorrectAnswers: 0,
       },
-      gameStatus: {
+      status: {
         played: false,
         final: false,
         pause: false,
       },
       errorCardIndex: null,
       roundColors: [],
-      gameFinalData: {},
+      finalData: {},
       answers: [],
       currentRound: 1,
       colors,
@@ -137,11 +139,11 @@ export default {
 
   computed: {
     difficulty() {
-      return this.gameSettings.difficulty.value;
+      return this.settings.difficulty.value;
     },
 
     language() {
-      return this.gameSettings.language.value;
+      return this.settings.language.value;
     },
   },
 
@@ -152,64 +154,42 @@ export default {
   },
 
   mounted() {
-    this.setGameOnPlayed();
-  },
-
-  destroyed() {
-    this.currentCard = null;
-    this.answers = null;
+    this.startSimulator();
   },
 
   methods: {
-    /**
-     * Устанавливает игру в режим игры
-     */
-    setGameOnPlayed() {
-      this.gameStatus.played = true;
-      this.gameStatus.pause = false;
-      this.gameStatus.final = false;
-
-      this.startGame();
+    setSimulatorOnPlayed() {
+      this.status.played = true;
+      this.status.final = false;
+      this.status.pause = false;
     },
 
-    /**
-     * Запускает или перезапускает игру
-     */
-    startGame() {
+    setSimulatorOnPause() {
+      this.status.played = false;
+      this.status.final = false;
+      this.status.pause = true;
+    },
+
+    setSimulatorOnFinal() {
+      this.status.played = false;
+      this.status.final = true;
+      this.status.pause = false;
+
+      // this.finalData.difficulty.value = this.settings.difficulty.value;
+      // this.finalData.moves.value = this.results.moves;
+    },
+
+    startSimulator() {
+      this.setSimulatorOnPlayed();
       this.roundColors = this.generateRoundCards();
       this.answers = this.fillAnswersArray();
     },
 
-    /**
-     * Устанавливает игру в режим паузы
-     */
-    setGameOnPause() {
-      this.gameStatus.played = false;
-      this.gameStatus.pause = true;
-    },
-
-    /**
-     * Устанавливает игру в режим "игра закончена"
-     */
-    setGameOnFinal() {
-      this.gameStatus.played = false;
-      this.gameStatus.final = true;
-
-      // this.gameFinalData.difficulty.value = this.gameSettings.difficulty.value;
-      // this.gameFinalData.moves.value = this.gameResult.moves;
-    },
-
-    /**
-     * Сбрасывает игру
-     */
-    resetGame() {
-      this.startGame();
+    resetSimulator() {
+      this.startSimulator();
       this.currentRound = 1;
     },
 
-    /**
-     * Генерирует случайное число где максимальное число это длинна массива colors
-     */
     generateRandomNumber() {
       return Math.floor(Math.random() * this.colors.length);
     },
@@ -333,6 +313,7 @@ export default {
     },
 
     comparisonAnswers(answer, propName) {
+
       const answers = [];
       const corrects = [];
 
@@ -379,28 +360,28 @@ export default {
       const coincidence = this.comparisonAnswers(answer, 'color');
 
       if (coincidence) {
-        this.gameResult.correctAnswers += 1;
-        console.log(this.gameResult.correctAnswers, this.gameSettings.rounds.value);
-        console.log(this.gameResult.correctAnswers === this.gameSettings.rounds.value);
-        if (this.gameResult.correctAnswers === this.gameSettings.rounds.value) {
-          this.setGameOnFinal();
+        this.results.correctAnswers += 1;
+        console.log(this.results.correctAnswers, this.settings.rounds.value);
+        console.log(this.results.correctAnswers === this.settings.rounds.value);
+        if (this.results.correctAnswers === this.settings.rounds.value) {
+          this.setSimulatorOnFinal();
         }
         this.currentRound += 1;
-        this.startGame();
+        this.startSimulator();
       } else {
         this.errorCardIndex = index;
         setTimeout(() => {
           this.errorCardIndex = null;
         }, 200);
-        this.gameResult.incorrectAnswers += 1;
+        this.results.incorrectAnswers += 1;
       }
     },
 
     changeSwitchableSettings(settingName, settingValue) {
-      this.setGameOnPause();
-      this.gameSettings[settingName].value = settingValue;
+      this.setSimulatorOnPause();
+      this.settings[settingName].value = settingValue;
 
-      this.resetGame();
+      this.resetSimulator();
     },
 
     shuffleArray,
@@ -414,6 +395,7 @@ export default {
   position relative
   display flex
   justify-content center
+  align-self center
   flex-wrap wrap
   width 100%
   background-color $white

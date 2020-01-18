@@ -15,7 +15,6 @@ export default {
       type: String,
       default: 'stop',
     },
-
     startPosition: {
       type: Object,
       default: null,

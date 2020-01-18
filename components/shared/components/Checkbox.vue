@@ -37,12 +37,10 @@ export default {
       type: [Boolean, String, Number, Array],
       default: null,
     },
-
     title: {
       type: String,
       default: null,
     },
-
     item: {
       type: Object,
       default: null,

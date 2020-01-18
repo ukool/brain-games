@@ -62,7 +62,6 @@ export default {
       type: String,
       default: '',
     },
-
     selectList: {
       type: Object,
       default: null,

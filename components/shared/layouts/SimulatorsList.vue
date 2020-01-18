@@ -33,7 +33,6 @@ export default {
       type: String,
       default: null,
     },
-
     simulators: {
       type: Array,
       default: null,

@@ -1,52 +1,52 @@
 <template>
-<main class="game">
-  <section class="game__container flex-container container">
-    <div class="row game__row">
+<main class="simulator">
+  <section class="simulator__container flex-container container">
+    <div class="row simulator__row">
       <div
-        class="game__inner"
+        class="simulator__inner"
         :class="{'full-screen': fullScreenMode }"
       >
         <transition name="fade">
-          <GameStartModal
-            v-if="!gameStarted"
+          <SimulatorStartModal
+            v-if="!simulatorStarted && showStartModal"
             :simulator-info="simulatorInfo"
-            @starting-game="startCountdown"
+            @start-simulator="startCountdown"
           />
         </transition>
 
         <transition name="fade">
           <Countdown
             v-if="showCountdown"
-            @countdown-final="startGame"
+            @countdown-final="startSimulator"
           />
         </transition>
 
         <transition name="fade">
-          <GameFinalModal
-            v-if="gameFinal"
+          <SimulatorFinalModal
+            v-if="simulatorFinal && !showCountdown"
             :simulator-info="simulatorInfo"
-            :final-data="finalModalData"
-            :time="spentTimeInGame"
-            @starting-game="startCountdown"
+            :final-data="finalData"
+            :time="spentTimeInSimulator"
+            @starting-simulator="startCountdown"
           />
         </transition>
 
-        <div class="game__field">
-          <slot
-            v-show="gameStarted"
-            name="game"
-          />
+        <div
+          v-show="simulatorStarted"
+          class="simulator__field"
+        >
+          <slot name="simulator" />
 
           <transition name="fade">
             <PlugPlayButton
-              v-if="gamePause"
-              @play="startGameAfterPause"
+              v-if="simulatorPause"
+              @play="startSimulatorAfterPause"
             />
           </transition>
         </div>
         <div
-          v-show="startGame"
-          class="game__sidebar"
+          v-show="simulatorStarted"
+          class="simulator__sidebar"
           :class="{'full-screen': fullScreenMode }"
         >
           <slot name="sidebar" />
@@ -58,16 +58,16 @@
 </template>
 
 <script>
-import GameStartModal from '~/components/shared/modal/GameStartModal';
-import GameFinalModal from '~/components/shared/modal/GameFinalModal';
+import SimulatorStartModal from '~/components/shared/modal/SimulatorStartModal';
+import SimulatorFinalModal from '~/components/shared/modal/SimulatorFinalModal';
 import StopWatch from '~/helpers/stopWatch';
 
 export default {
-  name: 'GameField',
+  name: 'SimulatorField',
 
   components: {
-    GameStartModal,
-    GameFinalModal,
+    SimulatorStartModal,
+    SimulatorFinalModal,
   },
 
   props: {
@@ -75,23 +75,19 @@ export default {
       type: Object,
       default: null,
     },
-
     simulatorInfo: {
       type: Object,
       default: null,
     },
-
-    gamePause: {
+    simulatorPause: {
       type: Boolean,
       default: false,
     },
-
-    gameFinal: {
+    simulatorFinal: {
       type: Boolean,
       default: false,
     },
-
-    finalModalData: {
+    finalData: {
       type: Object,
       default: null,
     },
@@ -99,11 +95,11 @@ export default {
 
   data() {
     return {
+      simulatorStarted: false,
       showCountdown: false,
-      gameStarted: false,
-      gameOnPause: false,
+      showStartModal: true,
       stopWatch: null,
-      spentTimeInGame: null,
+      spentTimeInSimulator: null,
     };
   },
 
@@ -114,9 +110,9 @@ export default {
   },
 
   watch: {
-    gameFinal() {
+    simulatorFinal() {
       this.stopWatch.stopWatch();
-      this.spentTimeInGame = this.stopWatch.getFormattedTime();
+      this.spentTimeInSimulator = this.stopWatch.getFormattedTime();
       this.stopWatch.resetWatch();
     },
   },
@@ -125,22 +121,30 @@ export default {
     this.stopWatch = new StopWatch();
   },
 
+  destroyed() {
+    this.$store.commit('settings/setFullScreenMode', false);
+  },
+
   methods: {
     startCountdown() {
       this.showCountdown = true;
+      this.showStartModal = false;
     },
 
-    startGame() {
-      this.stopWatch.startWatch();
+    startSimulator() {
       this.showCountdown = false;
-      this.gameStarted = true;
-      this.$emit('start-game');
+
+      setTimeout(() => {
+        this.simulatorStarted = true;
+        this.stopWatch.startWatch();
+        this.$emit('start-simulator');
+      }, 100);
     },
 
-    startGameAfterPause() {
+    startSimulatorAfterPause() {
       this.stopWatch.resetWatch();
-      this.$emit('start-game-after-pause');
-      this.gameStarted = true;
+      this.$emit('start-simulator-after-pause');
+      this.simulatorStarted = true;
       this.stopWatch.startWatch();
     },
   },
@@ -148,7 +152,7 @@ export default {
 </script>
 
 <style scoped lang="stylus">
-.game
+.simulator
   position relative
   height 100%
   display flex
@@ -185,13 +189,8 @@ export default {
     align-self center
     flex-wrap wrap
     width 75%
+    height 100%
     margin-right auto
-
-  &__tip
-    position absolute
-    top -12%
-    left 50%
-    transform translateX(-50%)
 
   &__sidebar
     align-self center
