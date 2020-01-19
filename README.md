@@ -1,6 +1,6 @@
 # memory
 
-> games for the brain
+> simulators for the brain
 
 ## Build Setup
 

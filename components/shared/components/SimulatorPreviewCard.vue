@@ -1,28 +1,28 @@
 <template>
 <n-link
-  class="game-preview"
+  class="simulator-preview"
   :to="simulator.page"
 >
-  <span class="game-preview__lines" />
+  <span class="simulator-preview__lines" />
   <svg-icon
-    class="game-preview__icon"
+    class="simulator-preview__icon"
     :name="simulator.iconName"
     width="65"
     height="65"
   />
 
-  <h2 class="game-preview__title">
+  <h2 class="simulator-preview__title">
     {{ simulator.name }}
   </h2>
 
-  <p class="game-preview__description">
+  <p class="simulator-preview__description">
     {{ simulator.description }}
   </p>
-  <p class="game-preview__target">
+  <p class="simulator-preview__target">
     {{ simulator.target }}
   </p>
 
-  <div class="game-preview__button">
+  <div class="simulator-preview__button">
     <BorderButton
       text="Играть"
       icon-name="play"
@@ -30,9 +30,8 @@
     />
   </div>
   <svg-icon
-    class="game-preview__shape"
+    class="simulator-preview__shape"
     :name="`shape/shape-${randomShapeNumber}`"
-    :fill="randomShapeColor"
     width="300"
     height="300"
   />
@@ -43,7 +42,7 @@
 import BorderButton from './buttons/BorderButton';
 
 export default {
-  name: 'GamePreviewCard',
+  name: 'SimulatorPreviewCard',
 
   components: { BorderButton },
 
@@ -66,7 +65,6 @@ export default {
         '#8ed1fc',
         '#fcb900',
       ],
-      currentColor: '',
     };
   },
 
@@ -74,18 +72,13 @@ export default {
     randomShapeNumber() {
       return Math.floor(Math.random() * 23);
     },
-
-    randomShapeColor() {
-      const randomNumber = Math.floor(Math.random() * (this.colors.length - 1));
-      return this.colors[randomNumber];
-    },
   },
 
 };
 </script>
 
 <style scoped lang="stylus">
-.game-preview
+.simulator-preview
   position relative
   box-sizing border-box
   overflow hidden
@@ -117,9 +110,15 @@ export default {
     &::before,
     &::after
       width 100%
-    .game-preview__lines::before,
-    .game-preview__lines::after
+    .simulator-preview__lines::before,
+    .simulator-preview__lines::after
       height 100%
+  &.memory > .simulator-preview__shape
+    fill #ecdaff
+  &.mind > .simulator-preview__shape
+    fill #fad12d
+  &.reading > .simulator-preview__shape
+    fill #8ed1fc
 
   &__lines
     &::before,

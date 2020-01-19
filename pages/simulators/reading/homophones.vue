@@ -5,7 +5,7 @@
   :simulator-final="status.final"
   :final-data="finalData"
   @start-simulator="startSimulator"
-  @start-simulator-after-pause="startSimulator"
+  @start-simulator-after-pause="startSimulatorAfterPause"
 >
   <template #simulator>
     <div class="homophones">
@@ -13,6 +13,7 @@
         <div
           v-if="status.played && !pauseBeforeNewRound"
           class="homophones__wrapper"
+          :class="settings.difficulty.value"
         >
           <template v-if="roundsCards.length">
             <HomophonesCard
@@ -34,7 +35,7 @@
   <template #sidebar>
     <Sidebar
       :settings="settings"
-      @change-selectable="changeSwitchableSettings"
+      @change-selectable="changeSelectableSettings"
       @reset="resetSimulator"
     >
       <template #info>
@@ -92,17 +93,17 @@ export default {
         },
         rounds: {
           title: 'Раундов',
-          value: 10,
+          value: 5,
           name: 'rounds',
           options: {
             default: {
-              value: 10,
-              title: 10,
+              value: 5,
+              title: 5,
             },
             list: [
+              { value: 5, title: 5 },
               { value: 10, title: 10 },
               { value: 15, title: 15 },
-              { value: 20, title: 20 },
             ],
           },
           type: 'selectable',
@@ -173,7 +174,7 @@ export default {
   },
 
   asyncData() {
-    return firebase.database().ref('simulatorsInfo/memory/remember-number')
+    return firebase.database().ref('simulatorsInfo/reading/homophones')
       .once('value')
       .then(snap => ({ simulatorInfo: snap.val() }));
   },
@@ -216,9 +217,19 @@ export default {
       this.roundsCards = this.shuffleArray(this.roundsCards, 4);
     },
 
+    startSimulatorAfterPause() {
+      this.resetSimulator();
+      this.startSimulator();
+    },
+
     resetSimulator() {
-      this.roundData.currentRound = 1;
       this.setSimulatorOnPause();
+      this.homophonesCards = [];
+      this.roundsCards = [];
+      this.roundData.currentRound = 1;
+      this.roundData.correctAnswers = 0;
+      this.results.correctAnswers = 0;
+      this.results.incorrectAnswers = 0;
     },
 
     /**
@@ -235,7 +246,7 @@ export default {
         const randomNumber = this.generateRandomNumber();
         const randomFirstValue = this.homophones[randomNumber].valueFirst;
 
-        if (!this.searchDuplicateItem(this.homophonesCards, 'searchDuplicateItem', randomFirstValue)) {
+        if (!this.searchDuplicateItem(this.homophonesCards, 'valueFirst', randomFirstValue)) {
           acc.push({
             valueFirst: this.homophones[randomNumber].valueFirst,
             valueSecond: this.homophones[randomNumber].valueSecond,
@@ -272,11 +283,10 @@ export default {
       return fillCards(0, []);
     },
 
-    changeSwitchableSettings(settingName, settingValue) {
-      this.setSimulatorOnPause();
+    changeSelectableSettings({ settingName, settingValue, settingDescription }) {
       this.settings[settingName].value = settingValue;
       this.settings[settingName].description = settingValue;
-
+      this.settings[settingName].description = settingDescription;
       this.resetSimulator();
     },
 
@@ -331,6 +341,8 @@ export default {
     flex-wrap wrap
     justify-content space-between
     width 60%
+    &.easy
+      width 50%
 
   &__card
     margin-bottom 10px

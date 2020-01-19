@@ -5,7 +5,7 @@
   :simulator-final="status.final"
   :final-data="finalData"
   @start-simulator="startSimulator"
-  @start-simulator-after-pause="startSimulator"
+  @start-simulator-after-pause="startSimulatorAfterPause"
 >
   <template #simulator>
     <div class="pair">
@@ -71,16 +71,16 @@ export default {
           title: 'Сложность',
           value: 'easy',
           name: 'difficulty',
-          description: 'легкий',
+          description: 'легкая',
           options: {
             default: {
               value: 'easy',
-              title: 'легкий',
+              title: 'легкая',
             },
             list: [
-              { value: 'easy', title: 'легкий' },
-              { value: 'medium', title: 'средний' },
-              { value: 'hard', title: 'сложный' },
+              { value: 'easy', title: 'легкая' },
+              { value: 'medium', title: 'средняя' },
+              { value: 'hard', title: 'сложная' },
             ],
           },
           type: 'selectable',
@@ -107,18 +107,18 @@ export default {
         },
         rounds: {
           title: 'Раундов',
-          value: 5,
+          value: 1,
           name: 'rounds',
           options: {
             default: {
-              value: 5,
-              title: 5,
+              value: 1,
+              title: 1,
             },
             list: [
               { value: 1, title: 1 },
+              { value: 3, title: 3 },
               { value: 5, title: 5 },
               { value: 10, title: 10 },
-              { value: 15, title: 15 },
             ],
           },
           type: 'selectable',
@@ -257,15 +257,22 @@ export default {
     startSimulator() {
       this.roundData.cardsFlipped = 0;
       this.setSimulatorOnPlayed();
-      this.roundCards = this.fillGameCardsArray();
+      this.roundCards = this.fillRoundCardsArray();
       this.roundCards = this.shuffleArray(this.roundCards);
     },
 
+    startSimulatorAfterPause() {
+      this.resetSimulator();
+      this.startSimulator();
+    },
+
     resetSimulator() {
+      this.setSimulatorOnPause();
       this.roundData.cardsFlipped = 0;
       this.roundData.currentRound = 1;
-      this.setSimulatorOnPause();
       this.roundCards = [];
+      this.results.correctAnswers = 0;
+      this.results.incorrectAnswers = 0;
     },
 
     /**
@@ -278,9 +285,8 @@ export default {
     /**
      * Заполняет массив roundCards
      */
-    fillGameCardsArray() {
+    fillRoundCardsArray() {
       const maxArrayLength = this.configDifficulty[this.difficulty].cardsQuantity;
-      console.log(maxArrayLength);
 
       const fillCardsArray = (index, acc) => {
         if (index === maxArrayLength) return acc;
@@ -323,7 +329,7 @@ export default {
     /**
      * Ищет карту в массиве карточек игры и возвращает ее
      */
-    findGameCard(id) {
+    findCard(id) {
       return this.roundCards.find(item => item.id === id);
     },
 
@@ -376,27 +382,21 @@ export default {
           this.firstClickOnCard.time = Date.now();
         }, 200);
 
-        this.flippedCards.first = this.findGameCard(id);
+        this.flippedCards.first = this.findCard(id);
         this.flippedCards.first.flip = true;
-        this.results.correctAnswers += 1;
       } else if (!this.flippedCards.second) {
         clearInterval(this.firstClickOnCard.timer);
-        this.flippedCards.second = this.findGameCard(id);
+        this.flippedCards.second = this.findCard(id);
         this.flippedCards.second.flip = true;
-        this.results.correctAnswers += 1;
         this.comparesCards();
       }
     },
 
-    /**
-     * Изменяет настройки игры
-     * @param settingName - имя настройки в объекте settings
-     * @param settingValue - новое значение настройки
-     */
-    changeSelectableSettings(settingName, settingValue) {
-      this.setSimulatorOnPause();
+    changeSelectableSettings({ settingName, settingValue, settingDescription }) {
       this.settings[settingName].value = settingValue;
       this.settings[settingName].description = settingValue;
+      this.settings[settingName].description = settingDescription;
+      this.resetSimulator();
     },
 
     shuffleArray,

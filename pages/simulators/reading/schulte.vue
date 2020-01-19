@@ -106,12 +106,12 @@ export default {
         },
         rounds: {
           title: 'Раундов',
-          value: 5,
+          value: 1,
           name: 'rounds',
           options: {
             default: {
-              value: 5,
-              title: 5,
+              value: 1,
+              title: 1,
             },
             list: [
               { value: 1, title: 1 },
@@ -197,7 +197,7 @@ export default {
           value: 5,
         },
       },
-      roundCards: null,
+      roundCards: [],
       cardNumberToBeClicked: 1,
       currentRound: 1,
       pauseBeforeNewRound: false,
@@ -280,17 +280,24 @@ export default {
     },
 
     startSimulator() {
-      this.roundCards = [];
       this.cardNumberToBeClicked = 1;
       this.setSimulatorOnPlayed();
       this.roundCards = this.generateRoundCardsArray();
       this.roundCards = this.shuffleArray(this.roundCards);
     },
 
+    startSimulatorAfterPause() {
+      this.resetSimulator();
+      this.startSimulator();
+    },
+
     resetSimulator() {
-      this.cardNumberToBeClicked = 1;
-      this.roundCards = [];
       this.setSimulatorOnPause();
+      this.currentRound = 1;
+      this.cardNumberToBeClicked = 1;
+      this.results.correctAnswers = 0;
+      this.results.incorrectAnswers = 0;
+      this.roundCards = [];
     },
 
     /**
@@ -346,36 +353,24 @@ export default {
       return this.roundCards.find(card => card.number === number);
     },
 
-    /**
-     * Изменяет настройки игры
-     * @param settingName - имя настройки в объекте settings
-     * @param settingValue - новое значение настройки
-     */
-    changeSelectableSettings(settingName, settingValue) {
-      this.setSimulatorOnPause();
+    changeSelectableSettings({ settingName, settingValue, settingDescription }) {
       this.settings[settingName].value = settingValue;
-      this.cardsQuantity = settingValue[0] * settingValue[2];
-
+      this.settings[settingName].description = settingValue;
+      this.settings[settingName].description = settingDescription;
       this.resetSimulator();
     },
 
-    /**
-     * Изменяет настройки игры
-     * @param value - новое значение настройки
-     * @param settingsName - имя настройки в объекте settings
-     */
-    changeSwitchableSettings(value, settingsName) {
-      const simulatorMustContinue = settingsName.includes('tip')
-        || settingsName.includes('animation')
-        || settingsName.includes('dotInCenter');
+    changeSwitchableSettings(value, settingName) {
+      const simulatorMustContinue = settingName.includes('tip')
+        || settingName.includes('animation')
+        || settingName.includes('dotInCenter');
 
       if (simulatorMustContinue) {
-        this.settings[settingsName].enabled = value;
+        this.settings[settingName].enabled = value;
         return;
       }
 
-      this.setSimulatorOnPause();
-      this.settings[settingsName].enabled = value;
+      this.settings[settingName].enabled = value;
       this.resetSimulator();
     },
 

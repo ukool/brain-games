@@ -17,14 +17,14 @@ const shuffleArray = (array, quantity = 3) => {
  * Ищет дубликаты в массиве
  */
 const searchDuplicateItem = (array, propName, value) => {
-  let duplicate = false;
+  let hasDuplicate = false;
   array.forEach((item) => {
     if (item[propName] === value) {
-      duplicate = true;
+      hasDuplicate = true;
     }
   });
 
-  return duplicate;
+  return hasDuplicate;
 };
 
 export {

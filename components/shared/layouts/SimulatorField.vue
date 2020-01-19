@@ -23,11 +23,11 @@
 
         <transition name="fade">
           <SimulatorFinalModal
-            v-if="simulatorFinal && !showCountdown"
+            v-if="simulatorFinal && !showCountdown && showFinalModal"
             :simulator-info="simulatorInfo"
             :final-data="finalData"
             :time="spentTimeInSimulator"
-            @starting-simulator="startCountdown"
+            @start-simulator="startCountdown"
           />
         </transition>
 
@@ -71,10 +71,6 @@ export default {
   },
 
   props: {
-    modalData: {
-      type: Object,
-      default: null,
-    },
     simulatorInfo: {
       type: Object,
       default: null,
@@ -98,6 +94,7 @@ export default {
       simulatorStarted: false,
       showCountdown: false,
       showStartModal: true,
+      showFinalModal: false,
       stopWatch: null,
       spentTimeInSimulator: null,
     };
@@ -114,6 +111,7 @@ export default {
       this.stopWatch.stopWatch();
       this.spentTimeInSimulator = this.stopWatch.getFormattedTime();
       this.stopWatch.resetWatch();
+      this.showFinalModal = true;
     },
   },
 
@@ -132,12 +130,17 @@ export default {
     },
 
     startSimulator() {
+      this.showFinalModal = false;
       this.showCountdown = false;
 
       setTimeout(() => {
         this.simulatorStarted = true;
         this.stopWatch.startWatch();
-        this.$emit('start-simulator');
+        if (!this.simulatorFinal) {
+          this.$emit('start-simulator');
+        } else {
+          this.$emit('start-simulator-after-pause');
+        }
       }, 100);
     },
 

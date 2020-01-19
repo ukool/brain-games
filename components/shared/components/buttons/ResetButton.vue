@@ -11,7 +11,7 @@
     width="16"
     height="16"
   />
-  {{ $props.text }}
+  {{ text }}
 </button>
 </template>
 

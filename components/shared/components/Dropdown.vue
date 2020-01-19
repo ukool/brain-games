@@ -35,7 +35,7 @@
           class="select__btn"
           :class="{ 'active': item.title === selectedItem }"
           type="button"
-          @click="clickHandler(item)"
+          @click="clickHandle(item)"
         >
           {{ item.title }}
 
@@ -76,10 +76,16 @@ export default {
   },
 
   methods: {
-    clickHandler(value) {
+    clickHandle(item) {
       this.visibleSelectList = false;
-      this.selectedItem = value.title;
-      this.$emit('click-select', value.value);
+      this.selectedItem = item.title;
+
+      const selectedItem = {
+        value: item.value,
+        description: item.title,
+      };
+
+      this.$emit('click-select', selectedItem);
     },
 
     hideSelectList() {

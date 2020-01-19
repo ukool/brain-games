@@ -52,7 +52,7 @@ export default {
   name: 'RememberNumberCard',
 
   props: {
-    currentNumber: {
+    roundNumber: {
       type: String,
       default: '',
     },
@@ -68,7 +68,7 @@ export default {
       type: Number,
       default: 1200,
     },
-    statusEndGame: {
+    statusEndRound: {
       type: Boolean,
       default: false,
     },
@@ -85,7 +85,6 @@ export default {
       fragmentedAnswer: {},
       answerFull: '',
       answerCss: [],
-      currentNumberLength: null,
       currentFieldIndex: 1,
       numbersForMedium: [],
     };
@@ -93,7 +92,7 @@ export default {
 
   computed: {
     splittedCurrentNumber() {
-      const arrayNumbers = String(this.currentNumber).split('');
+      const arrayNumbers = String(this.roundNumber).split('');
 
       let symbols = [];
 
@@ -121,11 +120,13 @@ export default {
   },
 
   watch: {
-    currentNumber() {
-      this.resetSimulator();
-      this.startSimulator();
+    roundNumber(value) {
+      if (value) {
+        this.resetSimulator();
+        this.startSimulator();
+      }
     },
-    statusEndGame(value) {
+    statusEndRound(value) {
       if (value) this.disabledInputs = true;
     },
   },

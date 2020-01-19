@@ -42,7 +42,7 @@
     <Countdown
       v-if="startCountdown"
       :start-timer="startCountdown"
-      @countdown-final="countdownFinalListener"
+      @countdown-final="countdownFinal"
     />
   </transition>
 </div>
@@ -63,7 +63,7 @@ export default {
       this.startCountdown = true;
     },
 
-    countdownFinalListener() {
+    countdownFinal() {
       this.startCountdown = false;
       this.$emit('play');
     },
@@ -112,21 +112,15 @@ export default {
     opacity 0.3
     transition all 0.5s ease-in-out
 
-@keyframes nudge{
-  0% {
+@keyframes nudge
+  0%
     transform translateX(0)
-  }
-  30% {
+  30%
     transform translateX(-5px)
-  }
-  50% {
+  50%
     transform translateX(5px)
-  }
-  70% {
+  70%
     transform translateX(-2px)
-  }
-  100% {
+  100%
     transform translateX(0)
-  }
-}
 </style>

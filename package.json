@@ -1,7 +1,7 @@
 {
   "name": "memory",
   "version": "1.0.0",
-  "description": "games for the brain",
+  "description": "simulators for the brain",
   "author": "ukol",
   "private": true,
   "scripts": {

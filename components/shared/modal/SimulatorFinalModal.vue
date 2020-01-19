@@ -35,11 +35,11 @@
       <BorderButton
         text="Еще раз"
         icon-name="play"
-        @click="startingGame"
+        @click="startSimulator"
       />
       <div class="simulator-modal__settings">
         <BorderLink
-          href="/"
+          :href="simulatorsLinks"
           text="К тренажерам"
         />
       </div>
@@ -73,6 +73,14 @@ export default {
     time: {
       type: String,
       default: null,
+    },
+  },
+
+  computed: {
+    simulatorsLinks() {
+      const routePath = this.$route.path;
+      const removePartIndex = routePath.lastIndexOf('/');
+      return routePath.slice(0, removePartIndex);
     },
   },
 };

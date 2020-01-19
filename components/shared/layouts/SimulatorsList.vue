@@ -1,32 +1,31 @@
 <template>
-<main class="simulators">
-  <div class="container">
-    <h2 class="simulators__title">
-      {{ simulatorsTitle }}
-    </h2>
+<div class="simulators">
+  <h2 class="simulators__title">
+    {{ simulatorsTitle }}
+  </h2>
 
-    <div class="row simulators__row">
-      <div
-        v-for="(simulator, index) in simulators"
-        :key="`${index}_simulator`"
-        class="simulators__item"
-      >
-        <GamePreviewCard
-          :simulator="simulator"
-        />
-      </div>
+  <div class="row simulators__row">
+    <div
+      v-for="(simulator, index) in simulators"
+      :key="`${index}_simulator`"
+      class="simulators__item"
+    >
+      <SimulatorPreviewCard
+        :simulator="simulator"
+        :class="SimulatorPreviewCardClass"
+      />
     </div>
   </div>
-</main>
+</div>
 </template>
 
 <script>
-import GamePreviewCard from '~/components/shared/components/GamePreviewCard';
+import SimulatorPreviewCard from '~/components/shared/components/SimulatorPreviewCard';
 
 export default {
   name: 'SimulatorsList',
 
-  components: { GamePreviewCard },
+  components: { SimulatorPreviewCard },
 
   props: {
     simulatorsTitle: {
@@ -38,13 +37,17 @@ export default {
       default: null,
     },
   },
+
+  computed: {
+    SimulatorPreviewCardClass() {
+      return this.$route.path.replace('/simulators/', '');
+    },
+  },
 };
 </script>
 
 <style scoped lang="stylus">
 .simulators
-  min-height calc(100vh - 61px - 71px) // TODO костылина - переделать
-
   &__title
     margin-top 50px
     font-weight 700
@@ -56,5 +59,4 @@ export default {
   &__item
     width calc(100% / 4 - 10px)
     margin 0 15px
-
 </style>

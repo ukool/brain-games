@@ -9,13 +9,13 @@
 >
   <template #simulator>
     <div
-      v-if="!status.pause"
+      v-show="!status.pause && roundNumber !== null"
       class="remember-number"
     >
       <RememberNumberCard
-        :current-number="roundNumber"
+        :round-number="roundNumber"
         :number-length="configDifficulty[difficulty].numberLength"
-        :status-end-game="status.complete"
+        :status-end-round="status.complete"
         :visible-time="configDifficulty[difficulty].visibleTime"
         :difficulty="difficulty"
         :number-in-filed="configDifficulty[difficulty].numberInFiled"
@@ -28,7 +28,7 @@
   <template #sidebar>
     <Sidebar
       :settings="settings"
-      @change-selectable="changeSwitchableSettings"
+      @change-selectable="changeSelectableSettings"
       @reset="resetSimulator"
     >
       <template #info>
@@ -65,16 +65,16 @@ export default {
           title: 'Сложность',
           value: 'easy',
           name: 'difficulty',
-          description: 'легкий',
+          description: 'легкая',
           options: {
             default: {
               value: 'easy',
-              title: 'легкий',
+              title: 'легкая',
             },
             list: [
-              { value: 'easy', title: 'легкий' },
-              { value: 'medium', title: 'средний' },
-              { value: 'hard', title: 'сложный' },
+              { value: 'easy', title: 'легкая' },
+              { value: 'medium', title: 'средняя' },
+              { value: 'hard', title: 'сложная' },
             ],
           },
           type: 'selectable',
@@ -147,7 +147,6 @@ export default {
       showTimer: false,
       userAnswer: null,
       roundNumber: null,
-      infinityGame: false,
       currentRound: 1,
       simulatorInfo: null,
     };
@@ -195,29 +194,28 @@ export default {
 
     startSimulator() {
       this.setSimulatorOnPlayed();
-      this.roundNumber = this.fillCurrentNumber();
+      this.roundNumber = this.generateRoundNumber();
     },
 
     startSimulatorAfterPause() {
-      this.status.pause = false;
-
-      setTimeout(() => {
-        this.setSimulatorOnPlayed();
-        this.roundNumber = this.fillCurrentNumber();
-      }, 100);
+      this.resetSimulator();
+      this.startSimulator();
     },
 
     resetSimulator() {
       this.setSimulatorOnPause();
       this.roundNumber = null;
+      this.userAnswer = null;
       this.currentRound = 1;
+      this.results.correctAnswers = 0;
+      this.results.incorrectAnswers = 0;
     },
 
     generateRandomNumber() {
       return Math.floor(Math.random() * 9);
     },
 
-    fillCurrentNumber() {
+    generateRoundNumber() {
       const maxLength = this.configDifficulty[this.difficulty].numberLength;
       let roundNumber = '';
 
@@ -272,7 +270,7 @@ export default {
           this.decreaseNumberLength();
         }
 
-        if (this.currentRound === this.settings.rounds.value && !this.settings.infinityGame) {
+        if (this.currentRound === this.settings.rounds.value) {
           this.setSimulatorOnFinal();
         } else {
           this.currentRound += 1;
@@ -281,10 +279,10 @@ export default {
       }, delay);
     },
 
-    changeSwitchableSettings(settingName, settingValue) {
-      this.setSimulatorOnPause();
+    changeSelectableSettings({ settingName, settingValue, settingDescription }) {
       this.settings[settingName].value = settingValue;
       this.settings[settingName].description = settingValue;
+      this.settings[settingName].description = settingDescription;
       this.resetSimulator();
     },
   },

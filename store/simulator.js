@@ -20,7 +20,7 @@ export const actions = {
   async loadSimulatorsList({ commit }) {
     const simulatorsList = await firebase.database()
       .ref('simulatorsList')
-      .once('value', snap => console.log(snap.val()));
+      .once('value', snap => snap.val());
     commit('setSimulatorsList', simulatorsList);
   },
 };

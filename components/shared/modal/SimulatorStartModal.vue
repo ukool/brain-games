@@ -42,19 +42,19 @@
       <BorderButton
         text="Начать игру"
         icon-name="play"
-        @click="startingGame"
+        @click="startSimulator"
       />
       <div class="simulator-modal__settings">
-        <BorderButton
-          class="simulator-modal__settings-btn"
-          size="xs"
-          icon-name="ques"
-        />
-        <BorderButton
-          class="simulator-modal__settings-btn"
-          size="xs"
-          icon-name="sound"
-        />
+        <!--<BorderButton-->
+        <!--  class="simulator-modal__settings-btn"-->
+        <!--  size="xs"-->
+        <!--  icon-name="ques"-->
+        <!--/>-->
+        <!--<BorderButton-->
+        <!--  class="simulator-modal__settings-btn"-->
+        <!--  size="xs"-->
+        <!--  icon-name="sound"-->
+        <!--/>-->
         <BorderButton
           class="simulator-modal__settings-btn"
           size="xs"

@@ -26,7 +26,7 @@ export default {
   },
 
   methods: {
-    startingGame() {
+    startSimulator() {
       this.$emit('start-simulator');
     },
   },

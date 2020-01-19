@@ -1,11 +1,10 @@
 <template>
 <main class="simulators">
   <div class="container simulators__container">
+    <Breadcrumbs :breadcrumbs="breadcrumbs" />
+
     <div class="row simulators__row">
       <aside class="simulators__sidebar">
-        <span class="simulators__sidebar-title">
-          Тренажеры:
-        </span>
         <ul class="simulators__sidebar-list">
           <li
             v-for="(simulator, index) in sidebarSimulators"
@@ -13,9 +12,9 @@
             class="simulators__sidebar-item"
           >
             <a
+              v-scroll-to="`#${simulator.domId}`"
               class="simulators__sidebar-link bottom-two-line"
               href="#"
-              v-scroll-to="`#${simulator.domId}`"
             >
               {{ simulator.title }}
             </a>
@@ -23,7 +22,6 @@
         </ul>
       </aside>
       <div class="simulators__inner">
-<!--        <FigureLoader v-if="!simulatorsList" />-->
         <template>
           <div
             v-for="(simulatorItem, index) in simulatorsList"
@@ -43,7 +41,10 @@
                 :key="`${i}_${simulatorItem.title}_simulator`"
                 class="simulators__unit"
               >
-                <GamePreviewCard :simulator="simulator" />
+                <SimulatorPreviewCard
+                  :simulator="simulator"
+                  :class="simulatorItem.page"
+                />
               </div>
               <div class="simulators__unit space" />
             </div>
@@ -57,20 +58,26 @@
 
 <script>
 import firebase from 'firebase/app';
-import GamePreviewCard from '~/components/shared/components/GamePreviewCard';
-import FigureLoader from '../../components/shared/components/loaders/FigureLoader';
+import SimulatorPreviewCard from '~/components/shared/components/SimulatorPreviewCard';
+import Breadcrumbs from '~/components/shared/components/Breadcrumbs';
 
 export default {
   name: 'SimulatorsPage',
   components: {
-    FigureLoader,
-    GamePreviewCard,
+    Breadcrumbs,
+    SimulatorPreviewCard,
   },
 
   data() {
     return {
       simulatorsList: null,
       sidebarSimulators: null,
+      breadcrumbs: [
+        {
+          name: 'Тренажеры',
+          href: '/simulators',
+        },
+      ],
     };
   },
 
@@ -100,21 +107,16 @@ export default {
 <style scoped lang="stylus">
 .simulators
   &__container
-    margin 50px 0
+    margin 40px 0
 
   &__row
     align-items flex-start
+    margin-top 40px
 
   &__sidebar
     width 20%
     position sticky
     top 20px
-
-    &-title
-      font-size 18px
-
-    &-list
-      margin-top 15px
 
     &-item
       font-size 16px

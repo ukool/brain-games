@@ -13,7 +13,7 @@
         class="sidebar__select"
         :select-list="setting.options"
         :title="setting.title"
-        @click-select="changeDifficultyListener($event, setting.name)"
+        @click-select="changeSelectableSettings($event, setting.name)"
       />
     </li>
   </ul>
@@ -46,16 +46,16 @@
   />
 
   <div class="sidebar__buttons">
-    <BorderButton
-      class="sidebar__button"
-      size="xs"
-      icon-name="ques"
-    />
-    <BorderButton
-      class="sidebar__button"
-      size="xs"
-      icon-name="sound"
-    />
+    <!--<BorderButton-->
+    <!--  class="sidebar__button"-->
+    <!--  size="xs"-->
+    <!--  icon-name="ques"-->
+    <!--/>-->
+    <!--<BorderButton-->
+    <!--  class="sidebar__button"-->
+    <!--  size="xs"-->
+    <!--  icon-name="sound"-->
+    <!--/>-->
     <BorderButton
       class="sidebar__button"
       size="xs"
@@ -104,7 +104,6 @@ export default {
 
       return selectableSettings;
     },
-
     switchableSettings() {
       const switchableSettings = {};
       Object.keys({ ...this.settings }).forEach((key) => {
@@ -118,8 +117,13 @@ export default {
   },
 
   methods: {
-    changeDifficultyListener(value, name) {
-      this.$emit('change-selectable', name, value);
+    changeSelectableSettings({ value, description }, name) {
+      const selectedItem = {
+        settingValue: value,
+        settingName: name,
+        settingDescription: description,
+      };
+      this.$emit('change-selectable', selectedItem);
     },
 
     changeHandle(value, name) {

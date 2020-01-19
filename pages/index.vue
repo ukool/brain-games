@@ -56,35 +56,36 @@
     </div>
   </section>
 
-  <section class="games">
+  <section class="simulators">
     <div class="container">
-      <h1 class="hero__title black games__title">
+      <h1 class="hero__title black simulators__title">
         Доступные категории
       </h1>
       <div class="row">
-        <ul class="games__list">
+        <ul class="simulators__list">
           <li
             v-for="(category, index) in categories"
             :key="`${index}_category`"
-            class="games__item"
+            class="simulators__item"
           >
             <nuxt-link
-              class="games__link"
+              class="simulators__link"
               :to="category.page"
             >
-              <span class="games__name">
+              <span class="simulators__name">
                 {{ category.title }}
               </span>
-              <span class="games__description">
+              <span class="simulators__description">
                 {{ category.description }}
               </span>
-              <span class="games__count">
-                Игр: {{ category.gameAmount }}
+              <span class="simulators__count">
+                Тренажеров: {{ category.simulatorQuantity }}
               </span>
               <img
-                class="games__image"
+                class="simulators__image"
                 :class="[category.page]"
                 :src="category.imageSrc"
+                alt=""
               />
             </nuxt-link>
           </li>
@@ -110,7 +111,7 @@
         <p class="hero__description">
           В скором времени ожидается
           <br />
-          пополнение&nbsp;игр
+          пополнение&nbsp;тренажеров
         </p>
       </div>
       <img
@@ -134,7 +135,7 @@
         </h1>
         <ul class="hero__list">
           <li class="hero__list-item">
-            новые игры
+            новые тренажеры
           </li>
           <li class="hero__list-item">
             личный кабинет
@@ -166,7 +167,7 @@
           Проект open source - вот
           <a
             class="hero__link bottom-two-line"
-            href="https://github.com/ukool/brain-games"
+            href="https://github.com/ukool/brain-simulators"
             target="_blank"
             rel="nofollow"
           >
@@ -216,7 +217,7 @@
           </a>,
           <a
             class="hero__link line-to-top"
-            href="https://github.com/ukool/brain-games/issues"
+            href="https://github.com/ukool/brain-simulators/issues"
             target="_blank"
             rel="nofollow"
           >
@@ -247,21 +248,21 @@ export default {
           description: 'Вжух и запомнил',
           page: '/simulators/memory',
           imageSrc: 'img/index/memory.svg',
-          gameAmount: 1,
+          simulatorQuantity: 2,
         },
         {
           title: 'Скорочтение',
           description: 'Вжух и прочитал',
           page: '/simulators/reading',
           imageSrc: '/img/index/speed.svg',
-          gameAmount: 1,
+          simulatorQuantity: 3,
         },
         {
-          title: 'Устный счет',
-          description: 'Вжух и посчитал',
+          title: 'Мышление',
+          description: 'Вжух и помыслил',
           page: '/simulators/mind',
           imageSrc: '/img/index/math.svg',
-          gameAmount: 1,
+          simulatorQuantity: 1,
         },
       ],
     };
@@ -271,99 +272,100 @@ export default {
 
 <style lang="stylus" scoped>
 .hero
+  position relative
+  height 600px
+  width 100%
+
+  &__container
+    box-sizing border-box
     position relative
-    height 600px
+    display flex
     width 100%
+    height 100%
+    padding 0 8%
 
-    &__container
-      box-sizing border-box
-      position relative
-      display flex
-      height 100%
-      padding 0 8%
+  &__col
+    display inline-flex
+    flex-direction column
+    &.half-width
+      width 50%
+    &.pressed-right
+      margin-left auto
+    &.pressed-left
+      margin-right auto
+    &.margin-right
+      margin-right 19.3%
 
-    &__col
-      display inline-flex
-      flex-direction column
-      &.half-width
-        width 50%
-      &.pressed-right
-        margin-left auto
-      &.pressed-left
-        margin-right auto
-      &.margin-right
-        margin-right 19.3%
+  &__title
+    font-weight 700
+    font-size 60px
+    padding-top 10vh
+    letter-spacing 1.1px
+    color white
+    &.black
+      color $black
 
-    &__title
-      font-weight 700
-      font-size 60px
-      padding-top 10vh
-      letter-spacing 1.1px
-      color white
-      &.black
-        color $black
+  &__description
+    margin-top 35px
+    font-size 35px
+    color white
+    & + &
+      margin-top 10px
 
-    &__description
-      margin-top 35px
-      font-size 35px
-      color white
-      & + &
-        margin-top 10px
+  &__links
+    display inline-flex
+    margin-top 50px
+    font-size 35px
 
-    &__links
-      display inline-flex
-      margin-top 50px
-      font-size 35px
+  &__link
+    font-weight 300
+    &:first-of-type
+      margin-left 10px
 
-    &__link
-      font-weight 300
-      &:first-of-type
-        margin-left 10px
+  &__list
+    margin-top 35px
+    &.white
+      color $white
 
-    &__list
-      margin-top 35px
-      &.white
-        color $white
-
-    &__list-item
-      position relative
-      font-size 25px
-      padding-left 20px
-      &::before
-        content ''
-        position absolute
-        top 50%
-        left 0
-        transform translateY(-50%)
-        width 10px
-        height 10px
-        border-radius 50%
-        background-color currentColor
-      & + &
-        margin-top 20px
-
-    &__image-box
+  &__list-item
+    position relative
+    font-size 25px
+    padding-left 20px
+    &::before
+      content ''
       position absolute
-      bottom 0
-      right 0
-      display flex
-      width 600px
-      height 100%
-      justify-content flex-end
+      top 50%
+      left 0
+      transform translateY(-50%)
+      width 10px
+      height 10px
+      border-radius 50%
+      background-color currentColor
+    & + &
+      margin-top 20px
 
-      img
-        align-self flex-end
+  &__image-box
+    position absolute
+    bottom 0
+    right 0
+    display flex
+    width 600px
+    height 100%
+    justify-content flex-end
 
-    &__img
-      display block
-      max-height 80%
-      height 80%
-      align-self center
-      &.medium
-        max-height 50%
-        height 50%
-      &.pressed-right
-        margin-left auto
+    img
+      align-self flex-end
+
+  &__img
+    display block
+    max-height 80%
+    height 80%
+    align-self center
+    &.medium
+      max-height 50%
+      height 50%
+    &.pressed-right
+      margin-left auto
 
 .about
   background-color $violet
@@ -371,7 +373,7 @@ export default {
 .differences
   background-color $yellow
 
-.games
+.simulators
   padding-bottom 4vh
 
   &__title

@@ -5,7 +5,7 @@
   :simulator-final="status.final"
   :final-data="finalData"
   @start-simulator="startSimulator"
-  @start-simulator-after-pause="startSimulator"
+  @start-simulator-after-pause="startSimulatorAfterPause"
 >
   <template #simulator>
     <div class="counting">
@@ -202,7 +202,7 @@ export default {
   },
 
   asyncData() {
-    return firebase.database().ref('simulatorsInfo/memory/remember-number')
+    return firebase.database().ref('simulatorsInfo/mind/verbal-counting')
       .once('value')
       .then(snap => ({ simulatorInfo: snap.val() }));
   },
@@ -219,7 +219,6 @@ export default {
     },
 
     setSimulatorOnPause() {
-      this.currentRound = 1;
       this.status.played = false;
       this.status.final = false;
       this.status.pause = true;
@@ -244,18 +243,20 @@ export default {
       this.correctAnswer = this.calculateAnswer(this.roundCondition);
     },
 
+    startSimulatorAfterPause() {
+      this.resetSimulator();
+      this.startSimulator();
+    },
+
     resetSimulator() {
       this.setSimulatorOnPause();
-      this.roundCondition = null;
-      this.correctAnswer = null;
       this.userAnswer = null;
-      this.pauseBeforeNewRound = true;
-
-      setTimeout(() => {
-        this.pauseBeforeNewRound = false;
-        this.startSimulator();
-        this.currentRound = 1;
-      }, 700);
+      this.previousOperator = null;
+      this.correctAnswer = null;
+      this.roundCondition = null;
+      this.currentRound = 1;
+      this.results.correctAnswers = 0;
+      this.results.incorrectAnswers = 0;
     },
 
     generateCondition() {
@@ -333,12 +334,12 @@ export default {
       }
     },
 
-    convertSettingNameToMathOperator(settingsName) {
+    convertSettingNameToMathOperator(settingName) {
       let operator;
 
-      if (settingsName === 'addition') operator = '+';
-      else if (settingsName === 'subtraction') operator = '-';
-      else if (settingsName === 'multiplication') operator = '*';
+      if (settingName === 'addition') operator = '+';
+      else if (settingName === 'subtraction') operator = '-';
+      else if (settingName === 'multiplication') operator = '*';
 
       return operator;
     },
@@ -353,27 +354,26 @@ export default {
       return settingName;
     },
 
-    changeSelectableSettings(settingName, settingValue) {
-      this.setSimulatorOnPause();
+    changeSelectableSettings({ settingName, settingValue, settingDescription }) {
       this.settings[settingName].value = settingValue;
       this.settings[settingName].description = settingValue;
-
-      this.setSimulatorOnPause();
+      this.settings[settingName].description = settingDescription;
+      this.resetSimulator();
     },
 
-    changeSwitchableSettings(value, settingsName) {
-      const operator = this.convertSettingNameToMathOperator(settingsName);
+    changeSwitchableSettings(value, settingName) {
+      const operator = this.convertSettingNameToMathOperator(settingName);
 
       if (value) {
         this.operators.push(operator);
-        this.settings[settingsName].enabled = value;
+        this.settings[settingName].enabled = value;
       } else if (!value && !this.hasOnlyOneOperator) {
         const operatorIndex = this.operators.indexOf(operator);
         this.operators.splice(operatorIndex, 1);
-        this.settings[settingsName].enabled = value;
+        this.settings[settingName].enabled = value;
       }
 
-      this.setSimulatorOnPause();
+      this.resetSimulator();
     },
   },
 

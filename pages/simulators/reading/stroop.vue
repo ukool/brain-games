@@ -5,7 +5,7 @@
   :simulator-final="status.final"
   :final-data="finalData"
   @start-simulator="startSimulator"
-  @start-simulator-after-pause="startSimulator"
+  @start-simulator-after-pause="startSimulatorAfterPause"
 >
   <template #simulator>
     <div class="stroop">
@@ -22,7 +22,7 @@
   <template #sidebar>
     <Sidebar
       :settings="settings"
-      @change-selectable="changeSwitchableSettings"
+      @change-selectable="changeSelectableSettings"
       @reset="resetSimulator"
     >
       <template #info>
@@ -60,12 +60,12 @@ export default {
           options: {
             default: {
               value: 'easy',
-              title: 'легкий',
+              title: 'легкая',
             },
             list: [
-              { value: 'easy', title: 'легкий' },
-              { value: 'medium', title: 'средний' },
-              { value: 'hard', title: 'сложный' },
+              { value: 'easy', title: 'легкая' },
+              { value: 'medium', title: 'средняя' },
+              { value: 'hard', title: 'сложная' },
             ],
           },
           type: 'selectable',
@@ -129,7 +129,24 @@ export default {
       },
       errorCardIndex: null,
       roundColors: [],
-      finalData: {},
+      finalData: {
+        difficulty: {
+          title: 'Сложность',
+          value: null,
+        },
+        correctAnswers: {
+          title: 'Правильных ответов',
+          value: null,
+        },
+        incorrectAnswers: {
+          title: 'Неправильных ответов',
+          value: null,
+        },
+        rounds: {
+          title: 'Количество раундов',
+          value: null,
+        },
+      },
       answers: [],
       currentRound: 1,
       colors,
@@ -148,7 +165,7 @@ export default {
   },
 
   asyncData() {
-    return firebase.database().ref('simulatorsInfo/reading/schulte')
+    return firebase.database().ref('simulatorsInfo/reading/stroop')
       .once('value')
       .then(snap => ({ simulatorInfo: snap.val() }));
   },
@@ -175,8 +192,10 @@ export default {
       this.status.final = true;
       this.status.pause = false;
 
-      // this.finalData.difficulty.value = this.settings.difficulty.value;
-      // this.finalData.moves.value = this.results.moves;
+      this.finalData.difficulty.value = this.settings.difficulty.description;
+      this.finalData.correctAnswers.value = this.results.correctAnswers;
+      this.finalData.incorrectAnswers.value = this.results.incorrectAnswers;
+      this.finalData.rounds.value = this.settings.rounds.value;
     },
 
     startSimulator() {
@@ -185,9 +204,17 @@ export default {
       this.answers = this.fillAnswersArray();
     },
 
-    resetSimulator() {
+    startSimulatorAfterPause() {
+      this.resetSimulator();
       this.startSimulator();
+    },
+
+    resetSimulator() {
+      this.roundColors = [];
+      this.answers = [];
       this.currentRound = 1;
+      this.results.correctAnswers = 0;
+      this.results.incorrectAnswers = 0;
     },
 
     generateRandomNumber() {
@@ -312,26 +339,49 @@ export default {
       return fillInnersAnswers(0, []);
     },
 
-    comparisonAnswers(answer, propName) {
+    comparisonAnswers(array, propName, index) {
+      // let uniqueAnswer = '';
+      //
+      // this.roundColors.forEach((item) => {
+      //   uniqueAnswer += item[propName];
+      // });
+      //
+      // const allTextAnnwers = [];
 
-      const answers = [];
-      const corrects = [];
 
-      answer.forEach((item) => {
-        answers.push(item[propName]);
-      });
+      // let currentAnswer = '';
+      // const answers = [];
+      //
+      // answer.forEach((item) => {
+      //   item.forEach((inner) => {
+      //     currentAnswer += inner[propName];
+      //   });
+      // });
 
-      this.roundColors.forEach((item) => {
-        corrects.push(item[propName]);
-      });
+      // array.forEach((item) => {
+      //   item.forEach((inner) => {
+      //     answers.push(inner[propName]);
+      //   });
+      // });
 
-      let coincidence = 0;
+      // console.log('currentAnswer', currentAnswer);
+      // console.log('answers', currentAnswer);
+      //
+      //
+      //
+      // console.log('uniqueAnswer', uniqueAnswer);
 
-      corrects.forEach((item) => {
-        if (answers.includes(item)) coincidence += 1;
-      });
+      // const maxDuplicateCount = uniqueAnswer.length;
+      // let duplicateCount = 0;
 
-      return coincidence === corrects.length;
+      // answers.forEach((item) => {
+      //   if (uniqueAnswer.includes(item) || answers.includes(item)) {
+      //     duplicateCount += 1;
+      //   }
+      // });
+      // console.log('>=', uniqueAnswer === currentAnswer);
+      // console.log('count', duplicateCount);
+      return false;// duplicateCount >= maxDuplicateCount;
     },
 
     checkAnswer({ answer, index }) {
@@ -361,8 +411,6 @@ export default {
 
       if (coincidence) {
         this.results.correctAnswers += 1;
-        console.log(this.results.correctAnswers, this.settings.rounds.value);
-        console.log(this.results.correctAnswers === this.settings.rounds.value);
         if (this.results.correctAnswers === this.settings.rounds.value) {
           this.setSimulatorOnFinal();
         }
@@ -377,10 +425,10 @@ export default {
       }
     },
 
-    changeSwitchableSettings(settingName, settingValue) {
-      this.setSimulatorOnPause();
+    changeSelectableSettings({ settingName, settingValue, settingDescription }) {
       this.settings[settingName].value = settingValue;
-
+      this.settings[settingName].description = settingValue;
+      this.settings[settingName].description = settingDescription;
       this.resetSimulator();
     },
 
