@@ -167,7 +167,7 @@
           Проект open source - вот
           <a
             class="hero__link bottom-two-line"
-            href="https://github.com/ukool/brain-simulators"
+            href="https://github.com/ukool/brain-games"
             target="_blank"
             rel="nofollow"
           >
@@ -217,7 +217,7 @@
           </a>,
           <a
             class="hero__link line-to-top"
-            href="https://github.com/ukool/brain-simulators/issues"
+            href="https://github.com/ukool/brain-games/issues"
             target="_blank"
             rel="nofollow"
           >
